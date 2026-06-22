@@ -46,7 +46,7 @@ extension Markdown.Strong: InlineConvertible {
       newContainer[.font] = config.paragraphStyle.textFonts.bold ?? config.paragraphStyle.textFonts.normal
     }
     if self.parent is Paragraph && self.indexInParent == 0 && self.parent?.parent is ListItem && parent?.indexInParent == 0 {
-      newContainer[.foregroundColor] = config.inlineStyle.boldTextColor
+      newContainer[.foregroundColor] = UIColor(config.inlineStyle.boldTextColor)
     }
     self.inlineConvertibleChildren.forEach { convertible in
       str.append(convertible.convert(attributeContainer: newContainer, config: config))
@@ -122,7 +122,7 @@ extension Markdown.Link: InlineConvertible {
       // Is a real link, provided as markdown
       container[.link] = url
       container[.font] = config.inlineStyle.linkTextFont
-      container[.foregroundColor] = config.inlineStyle.linkTextColor
+      container[.foregroundColor] = UIColor(config.inlineStyle.linkTextColor)
       container[.underlineStyle] = []
       return buildAttributedString()
     }
@@ -157,7 +157,7 @@ extension Markdown.InlineCode: InlineConvertible {
         .dropFirst(LaTexPreProcessorImpl.inlineCodePrefix.count)
         .dropLast(LaTexPreProcessorImpl.inlineCodeSuffix.count))
       let font = attributeContainer[NSAttributedString.Key.font] as? UIFont ?? config.paragraphStyle.textFonts.normal
-      let textColor = config.paragraphStyle.textColor
+      let textColor = UIColor(config.paragraphStyle.textColor)
       let lightHex = textColor.resolvedColor(with: UITraitCollection(userInterfaceStyle: .light)).toHexString()
       let darkHex = textColor.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark)).toHexString()
       let attachmentData = LatexAttachmentData(
@@ -174,10 +174,10 @@ extension Markdown.InlineCode: InlineConvertible {
     }
     var container = attributeContainer
     container[.font] = config.inlineStyle.codeTextFont
-    container[.foregroundColor] = config.inlineStyle.codeTextColor
-    container[.backgroundColor] = config.inlineStyle.codeBackgroundColor
+    container[.foregroundColor] = UIColor(config.inlineStyle.codeTextColor)
+    container[.backgroundColor] = UIColor(config.inlineStyle.codeBackgroundColor)
     container[.underlineStyle] =  NSUnderlineStyle.patternDot.rawValue
-    container[.underlineColor] = config.inlineStyle.codeUnderlineColor
+    container[.underlineColor] = UIColor(config.inlineStyle.codeUnderlineColor)
     return NSMutableAttributedString(string: codeContent).mergingAttributes(container)
   }
 }

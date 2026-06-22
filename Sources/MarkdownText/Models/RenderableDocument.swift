@@ -6,6 +6,7 @@
 import Foundation
 import Markdown
 import SwiftUI
+import UIKit
 
 /// A `MarkdownRenderConfig`-aware snapshot of a parsed markdown `Document`,
 /// ready to be handed to a `MarkdownView` for rendering. Producing one is
@@ -39,7 +40,7 @@ public struct RenderableDocument: Equatable, Sendable {
   public init(plainText: String, config: MarkdownRenderConfig) {
     var attributes: [NSAttributedString.Key: Any] = [
       .font: config.paragraphStyle.textFonts.normal,
-      .foregroundColor: config.paragraphStyle.textColor
+      .foregroundColor: UIColor(config.paragraphStyle.textColor)
     ]
     if let kern = config.paragraphStyle.textFonts.preferredLetterSpacing {
       attributes[.kern] = kern

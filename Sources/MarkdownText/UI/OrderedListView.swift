@@ -17,7 +17,7 @@ struct OrderedListView: View {
         HStack(alignment: .centerOfFirstLine, spacing: 11) {
           Text(verbatim: "\(idx+1).")
             .font(config.orderedListStyle.textFonts, bold: true)
-            .foregroundStyle(Color(config.orderedListStyle.textColor))
+            .foregroundStyle(config.orderedListStyle.textColor)
             .transition(.opacity)
           if let firstChild = items[idx].children.first {
             if case .paragraph(_, let contents) = firstChild {

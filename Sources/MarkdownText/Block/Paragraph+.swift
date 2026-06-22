@@ -6,6 +6,7 @@
 import Foundation
 import Markdown
 import SwiftUI
+import UIKit
 
 extension Paragraph: BlockConvertible {
 
@@ -16,7 +17,7 @@ extension Paragraph: BlockConvertible {
     if let kern = config.paragraphStyle.textFonts.preferredLetterSpacing {
       container[.kern] = kern
     }
-    container[.foregroundColor] = config.paragraphStyle.textColor
+    container[.foregroundColor] = UIColor(config.paragraphStyle.textColor)
     let paragraphContent: NSMutableAttributedString = self.buildParagraphContent(container: container, config: config)
     return MarkdownRenderable.paragraph(id: self.id, content: paragraphContent)
   }

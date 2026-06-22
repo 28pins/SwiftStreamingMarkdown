@@ -76,8 +76,8 @@ final class InlineCitationAttachment: NSTextAttachment {
     self.citationData = citationData
 
     self.font = citationConfig.font
-    self.textColor = citationConfig.textColor
-    self.backgroundColor = citationConfig.backgroundColor
+    self.textColor = UIColor(citationConfig.textColor)
+    self.backgroundColor = UIColor(citationConfig.backgroundColor)
 
     if let title = citationData?.title {
       self.lightPreviewImage = Self.renderCitationImage(

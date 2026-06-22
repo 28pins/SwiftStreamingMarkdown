@@ -5,6 +5,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 enum RowContent: Equatable {
   case text(string: AttributedString)
@@ -50,7 +51,7 @@ struct TableView: View {
   private func headerView(colIdx: Int) -> some View {
     HStack(spacing: 0) {
       Text(headings[colIdx])
-        .foregroundStyle(Color(config.tableStyle.headerTextColor))
+        .foregroundStyle(config.tableStyle.headerTextColor)
         .lineLimit(nil)
         .multilineTextAlignment(.leading)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -62,8 +63,8 @@ struct TableView: View {
     }
     .padding(12)
     .id("\(colIdx)-heading")
-    .background(Color(config.tableStyle.headerBackgroundColor))
-    .applyHeaderBorder(colIndex: colIdx, colCount: headings.count, color: Color(config.tableStyle.borderColor))
+    .background(config.tableStyle.headerBackgroundColor)
+    .applyHeaderBorder(colIndex: colIdx, colCount: headings.count, color: config.tableStyle.borderColor)
   }
 
   @ViewBuilder
@@ -108,11 +109,11 @@ struct TableView: View {
       .frame(maxHeight: .infinity)
       .padding(12)
       .id("\(colIdx)-\(rowIdx)")
-      .applyCellBorder(colIndex: colIdx, colCount: headings.count, rowIndex: rowIdx, rowCount: numOfRows, color: Color(config.tableStyle.borderColor))
+      .applyCellBorder(colIndex: colIdx, colCount: headings.count, rowIndex: rowIdx, rowCount: numOfRows, color: config.tableStyle.borderColor)
     case .text(let attributedString):
       HStack(spacing: 0) {
         Text(attributedString)
-          .foregroundStyle(Color(config.tableStyle.regularTextColor))
+          .foregroundStyle(config.tableStyle.regularTextColor)
           .lineLimit(nil)
           .multilineTextAlignment(.leading)
           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -125,7 +126,7 @@ struct TableView: View {
       .frame(maxHeight: .infinity)
       .padding(12)
       .id("\(colIdx)-\(rowIdx)")
-      .applyCellBorder(colIndex: colIdx, colCount: headings.count, rowIndex: rowIdx, rowCount: numOfRows, color: Color(config.tableStyle.borderColor))
+      .applyCellBorder(colIndex: colIdx, colCount: headings.count, rowIndex: rowIdx, rowCount: numOfRows, color: config.tableStyle.borderColor)
     }
   }
 
@@ -159,7 +160,7 @@ struct TableView: View {
         .overlay(
           RoundedRectangle(cornerRadius: 12)
             .inset(by: 0.5)
-            .stroke(Color(config.tableStyle.borderColor), lineWidth: 1)
+            .stroke(config.tableStyle.borderColor, lineWidth: 1)
         )
         .cornerRadius(12)
         .onWidthChange { newWidth in
@@ -199,13 +200,13 @@ struct TableView: View {
       ZStack {
         Image("Copy", bundle: .module)
           .renderingMode(.template)
-          .foregroundStyle(Color(config.tableStyle.actionButtonColor))
+          .foregroundStyle(config.tableStyle.actionButtonColor)
           .frame(width: 20, height: 20)
           .opacity(isCopyPressed ? 0.0 : 1.0)
 
         Image("CopyFilled", bundle: .module)
           .renderingMode(.template)
-          .foregroundStyle(Color(config.tableStyle.actionButtonColor))
+          .foregroundStyle(config.tableStyle.actionButtonColor)
           .frame(width: 20, height: 20)
           .opacity(isCopyPressed ? 1.0 : 0.0)
       }
@@ -221,7 +222,7 @@ struct TableView: View {
     }, label: {
       Image("downloadArrow", bundle: .module)
         .renderingMode(.template)
-        .foregroundStyle(Color(config.tableStyle.actionButtonColor))
+        .foregroundStyle(config.tableStyle.actionButtonColor)
         .frame(width: 20, height: 20)
         .padding(2)
     })
@@ -334,7 +335,7 @@ extension TableView {
     // Apply typography theming for table cells
     let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
     let fullRange = NSRange(location: 0, length: mutableAttributedString.length)
-    let themeColor = config.tableStyle.regularTextColor
+    let themeColor = UIColor(config.tableStyle.regularTextColor)
 
     // Apply theme color to text that doesn't already have a foreground color
     mutableAttributedString.enumerateAttribute(.foregroundColor, in: fullRange, options: []) { existingColor, range, _ in
