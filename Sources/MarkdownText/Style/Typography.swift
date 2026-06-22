@@ -5,7 +5,11 @@
 
 import Foundation
 import SwiftUI
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 enum Typography: CaseIterable, Sendable {
   case extraLargeStrong
@@ -41,7 +45,7 @@ enum Typography: CaseIterable, Sendable {
   case code
   case tripleExtraSmallCustom450
 
-  var uiFont: UIFont {
+  var uiFont: PlatformFont {
     return switch self {
     case .tripleExtraSmallCustom450: Self.systemFont(size: 10.0, weight: .regular)
     case .code: Self.systemMonospacedFont(size: 15.0, weight: .regular)
@@ -78,18 +82,26 @@ enum Typography: CaseIterable, Sendable {
     }
   }
 
-  private static func systemFont(size: CGFloat, weight: UIFont.Weight, italic: Bool = false) -> UIFont {
+  private static func systemFont(size: CGFloat, weight: PlatformFont.Weight, italic: Bool = false) -> PlatformFont {
+    #if os(macOS)
+    let baseFont = NSFont.systemFont(ofSize: size, weight: weight)
+    #else
     let scaledSize = UIFontMetrics.default.scaledValue(for: size)
     let baseFont = UIFont.systemFont(ofSize: scaledSize, weight: weight)
+    #endif
     guard italic else {
       return baseFont
     }
     return baseFont.withItalicTrait()
   }
 
-  private static func systemMonospacedFont(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+  private static func systemMonospacedFont(size: CGFloat, weight: PlatformFont.Weight) -> PlatformFont {
+    #if os(macOS)
+    return NSFont.monospacedSystemFont(ofSize: size, weight: weight)
+    #else
     let scaledSize = UIFontMetrics.default.scaledValue(for: size)
     return UIFont.monospacedSystemFont(ofSize: scaledSize, weight: weight)
+    #endif
   }
 
   var font: Font {
@@ -174,12 +186,18 @@ enum Typography: CaseIterable, Sendable {
   }
 }
 
-private extension UIFont {
-  func withItalicTrait() -> UIFont {
+private extension PlatformFont {
+  func withItalicTrait() -> PlatformFont {
+    #if os(macOS)
+    let traits = fontDescriptor.symbolicTraits.union(.italic)
+    let descriptor = fontDescriptor.withSymbolicTraits(traits)
+    return NSFont(descriptor: descriptor, size: pointSize) ?? self
+    #else
     let traits = fontDescriptor.symbolicTraits.union(.traitItalic)
     guard let descriptor = fontDescriptor.withSymbolicTraits(traits) else {
       return self
     }
     return UIFont(descriptor: descriptor, size: pointSize)
+    #endif
   }
 }

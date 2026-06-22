@@ -5,7 +5,11 @@
 
 import Foundation
 import SwiftUI
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 /// Aggregate styling and behavior configuration applied to a `MarkdownView`.
 ///
@@ -39,10 +43,10 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     /// Font set used for normal, bold, and italic variants.
     public let textFonts: TextFonts
     /// Foreground color applied to the text.
-    public let textColor: UIColor
+    public let textColor: PlatformColor
 
     /// Create a text style with the given fonts and foreground color.
-    public init(textFonts: TextFonts, textColor: UIColor) {
+    public init(textFonts: TextFonts, textColor: PlatformColor) {
       self.textFonts = textFonts
       self.textColor = textColor
     }
@@ -54,18 +58,18 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     /// Font set used in both header and body cells.
     public let textFonts: TextFonts
     /// Foreground color applied to header cell text.
-    public let headerTextColor: UIColor
+    public let headerTextColor: PlatformColor
     /// Foreground color applied to body cell text.
-    public let regularTextColor: UIColor
+    public let regularTextColor: PlatformColor
     /// Background color of the header row.
-    public let headerBackgroundColor: UIColor
+    public let headerBackgroundColor: PlatformColor
     /// Color used for table borders and dividers.
-    public let borderColor: UIColor
+    public let borderColor: PlatformColor
     /// Tint color of the action button shown in the table footer.
-    public let actionButtonColor: UIColor
+    public let actionButtonColor: PlatformColor
 
     /// Create a table style with the supplied fonts and color palette.
-    public init(textFonts: TextFonts, headerTextColor: UIColor, regularTextColor: UIColor, headerBackgroundColor: UIColor, borderColor: UIColor, actionButtonColor: UIColor) {
+    public init(textFonts: TextFonts, headerTextColor: PlatformColor, regularTextColor: PlatformColor, headerBackgroundColor: PlatformColor, borderColor: PlatformColor, actionButtonColor: PlatformColor) {
       self.textFonts = textFonts
       self.headerTextColor = headerTextColor
       self.regularTextColor = regularTextColor
@@ -90,10 +94,10 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     /// Font set for level-6 headings.
     public let h6Font: TextFonts
     /// Foreground color shared by every heading level.
-    public let textColor: UIColor
+    public let textColor: PlatformColor
 
     /// Create a heading style with explicit fonts per level and a shared color.
-    public init(h1Font: TextFonts, h2Font: TextFonts, h3Font: TextFonts, h4Font: TextFonts, h5Font: TextFonts, h6Font: TextFonts, textColor: UIColor) {
+    public init(h1Font: TextFonts, h2Font: TextFonts, h3Font: TextFonts, h4Font: TextFonts, h5Font: TextFonts, h6Font: TextFonts, textColor: PlatformColor) {
       self.h1Font = h1Font
       self.h2Font = h2Font
       self.h3Font = h3Font
@@ -107,22 +111,22 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   /// Styling for inline runs: bold emphasis, links, and inline code spans.
   public struct MarkdownInlineTextStyle: Hashable, Sendable {
     /// Foreground color applied to bold-emphasis runs.
-    public let boldTextColor: UIColor
+    public let boldTextColor: PlatformColor
     /// Font used for link runs.
-    public let linkTextFont: UIFont
+    public let linkTextFont: PlatformFont
     /// Foreground color applied to link runs.
-    public let linkTextColor: UIColor
+    public let linkTextColor: PlatformColor
     /// Font used for inline code spans.
-    public let codeTextFont: UIFont
+    public let codeTextFont: PlatformFont
     /// Foreground color applied to inline code spans.
-    public let codeTextColor: UIColor
+    public let codeTextColor: PlatformColor
     /// Background fill behind inline code spans.
-    public let codeBackgroundColor: UIColor
+    public let codeBackgroundColor: PlatformColor
     /// Underline color drawn beneath inline code spans.
-    public let codeUnderlineColor: UIColor
+    public let codeUnderlineColor: PlatformColor
 
     /// Create an inline text style with the supplied fonts and color palette.
-    public init(boldTextColor: UIColor, linkTextFont: UIFont, linkTextColor: UIColor, codeTextFont: UIFont, codeTextColor: UIColor, codeBackgroundColor: UIColor, codeUnderlineColor: UIColor) {
+    public init(boldTextColor: PlatformColor, linkTextFont: PlatformFont, linkTextColor: PlatformColor, codeTextFont: PlatformFont, codeTextColor: PlatformColor, codeBackgroundColor: PlatformColor, codeUnderlineColor: PlatformColor) {
       self.boldTextColor = boldTextColor
       self.linkTextFont = linkTextFont
       self.linkTextColor = linkTextColor
@@ -140,11 +144,11 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     /// Encoder/decoder used to embed citation payloads into the markdown.
     public let coder: CitationCoder
     /// Font applied to the rendered citation chip.
-    public let font: UIFont
+    public let font: PlatformFont
     /// Foreground color of the citation chip text.
-    public let textColor: UIColor
+    public let textColor: PlatformColor
     /// Background fill of the citation chip.
-    public let backgroundColor: UIColor
+    public let backgroundColor: PlatformColor
 
     /// Create a citation configuration.
     /// - Parameters:
@@ -156,9 +160,9 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     public init(
       isEnabled: Bool = true,
       coder: CitationCoder = .default,
-      font: UIFont,
-      textColor: UIColor,
-      backgroundColor: UIColor
+      font: PlatformFont,
+      textColor: PlatformColor,
+      backgroundColor: PlatformColor
     ) {
       self.isEnabled = isEnabled
       self.coder = coder
@@ -170,15 +174,15 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     /// Default citation styling derived from the bundled `Typography` and `Color.Theme` palette.
     public static let `default` = CitationConfig(
       font: Typography.tripleExtraSmallCustom450.uiFont,
-      textColor: UIColor(Color.Theme.Foreground.Primary.Primary750),
-      backgroundColor: UIColor(Color.Theme.Overlay.Black.Black5)
+      textColor: PlatformColor(Color.Theme.Foreground.Primary.Primary750),
+      backgroundColor: PlatformColor(Color.Theme.Overlay.Black.Black5)
     )
   }
 
   /// Default styling for `blockQuoteStyle`.
   public static let defaultBlockQuoteStyle = MarkdownTextStyle(
     textFonts: Typography.baseTextFonts,
-    textColor: UIColor(Color.Theme.Foreground.Primary.Primary750)
+    textColor: PlatformColor(Color.Theme.Foreground.Primary.Primary750)
   )
 
   /// Default styling for `headingStyle`.
@@ -189,40 +193,40 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     h4Font: Typography.mediumTextFonts,
     h5Font: Typography.mediumTextFonts,
     h6Font: Typography.mediumTextFonts,
-    textColor: UIColor(Color.Theme.Foreground.Primary.Primary750)
+    textColor: PlatformColor(Color.Theme.Foreground.Primary.Primary750)
   )
 
   /// Default styling for `orderedListStyle`.
   public static let defaultOrderedListStyle = MarkdownTextStyle(
     textFonts: Typography.baseTextFonts,
-    textColor: UIColor(Color.Theme.Foreground.Primary.Primary450)
+    textColor: PlatformColor(Color.Theme.Foreground.Primary.Primary450)
   )
 
   /// Default styling for `paragraphStyle`.
   public static let defaultParagraphStyle = MarkdownTextStyle(
     textFonts: Typography.baseTextFonts,
-    textColor: UIColor(Color.Theme.Foreground.Primary.Primary750)
+    textColor: PlatformColor(Color.Theme.Foreground.Primary.Primary750)
   )
 
   /// Default styling for `tableStyle`.
   public static let defaultTableStyle = MarkdownTableTextStyle(
     textFonts: Typography.smallTextFonts,
-    headerTextColor: UIColor(Color.Theme.Foreground.Primary.Primary750),
-    regularTextColor: UIColor(Color.Theme.Foreground.Primary.Primary800),
-    headerBackgroundColor: UIColor(Color.Theme.Component.Table.Background.Header),
-    borderColor: UIColor(Color.Theme.Stroke.Default.Default250),
-    actionButtonColor: UIColor(Color.Theme.Component.Button.Foreground.Rest)
+    headerTextColor: PlatformColor(Color.Theme.Foreground.Primary.Primary750),
+    regularTextColor: PlatformColor(Color.Theme.Foreground.Primary.Primary800),
+    headerBackgroundColor: PlatformColor(Color.Theme.Component.Table.Background.Header),
+    borderColor: PlatformColor(Color.Theme.Stroke.Default.Default250),
+    actionButtonColor: PlatformColor(Color.Theme.Component.Button.Foreground.Rest)
   )
 
   /// Default styling for `inlineStyle`.
   public static let defaultInlineStyle = MarkdownInlineTextStyle(
-    boldTextColor: UIColor(Color.Theme.Foreground.Primary.Primary750),
+    boldTextColor: PlatformColor(Color.Theme.Foreground.Primary.Primary750),
     linkTextFont: Typography.baseTextFonts.normal,
-    linkTextColor: UIColor(Color.Theme.Accent.Accent600),
+    linkTextColor: PlatformColor(Color.Theme.Accent.Accent600),
     codeTextFont: Typography.codeTextFonts.normal,
-    codeTextColor: UIColor(Color.Theme.Foreground.Primary.Primary750),
-    codeBackgroundColor: UIColor(Color.Theme.Component.Table.Background.Header),
-    codeUnderlineColor: UIColor(Color.Theme.Component.CodeBlock.Foreground.Header)
+    codeTextColor: PlatformColor(Color.Theme.Foreground.Primary.Primary750),
+    codeBackgroundColor: PlatformColor(Color.Theme.Component.Table.Background.Header),
+    codeUnderlineColor: PlatformColor(Color.Theme.Component.CodeBlock.Foreground.Header)
   )
 
   /// Create a render config. Every parameter has a sensible default that

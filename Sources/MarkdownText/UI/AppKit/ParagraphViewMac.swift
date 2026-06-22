@@ -3,9 +3,11 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if os(macOS)
+import AppKit
 import SwiftUI
 
-struct ParagraphView: UIViewRepresentable {
+struct ParagraphViewMac: NSViewRepresentable {
   @Environment(\.openURL) var openURL
   @Environment(\.markdownConfig) var config: MarkdownRenderConfig
   @Environment(\.markdownController) var markdownController: MarkdownController?
@@ -17,74 +19,75 @@ struct ParagraphView: UIViewRepresentable {
     Coordinator()
   }
 
-  func makeUIView(context: Context) -> ParagraphUIView {
+  func makeNSView(context: Context) -> ParagraphNSView {
     let openUrlFunction = openURL.callAsFunction(_:)
-    let view = ParagraphUIViewCache.shared.createOrReuseParagraphUIView(contents: contents, lineSpacing: lineSpacing)
+    let view = ParagraphNSViewCache.shared.createOrReuseParagraphNSView(contents: contents, lineSpacing: lineSpacing)
     view.onUrlTap = openUrlFunction
     view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
     view.setTextContextMenu(config.textContextMenu)
     view.setMarkdownController(markdownController)
 
     if config.shouldAnimateText {
-      view.alpha = 0
-      UIView.animate(withDuration: ParagraphUIView.animationDuration) {
-        view.alpha = 1
+      view.alphaValue = 0
+      NSAnimationContext.runAnimationGroup { ctx in
+        ctx.duration = ParagraphNSView.animationDuration
+        view.animator().alphaValue = 1
       }
     }
 
     return view
   }
 
-  func updateUIView(_ view: ParagraphUIView, context: Context) {
+  func updateNSView(_ view: ParagraphNSView, context: Context) {
     if view.paragraphContents != contents || view.lineSpacing != lineSpacing {
-      let shouldAnimate = view.window != nil && config.shouldAnimateText // only animate when visible
+      let shouldAnimate = view.window != nil && config.shouldAnimateText
       view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: shouldAnimate)
     }
     view.setTextContextMenu(config.textContextMenu)
     view.setMarkdownController(markdownController)
   }
 
-  // If we don't implement this function, the snapshot tests will fail with incorrect sizing.
-  func sizeThatFits(_ proposal: ProposedViewSize, uiView: ParagraphUIView, context: Context) -> CGSize? {
+  func sizeThatFits(_ proposal: ProposedViewSize, nsView: ParagraphNSView, context: Context) -> CGSize? {
     guard let width = proposal.width, width > 0, width.isFinite else {
       return nil
     }
 
-    // Check if content or lineSpacing changed - if so, clear the cache
     if contents != context.coordinator.lastContents || lineSpacing != context.coordinator.lastLineSpacing {
       context.coordinator.sizeCache.removeAll()
       context.coordinator.lastContents = contents
       context.coordinator.lastLineSpacing = lineSpacing
     }
 
-    // Round width to avoid cache misses from floating point precision issues
-    let cacheKey = (width * 10).rounded() / 10 // Round to 1 decimal place
+    let cacheKey = (width * 10).rounded() / 10
 
-    // Check if we have a cached size for this width
     if let cachedSize = context.coordinator.sizeCache[cacheKey] {
       return cachedSize
     }
 
-    // Calculate new size
-    let targetSize = CGSize(width: width, height: .greatestFiniteMagnitude)
-    let size = uiView.sizeThatFits(targetSize)
-    let calculatedSize = CGSize(width: size.width, height: size.height.rounded(.up))
+    guard let textContainer = nsView.textContainer,
+          let layoutManager = textContainer.layoutManager else {
+      return nil
+    }
+
+    textContainer.containerSize = NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+    layoutManager.ensureLayout(for: textContainer)
+    let usedRect = layoutManager.usedRect(for: textContainer)
+    let calculatedSize = CGSize(width: usedRect.width.rounded(.up), height: usedRect.height.rounded(.up))
 
     context.coordinator.sizeCache[cacheKey] = calculatedSize
-
     return calculatedSize
   }
 
   class Coordinator {
-    // Cache all calculated sizes keyed by width
     var sizeCache: [CGFloat: CGSize] = [:]
     var lastContents: NSMutableAttributedString?
     var lastLineSpacing: CGFloat?
   }
 }
 
-extension ParagraphView: Equatable {
-  static func == (lhs: ParagraphView, rhs: ParagraphView) -> Bool {
+extension ParagraphViewMac: Equatable {
+  static func == (lhs: ParagraphViewMac, rhs: ParagraphViewMac) -> Bool {
     lhs.contents == rhs.contents && lhs.lineSpacing == rhs.lineSpacing
   }
 }
+#endif

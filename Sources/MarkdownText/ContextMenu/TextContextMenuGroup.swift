@@ -3,7 +3,11 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 /// A grouping of related `TextContextMenuItem`s rendered as either a submenu
 /// or an inline section within `TextContextMenu`.
@@ -11,7 +15,7 @@ public struct TextContextMenuGroup: Hashable, Sendable {
   /// Submenu title, or `nil` for an inline/untitled group.
   public let title: String?
   /// Optional icon shown next to the title.
-  public let image: UIImage?
+  public let image: PlatformImage?
   /// When `true`, the group renders inline rather than as a submenu.
   public let displayInline: Bool
   /// Ordered items that belong to this group.
@@ -20,7 +24,7 @@ public struct TextContextMenuGroup: Hashable, Sendable {
   /// Create a group from the supplied title, icon, layout flag, and items.
   public init(
     title: String?,
-    image: UIImage?,
+    image: PlatformImage?,
     displayInline: Bool,
     items: [TextContextMenuItem]
   ) {
@@ -31,7 +35,7 @@ public struct TextContextMenuGroup: Hashable, Sendable {
   }
 
   /// Equality compares `title`, `displayInline`, and `items` (image is ignored
-  /// because `UIImage` is not value-equatable in a useful way).
+  /// because `PlatformImage` is not value-equatable in a useful way).
   public static func == (lhs: TextContextMenuGroup, rhs: TextContextMenuGroup) -> Bool {
     lhs.title == rhs.title && lhs.displayInline == rhs.displayInline && lhs.items == rhs.items
   }

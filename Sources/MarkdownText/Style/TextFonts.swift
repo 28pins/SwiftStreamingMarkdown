@@ -3,7 +3,11 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 import Foundation
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 import SwiftUI
 
 /// A bundle of font variants (normal/italic/bold/boldItalic) plus optional
@@ -11,13 +15,13 @@ import SwiftUI
 /// to style a run of text.
 public struct TextFonts: Hashable, Sendable {
   /// Regular variant. Always required.
-  public let normal: UIFont
+  public let normal: PlatformFont
   /// Italic variant, or `nil` to fall back to `normal` for emphasis.
-  public let italic: UIFont?
+  public let italic: PlatformFont?
   /// Bold variant, or `nil` to fall back to `normal` for strong runs.
-  public let bold: UIFont?
+  public let bold: PlatformFont?
   /// Bold-italic variant, or `nil` to fall back to `bold` then `italic`.
-  public let boldItalic: UIFont?
+  public let boldItalic: PlatformFont?
   /// Optional kerning override applied via `NSAttributedString.Key.kern`.
   public let preferredLetterSpacing: CGFloat?
   /// Optional preferred line height in points. When greater than the font's
@@ -25,7 +29,7 @@ public struct TextFonts: Hashable, Sendable {
   public let preferredLineHeight: CGFloat?
 
   /// Create a font set with explicit variants and optional spacing overrides.
-  public init(normal: UIFont, italic: UIFont?, bold: UIFont?, boldItalic: UIFont?, preferredLetterSpacing: CGFloat?, preferredLineHeight: CGFloat?) {
+  public init(normal: PlatformFont, italic: PlatformFont?, bold: PlatformFont?, boldItalic: PlatformFont?, preferredLetterSpacing: CGFloat?, preferredLineHeight: CGFloat?) {
     self.normal = normal
     self.italic = italic
     self.bold = bold
@@ -37,14 +41,14 @@ public struct TextFonts: Hashable, Sendable {
 
 extension TextFonts {
 
-  func italicize(font: UIFont) -> UIFont? {
+  func italicize(font: PlatformFont) -> PlatformFont? {
     if font == bold || font == boldItalic {
       return self.boldItalic
     }
     return self.italic
   }
 
-  func bold(font: UIFont) -> UIFont? {
+  func bold(font: PlatformFont) -> PlatformFont? {
     if font == italic || font == boldItalic {
       return self.boldItalic
     }
@@ -55,7 +59,7 @@ extension TextFonts {
 extension View {
 
   func font(_ font: TextFonts, bold: Bool = false, italic: Bool = false) -> some View {
-    let fontToUse: UIFont?
+    let fontToUse: PlatformFont?
     if bold && italic {
       fontToUse = font.boldItalic
     } else if bold {

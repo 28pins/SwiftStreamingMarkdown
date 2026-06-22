@@ -3,6 +3,7 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if os(iOS)
 import iosMath
 import SwiftUI
 import UIKit
@@ -418,26 +419,6 @@ fileprivate extension NSMutableAttributedString {
   }
 }
 
-struct LatexAttachmentData: Codable {
-  let latex: String
-  let fontSize: CGFloat
-  let lightTextColor: String
-  let darkTextColor: String
-}
-
-extension LatexAttachmentData {
-  var resolvedTextColor: UIColor {
-    let fallback = UIColor(Color.Theme.Foreground.Primary.Primary750)
-    guard let lightColor = UIColor(hex: lightTextColor),
-          let darkColor = UIColor(hex: darkTextColor) else {
-      return fallback
-    }
-    return UIColor { trait in
-      trait.userInterfaceStyle == .dark ? darkColor : lightColor
-    }
-  }
-}
-
 final class LatexViewProvider: NSTextAttachmentViewProvider {
   private let latex: String
   private let fontSize: CGFloat
@@ -497,3 +478,4 @@ final class LatexViewProvider: NSTextAttachmentViewProvider {
     return CGRect(x: 0, y: yOffset, width: mathLabel.bounds.width.rounded(.up), height: height)
   }
 }
+#endif

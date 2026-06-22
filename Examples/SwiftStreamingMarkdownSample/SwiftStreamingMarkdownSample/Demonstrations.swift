@@ -48,8 +48,13 @@ enum Demonstration: String, CaseIterable, Identifiable, Hashable {
   var customContextMenu: TextContextMenu? {
     switch self {
     case .multiParagraph:
+      #if os(macOS)
+      let shareImage = NSImage(systemSymbolName: "square.and.arrow.up", accessibilityDescription: nil)
+      #else
+      let shareImage = UIImage(systemName: "square.and.arrow.up")
+      #endif
       return TextContextMenu(menuGroups: [
-        .init(title: "Group 1", image: UIImage(systemName: "square.and.arrow.up"), displayInline: false, items: [
+        .init(title: "Group 1", image: shareImage, displayInline: false, items: [
           .init(id: "1", title: "Item 1"),
           .init(id: "2", title: "Item 2")
         ])
@@ -65,7 +70,11 @@ enum Demonstration: String, CaseIterable, Identifiable, Hashable {
   var automaticBackgroundColor: Color {
     switch self {
     case .robotoTheme: RobotoTheme.pageBackground
+    #if os(macOS)
+    default: Color(nsColor: .windowBackgroundColor)
+    #else
     default: Color(.systemBackground)
+    #endif
     }
   }
 }

@@ -5,7 +5,11 @@
 
 import SwiftStreamingMarkdown
 import SwiftUI
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
   case automatic
@@ -33,15 +37,19 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
     case .automatic:
       demonstration.automaticBackgroundColor
     case .system:
+      #if os(macOS)
+      Color(nsColor: .windowBackgroundColor)
+      #else
       Color(.systemBackground)
+      #endif
     case .roboto:
       RobotoTheme.pageBackground
     case .presentation:
-      Color(uiColor: Palette.presentation.background)
+      Color(platformColor: Palette.presentation.background)
     case .midnight:
-      Color(uiColor: Palette.midnight.background)
+      Color(platformColor: Palette.midnight.background)
     case .sepia:
-      Color(uiColor: Palette.sepia.background)
+      Color(platformColor: Palette.sepia.background)
     }
   }
 
@@ -131,16 +139,16 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
 }
 
 private struct Palette {
-  let background: UIColor
-  let foreground: UIColor
-  let secondaryForeground: UIColor
-  let heading: UIColor
-  let accent: UIColor
-  let softAccent: UIColor
-  let codeForeground: UIColor
-  let codeBackground: UIColor
-  let tableHeaderBackground: UIColor
-  let border: UIColor
+  let background: PlatformColor
+  let foreground: PlatformColor
+  let secondaryForeground: PlatformColor
+  let heading: PlatformColor
+  let accent: PlatformColor
+  let softAccent: PlatformColor
+  let codeForeground: PlatformColor
+  let codeBackground: PlatformColor
+  let tableHeaderBackground: PlatformColor
+  let border: PlatformColor
 
   static let presentation = Palette(
     background: .dynamic(light: .sampleRGB(0.95, 0.98, 1.00), dark: .sampleRGB(0.03, 0.07, 0.13)),
@@ -182,14 +190,30 @@ private struct Palette {
   )
 }
 
-private extension UIColor {
-  static func dynamic(light: UIColor, dark: UIColor) -> UIColor {
+private extension PlatformColor {
+  static func dynamic(light: PlatformColor, dark: PlatformColor) -> PlatformColor {
+    #if os(macOS)
+    NSColor(name: nil) { appearance in
+      appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? dark : light
+    }
+    #else
     UIColor { traitCollection in
       traitCollection.userInterfaceStyle == .dark ? dark : light
     }
+    #endif
   }
 
-  static func sampleRGB(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> UIColor {
-    UIColor(red: red, green: green, blue: blue, alpha: 1)
+  static func sampleRGB(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> PlatformColor {
+    PlatformColor(red: red, green: green, blue: blue, alpha: 1)
+  }
+}
+
+private extension Color {
+  init(platformColor: PlatformColor) {
+    #if os(macOS)
+    self.init(nsColor: platformColor)
+    #else
+    self.init(uiColor: platformColor)
+    #endif
   }
 }

@@ -3,6 +3,7 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if os(iOS)
 import iosMath
 import SwiftUI
 
@@ -39,3 +40,4 @@ struct BlockMathView: UIViewRepresentable {
     return CGSize(width: size.width.rounded(.up), height: size.height.rounded(.up) + 1)
   }
 }
+#endif

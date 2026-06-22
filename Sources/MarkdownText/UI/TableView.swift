@@ -100,9 +100,15 @@ struct TableView: View {
     switch content {
     case .containsAttachment(let nsAttributedString):
       HStack(spacing: 0) {
+        #if os(macOS)
+        ParagraphViewMac(contents: applyTypographyThemingAndGetContent(nsAttributedString))
+          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+          .accessibilityValue(String.itemPositionInTable(rowIndex: rowIdx + 2, totalRow: numOfRows + 1, columnIndex: colIdx + 1, totalColumn: headings.count))
+        #else
         ParagraphView(contents: applyTypographyThemingAndGetContent(nsAttributedString))
           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
           .accessibilityValue(String.itemPositionInTable(rowIndex: rowIdx + 2, totalRow: numOfRows + 1, columnIndex: colIdx + 1, totalColumn: headings.count))
+        #endif
         Spacer()
       }
       .frame(maxHeight: .infinity)
@@ -578,7 +584,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
   complexContent.append(NSAttributedString(string: " show "))
 
   let boldText = NSAttributedString(string: "significant improvement", attributes: [
-    .font: UIFont.boldSystemFont(ofSize: 14)
+    .font: PlatformFont.boldSystemFont(ofSize: 14)
   ])
   complexContent.append(boldText)
 
@@ -587,7 +593,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
     complexContent.append(NSAttributedString(string: " and see "))
     let linkText = NSAttributedString(string: "documentation", attributes: [
       .link: docURL,
-      .foregroundColor: UIColor.systemBlue
+      .foregroundColor: PlatformColor.systemBlue
     ])
     complexContent.append(linkText)
     complexContent.append(NSAttributedString(string: " for details."))
@@ -628,7 +634,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
   complexContent.append(NSAttributedString(string: " show "))
 
   let boldText = NSAttributedString(string: "significant improvement", attributes: [
-    .font: UIFont.boldSystemFont(ofSize: 14)
+    .font: PlatformFont.boldSystemFont(ofSize: 14)
   ])
   complexContent.append(boldText)
 
@@ -637,7 +643,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
     complexContent.append(NSAttributedString(string: " and see "))
     let linkText = NSAttributedString(string: "documentation", attributes: [
       .link: docURL,
-      .foregroundColor: UIColor.systemBlue
+      .foregroundColor: PlatformColor.systemBlue
     ])
     complexContent.append(linkText)
     complexContent.append(NSAttributedString(string: " for details."))

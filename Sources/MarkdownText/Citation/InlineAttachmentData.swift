@@ -4,7 +4,11 @@
 //
 
 import Foundation
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 enum AttachmentType: String, Codable {
   case citation

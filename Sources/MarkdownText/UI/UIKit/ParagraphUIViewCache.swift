@@ -3,6 +3,7 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if os(iOS)
 import UIKit
 
 class ParagraphUIViewCache {
@@ -38,3 +39,4 @@ class ParagraphUIViewCache {
     return availableView
   }
 }
+#endif

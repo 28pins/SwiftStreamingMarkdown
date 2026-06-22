@@ -5,7 +5,11 @@
 
 import Foundation
 import SwiftUI
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 import SwiftStreamingMarkdown
 
 class LoggingMarkdownListener: MarkdownListener, ObservableObject {
@@ -55,7 +59,12 @@ class LoggingMarkdownListener: MarkdownListener, ObservableObject {
   }
 
   func onTableCopyTap(content: String) async {
+    #if os(macOS)
+    NSPasteboard.general.clearContents()
+    NSPasteboard.general.setString(content, forType: .string)
+    #else
     UIPasteboard.general.string = content
+    #endif
     await presentCopyConfirmation()
   }
 
@@ -73,6 +82,13 @@ class LoggingMarkdownListener: MarkdownListener, ObservableObject {
 
   @MainActor
   private func presentCopyConfirmation() {
+    #if os(macOS)
+    let alert = NSAlert()
+    alert.messageText = "Copied"
+    alert.informativeText = "Table content copied to clipboard."
+    alert.addButton(withTitle: "OK")
+    alert.runModal()
+    #else
     guard let presenter = topPresentingViewController() else {
       return
     }
@@ -84,10 +100,18 @@ class LoggingMarkdownListener: MarkdownListener, ObservableObject {
     )
     alert.addAction(UIAlertAction(title: "OK", style: .default))
     presenter.present(alert, animated: true)
+    #endif
   }
 
   @MainActor
   private func presentShareSheet(for content: String) {
+    #if os(macOS)
+    let picker = NSSharingServicePicker(items: [content])
+    if let window = NSApplication.shared.keyWindow,
+       let contentView = window.contentView {
+      picker.show(relativeTo: contentView.bounds, of: contentView, preferredEdge: .minY)
+    }
+    #else
     guard let presenter = topPresentingViewController() else {
       return
     }
@@ -109,8 +133,10 @@ class LoggingMarkdownListener: MarkdownListener, ObservableObject {
     }
 
     presenter.present(activityViewController, animated: true)
+    #endif
   }
 
+  #if os(iOS)
   @MainActor
   private func topPresentingViewController() -> UIViewController? {
     guard
@@ -127,4 +153,5 @@ class LoggingMarkdownListener: MarkdownListener, ObservableObject {
     }
     return presenter
   }
+  #endif
 }

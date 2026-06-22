@@ -3,51 +3,13 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if os(iOS)
 import UIKit
 
 extension UIColor {
   convenience init?(hex: String) {
-    let normalized = hex
-      .trimmingCharacters(in: .whitespacesAndNewlines)
-      .replacingOccurrences(of: "#", with: "")
-      .replacingOccurrences(of: "0x", with: "")
-      .replacingOccurrences(of: "0X", with: "")
-
-    guard !normalized.isEmpty else {
-      return nil
-    }
-
-    var value: UInt64 = 0
-    guard Scanner(string: normalized).scanHexInt64(&value) else {
-      return nil
-    }
-
-    let red: CGFloat
-    let green: CGFloat
-    let blue: CGFloat
-    let alpha: CGFloat
-
-    switch normalized.count {
-    case 3:
-      red = CGFloat((value >> 8) & 0xF) / 15.0
-      green = CGFloat((value >> 4) & 0xF) / 15.0
-      blue = CGFloat(value & 0xF) / 15.0
-      alpha = 1.0
-    case 6:
-      red = CGFloat((value >> 16) & 0xFF) / 255.0
-      green = CGFloat((value >> 8) & 0xFF) / 255.0
-      blue = CGFloat(value & 0xFF) / 255.0
-      alpha = 1.0
-    case 8:
-      alpha = CGFloat((value >> 24) & 0xFF) / 255.0
-      red = CGFloat((value >> 16) & 0xFF) / 255.0
-      green = CGFloat((value >> 8) & 0xFF) / 255.0
-      blue = CGFloat(value & 0xFF) / 255.0
-    default:
-      return nil
-    }
-
-    self.init(red: red, green: green, blue: blue, alpha: alpha)
+    guard let (r, g, b, a) = hexToRGBA(hex) else { return nil }
+    self.init(red: r, green: g, blue: b, alpha: a)
   }
 
   func toHexString(includeAlpha: Bool = false) -> String {
@@ -71,4 +33,75 @@ extension UIColor {
 
     return String(format: "#%02X%02X%02X", r, g, b)
   }
+}
+#endif
+
+#if os(macOS)
+import AppKit
+
+extension NSColor {
+  convenience init?(hex: String) {
+    guard let (r, g, b, a) = hexToRGBA(hex) else { return nil }
+    self.init(red: r, green: g, blue: b, alpha: a)
+  }
+
+  func toHexString(includeAlpha: Bool = false) -> String {
+    guard let color = usingColorSpace(.sRGB) else { return "#000000" }
+    let red = color.redComponent
+    let green = color.greenComponent
+    let blue = color.blueComponent
+    let alpha = color.alphaComponent
+
+    let r = Int((red * 255.0).rounded())
+    let g = Int((green * 255.0).rounded())
+    let b = Int((blue * 255.0).rounded())
+
+    if includeAlpha || alpha < 1.0 {
+      let a = Int((alpha * 255.0).rounded())
+      return String(format: "#%02X%02X%02X%02X", a, r, g, b)
+    }
+
+    return String(format: "#%02X%02X%02X", r, g, b)
+  }
+}
+#endif
+
+private func hexToRGBA(_ hex: String) -> (CGFloat, CGFloat, CGFloat, CGFloat)? {
+  let normalized = hex
+    .trimmingCharacters(in: .whitespacesAndNewlines)
+    .replacingOccurrences(of: "#", with: "")
+    .replacingOccurrences(of: "0x", with: "")
+    .replacingOccurrences(of: "0X", with: "")
+
+  guard !normalized.isEmpty else { return nil }
+
+  var value: UInt64 = 0
+  guard Scanner(string: normalized).scanHexInt64(&value) else { return nil }
+
+  let red: CGFloat
+  let green: CGFloat
+  let blue: CGFloat
+  let alpha: CGFloat
+
+  switch normalized.count {
+  case 3:
+    red = CGFloat((value >> 8) & 0xF) / 15.0
+    green = CGFloat((value >> 4) & 0xF) / 15.0
+    blue = CGFloat(value & 0xF) / 15.0
+    alpha = 1.0
+  case 6:
+    red = CGFloat((value >> 16) & 0xFF) / 255.0
+    green = CGFloat((value >> 8) & 0xFF) / 255.0
+    blue = CGFloat(value & 0xFF) / 255.0
+    alpha = 1.0
+  case 8:
+    alpha = CGFloat((value >> 24) & 0xFF) / 255.0
+    red = CGFloat((value >> 16) & 0xFF) / 255.0
+    green = CGFloat((value >> 8) & 0xFF) / 255.0
+    blue = CGFloat(value & 0xFF) / 255.0
+  default:
+    return nil
+  }
+
+  return (red, green, blue, alpha)
 }

@@ -6,51 +6,53 @@
 import Foundation
 import SwiftStreamingMarkdown
 import SwiftUI
-import UIKit
 
-/// A completely custom `MarkdownRenderConfig` that demonstrates plugging in a
-/// different type family (Google Roboto) and a vivid teal-on-deep-purple
-/// color palette. Compare side-by-side against `MarkdownRenderConfig.default`
-/// to see how every text style and color is configurable.
 enum RobotoTheme {
 
   // MARK: - Colors
 
-  /// Loads a named color from the `RobotoTheme` namespace in the main bundle's
-  /// asset catalog. Each color provides both a light and dark appearance, so
-  /// using the asset-backed `UIColor` lets the rendered markdown automatically
-  /// adapt when the user toggles dark mode.
-  private static func color(_ name: String) -> UIColor {
+  private static func color(_ name: String) -> PlatformColor {
+    #if os(macOS)
+    NSColor(named: "RobotoTheme/\(name)") ?? .systemPink
+    #else
     UIColor(named: "RobotoTheme/\(name)") ?? .systemPink
+    #endif
   }
 
-  private static var pageForeground: UIColor { color("PageForeground") }
-  private static var mutedForeground: UIColor { color("MutedForeground") }
-  private static var accent: UIColor { color("Accent") }
-  private static var accentSoft: UIColor { color("AccentSoft") }
-  private static var boldEmphasis: UIColor { color("BoldEmphasis") }
-  private static var codeForeground: UIColor { color("CodeForeground") }
-  private static var codeBackground: UIColor { color("CodeBackground") }
-  private static var codeUnderline: UIColor { color("CodeUnderline") }
-  private static var tableHeaderBackground: UIColor { color("TableHeaderBackground") }
-  private static var tableBorder: UIColor { color("TableBorder") }
+  private static var pageForeground: PlatformColor { color("PageForeground") }
+  private static var mutedForeground: PlatformColor { color("MutedForeground") }
+  private static var accent: PlatformColor { color("Accent") }
+  private static var accentSoft: PlatformColor { color("AccentSoft") }
+  private static var boldEmphasis: PlatformColor { color("BoldEmphasis") }
+  private static var codeForeground: PlatformColor { color("CodeForeground") }
+  private static var codeBackground: PlatformColor { color("CodeBackground") }
+  private static var codeUnderline: PlatformColor { color("CodeUnderline") }
+  private static var tableHeaderBackground: PlatformColor { color("TableHeaderBackground") }
+  private static var tableBorder: PlatformColor { color("TableBorder") }
 
-  /// Background applied around the rendered content to make the Roboto theme
-  /// pop visually. Exposed so `DemonstrationView` can paint the scroll view.
-  /// Backed by the same dark-mode-aware asset as everything else.
   static var pageBackground: Color { Color("RobotoTheme/PageBackground") }
 
   // MARK: - Fonts
 
-  private static func roboto(_ size: CGFloat, weight: String = "Regular") -> UIFont {
+  private static func roboto(_ size: CGFloat, weight: String = "Regular") -> PlatformFont {
+    #if os(macOS)
+    NSFont(name: "Roboto-\(weight)", size: size)
+      ?? .systemFont(ofSize: size, weight: weight == "Bold" ? .bold : (weight == "Medium" ? .medium : .regular))
+    #else
     UIFont(name: "Roboto-\(weight)", size: size)
       ?? .systemFont(ofSize: size, weight: weight == "Bold" ? .bold : (weight == "Medium" ? .medium : .regular))
+    #endif
   }
 
-  private static func robotoItalic(_ size: CGFloat, bold: Bool = false) -> UIFont {
+  private static func robotoItalic(_ size: CGFloat, bold: Bool = false) -> PlatformFont {
     let name = bold ? "Roboto-BoldItalic" : "Roboto-Italic"
+    #if os(macOS)
+    return NSFont(name: name, size: size)
+      ?? NSFont.systemFont(ofSize: size)
+    #else
     return UIFont(name: name, size: size)
       ?? .italicSystemFont(ofSize: size)
+    #endif
   }
 
   private static func textFonts(size: CGFloat, lineHeight: CGFloat? = nil, letterSpacing: CGFloat? = nil) -> TextFonts {
@@ -112,7 +114,7 @@ enum RobotoTheme {
       boldTextColor: boldEmphasis,
       linkTextFont: roboto(16, weight: "Medium"),
       linkTextColor: accent,
-      codeTextFont: UIFont.monospacedSystemFont(ofSize: 15, weight: .regular),
+      codeTextFont: PlatformFont.monospacedSystemFont(ofSize: 15, weight: .regular),
       codeTextColor: codeForeground,
       codeBackgroundColor: codeBackground,
       codeUnderlineColor: codeUnderline

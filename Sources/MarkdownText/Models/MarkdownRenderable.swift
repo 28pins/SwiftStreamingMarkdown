@@ -4,7 +4,11 @@
 //
 
 import Foundation
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 /// Markdown element representation that is ready to be rendered by a SwiftUI View
 /// The representation already have all the parsing and processing completed to minimize rendering overhead on UI thread.

@@ -38,25 +38,43 @@ struct SingleBlockView: View {
       switch renderable {
       case .heading(_, _, let contents):
         HStack(spacing: 0) {
+          #if os(macOS)
+          ParagraphViewMac(contents: contents)
+            .transition(.opacity)
+            .accessibilityAddTraits(.isHeader)
+          #else
           ParagraphView(contents: contents)
             .transition(.opacity)
             .accessibilityAddTraits(.isHeader)
+          #endif
           Spacer()
         }
       case .paragraph(_, let contents):
         HStack(spacing: 0) {
+          #if os(macOS)
+          ParagraphViewMac(contents: contents, lineSpacing: 5)
+            .fixedSize(horizontal: false, vertical: true)
+            .transition(.opacity)
+          #else
           ParagraphView(contents: contents, lineSpacing: 5)
             .fixedSize(horizontal: false, vertical: true)
             .transition(.opacity)
+          #endif
           Spacer()
         }
       case .latex(_, let latexString):
+        #if os(macOS)
+        // TODO: Add macOS BlockMathView equivalent
+        Text(latexString)
+          .font(.system(.body, design: .monospaced))
+        #else
         ScrollView(.horizontal) {
           HStack(spacing: 0) {
             BlockMathView(latex: latexString, color: Color(config.paragraphStyle.textColor))
             Spacer()
           }
         }.scrollIndicators(.hidden)
+        #endif
       case .orderedList(_, let items):
         OrderedListView(items: items)
       case .unorderedList(_, let items, let nestedLevel):

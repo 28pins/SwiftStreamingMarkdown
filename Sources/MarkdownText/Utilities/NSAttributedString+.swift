@@ -4,7 +4,11 @@
 //
 
 import Foundation
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 extension NSAttributedString {
   func splitIntoWords(withIn range: NSRange) -> [NSRange] {

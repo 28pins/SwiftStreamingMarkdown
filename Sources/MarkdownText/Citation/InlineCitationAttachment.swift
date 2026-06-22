@@ -4,7 +4,11 @@
 //
 
 import Foundation
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 import UniformTypeIdentifiers
 
 final class InlineCitationAttachment: NSTextAttachment {
@@ -13,26 +17,34 @@ final class InlineCitationAttachment: NSTextAttachment {
 
   /// Styling resolved from the active `CitationConfig`. Exposed so the live
   /// label provider can mirror the same look as the precomputed preview image.
-  let font: UIFont
-  let textColor: UIColor
-  let backgroundColor: UIColor
+  let font: PlatformFont
+  let textColor: PlatformColor
+  let backgroundColor: PlatformColor
 
   // MARK: - Interface style tracking
 
-  /// Latest interface style, used by `image` to pick between the precomputed
-  /// light/dark images. Updated from the main thread when a `ParagraphUIView`
-  /// applies new content. Defaults to `.dark` to match the pre-existing
-  /// behavior from #12415 before `updateInterfaceStyle` has been called.
-  private static var currentInterfaceStyle: UIUserInterfaceStyle = .dark
+  enum InterfaceStyle {
+    case light, dark
+  }
+
+  private static var currentInterfaceStyle: InterfaceStyle = .dark
   private static let styleLock = NSLock()
 
+  #if os(iOS)
   static func updateInterfaceStyle(_ style: UIUserInterfaceStyle) {
+    styleLock.lock()
+    defer { styleLock.unlock() }
+    currentInterfaceStyle = style == .dark ? .dark : .light
+  }
+  #endif
+
+  static func updateInterfaceStyle(_ style: InterfaceStyle) {
     styleLock.lock()
     defer { styleLock.unlock() }
     currentInterfaceStyle = style
   }
 
-  private static var latestStyle: UIUserInterfaceStyle {
+  private static var latestStyle: InterfaceStyle {
     styleLock.lock()
     defer { styleLock.unlock() }
     return currentInterfaceStyle
@@ -40,21 +52,28 @@ final class InlineCitationAttachment: NSTextAttachment {
 
   // MARK: - Precomputed preview images
 
-  /// Nil when `citationData` is missing. Rendered once at init and never
-  /// mutated afterwards. `var` (vs `let`) is only so `init(coder:)` can
-  /// populate these after `super.init` reconstructs `contents`.
+  #if os(macOS)
+  private var lightPreviewImage: NSImage?
+  private var darkPreviewImage: NSImage?
+  private var assignedImage: NSImage?
+
+  static let textInsets = NSEdgeInsets(top: 2, left: 4, bottom: 2, right: 4)
+  static let cornerRadius: CGFloat = 6
+
+  override var image: NSImage? {
+    get {
+      if let assignedImage { return assignedImage }
+      return Self.latestStyle == .dark ? darkPreviewImage : lightPreviewImage
+    }
+    set {
+      assignedImage = newValue
+    }
+  }
+  #else
   private var lightPreviewImage: UIImage?
   private var darkPreviewImage: UIImage?
-
-  /// Backing store for `image` setter. Kept separate from the precomputed
-  /// pair so a `set` call does not clobber `contents`/`fileType`.
   private var assignedImage: UIImage?
 
-  // MARK: - Shared Layout
-
-  /// Layout constants shared between the live `AttachmentCitationLabel` (in
-  /// `InlineCitationViewProvider`) and the static image rasterized by
-  /// `renderCitationImage`, so the two renderings stay visually identical.
   static let textInsets = UIEdgeInsets(top: 2, left: 4, bottom: 2, right: 4)
   static let cornerRadius: CGFloat = 6
 
@@ -67,6 +86,7 @@ final class InlineCitationAttachment: NSTextAttachment {
       assignedImage = newValue
     }
   }
+  #endif
 
   /// Called during markdown parsing (background queue). Rasterizes both
   /// light/dark previews here so the getter never does work on the main thread.
@@ -85,14 +105,14 @@ final class InlineCitationAttachment: NSTextAttachment {
         font: self.font,
         textColor: self.textColor,
         backgroundColor: self.backgroundColor,
-        traitCollection: UITraitCollection(userInterfaceStyle: .light)
+        isDark: false
       )
       self.darkPreviewImage = Self.renderCitationImage(
         title: title,
         font: self.font,
         textColor: self.textColor,
         backgroundColor: self.backgroundColor,
-        traitCollection: UITraitCollection(userInterfaceStyle: .dark)
+        isDark: true
       )
     } else {
       self.lightPreviewImage = nil
@@ -117,22 +137,65 @@ final class InlineCitationAttachment: NSTextAttachment {
 
   // MARK: - Preview Image Rendering
 
-  /// Thread-safe citation-label rendering using Core Graphics. Shares styling
-  /// constants with `AttachmentCitationLabel` for visual consistency.
+  #if os(macOS)
+  private static func renderCitationImage(
+    title: String,
+    font: NSFont,
+    textColor: NSColor,
+    backgroundColor: NSColor,
+    isDark: Bool
+  ) -> NSImage {
+    let textInsets = Self.textInsets
+    let cornerRadius = Self.cornerRadius
+
+    let appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)!
+    var resolvedTextColor = textColor
+    var resolvedBackgroundColor = backgroundColor
+    appearance.performAsCurrentDrawingAppearance {
+      resolvedTextColor = textColor
+      resolvedBackgroundColor = backgroundColor
+    }
+
+    let attributes: [NSAttributedString.Key: Any] = [
+      .font: font,
+      .foregroundColor: resolvedTextColor
+    ]
+    let textSize = (title as NSString).size(withAttributes: attributes)
+    let totalSize = CGSize(
+      width: ceil(textSize.width) + textInsets.left + textInsets.right,
+      height: ceil(textSize.height) + textInsets.top + textInsets.bottom
+    )
+
+    let image = NSImage(size: totalSize, flipped: true) { rect in
+      let path = NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius)
+      resolvedBackgroundColor.setFill()
+      path.fill()
+
+      let textRect = CGRect(
+        x: textInsets.left,
+        y: textInsets.top,
+        width: ceil(textSize.width),
+        height: ceil(textSize.height)
+      )
+      (title as NSString).draw(in: textRect, withAttributes: attributes)
+      return true
+    }
+    return image
+  }
+  #else
   private static func renderCitationImage(
     title: String,
     font: UIFont,
     textColor: UIColor,
     backgroundColor: UIColor,
-    traitCollection: UITraitCollection
+    isDark: Bool
   ) -> UIImage {
     let textInsets = Self.textInsets
     let cornerRadius = Self.cornerRadius
-    // Resolve dynamic colors for the current appearance (light/dark mode).
+    let traitCollection = UITraitCollection(userInterfaceStyle: isDark ? .dark : .light)
     let resolvedTextColor = textColor.resolvedColor(with: traitCollection)
     let resolvedBackgroundColor = backgroundColor.resolvedColor(with: traitCollection)
 
-    // Measure text size using NSAttributedString (thread-safe)
     let attributes: [NSAttributedString.Key: Any] = [
       .font: font,
       .foregroundColor: resolvedTextColor
@@ -159,4 +222,5 @@ final class InlineCitationAttachment: NSTextAttachment {
       (title as NSString).draw(in: textRect, withAttributes: attributes)
     }
   }
+  #endif
 }
