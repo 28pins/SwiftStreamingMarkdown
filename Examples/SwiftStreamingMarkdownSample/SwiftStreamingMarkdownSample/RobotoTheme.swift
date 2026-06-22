@@ -3,7 +3,6 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
-import Foundation
 import SwiftStreamingMarkdown
 import SwiftUI
 import UIKit
@@ -16,24 +15,20 @@ enum RobotoTheme {
 
   // MARK: - Colors
 
-  private static func color(_ name: String) -> Color {
-    Color("RobotoTheme/\(name)")
-  }
-
-  private static var pageForeground: Color { color("PageForeground") }
-  private static var mutedForeground: Color { color("MutedForeground") }
-  private static var accent: Color { color("Accent") }
-  private static var accentSoft: Color { color("AccentSoft") }
-  private static var boldEmphasis: Color { color("BoldEmphasis") }
-  private static var codeForeground: Color { color("CodeForeground") }
-  private static var codeBackground: Color { color("CodeBackground") }
-  private static var codeUnderline: Color { color("CodeUnderline") }
-  private static var tableHeaderBackground: Color { color("TableHeaderBackground") }
-  private static var tableBorder: Color { color("TableBorder") }
+  private static let pageForeground = Color("RobotoTheme/PageForeground")
+  private static let mutedForeground = Color("RobotoTheme/MutedForeground")
+  private static let accent = Color("RobotoTheme/Accent")
+  private static let accentSoft = Color("RobotoTheme/AccentSoft")
+  private static let boldEmphasis = Color("RobotoTheme/BoldEmphasis")
+  private static let codeForeground = Color("RobotoTheme/CodeForeground")
+  private static let codeBackground = Color("RobotoTheme/CodeBackground")
+  private static let codeUnderline = Color("RobotoTheme/CodeUnderline")
+  private static let tableHeaderBackground = Color("RobotoTheme/TableHeaderBackground")
+  private static let tableBorder = Color("RobotoTheme/TableBorder")
 
   /// Background applied around the rendered content to make the Roboto theme
   /// pop visually. Exposed so `DemonstrationView` can paint the scroll view.
-  static var pageBackground: Color { Color("RobotoTheme/PageBackground") }
+  static let pageBackground = Color("RobotoTheme/PageBackground")
 
   // MARK: - Fonts
 
