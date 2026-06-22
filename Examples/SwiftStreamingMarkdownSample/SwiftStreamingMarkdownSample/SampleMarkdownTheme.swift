@@ -37,11 +37,11 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
     case .roboto:
       RobotoTheme.pageBackground
     case .presentation:
-      Color(uiColor: Palette.presentation.background)
+      Palette.presentation.background
     case .midnight:
-      Color(uiColor: Palette.midnight.background)
+      Palette.midnight.background
     case .sepia:
-      Color(uiColor: Palette.sepia.background)
+      Palette.sepia.background
     }
   }
 
@@ -131,16 +131,16 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
 }
 
 private struct Palette {
-  let background: UIColor
-  let foreground: UIColor
-  let secondaryForeground: UIColor
-  let heading: UIColor
-  let accent: UIColor
-  let softAccent: UIColor
-  let codeForeground: UIColor
-  let codeBackground: UIColor
-  let tableHeaderBackground: UIColor
-  let border: UIColor
+  let background: Color
+  let foreground: Color
+  let secondaryForeground: Color
+  let heading: Color
+  let accent: Color
+  let softAccent: Color
+  let codeForeground: Color
+  let codeBackground: Color
+  let tableHeaderBackground: Color
+  let border: Color
 
   static let presentation = Palette(
     background: .dynamic(light: .sampleRGB(0.95, 0.98, 1.00), dark: .sampleRGB(0.03, 0.07, 0.13)),
@@ -182,14 +182,14 @@ private struct Palette {
   )
 }
 
-private extension UIColor {
-  static func dynamic(light: UIColor, dark: UIColor) -> UIColor {
-    UIColor { traitCollection in
-      traitCollection.userInterfaceStyle == .dark ? dark : light
-    }
+private extension Color {
+  static func dynamic(light: Color, dark: Color) -> Color {
+    Color(UIColor { traitCollection in
+      traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
+    })
   }
 
-  static func sampleRGB(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> UIColor {
-    UIColor(red: red, green: green, blue: blue, alpha: 1)
+  static func sampleRGB(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> Color {
+    Color(red: red, green: green, blue: blue)
   }
 }

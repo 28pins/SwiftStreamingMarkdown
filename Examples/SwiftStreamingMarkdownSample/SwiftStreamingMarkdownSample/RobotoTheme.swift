@@ -16,28 +16,23 @@ enum RobotoTheme {
 
   // MARK: - Colors
 
-  /// Loads a named color from the `RobotoTheme` namespace in the main bundle's
-  /// asset catalog. Each color provides both a light and dark appearance, so
-  /// using the asset-backed `UIColor` lets the rendered markdown automatically
-  /// adapt when the user toggles dark mode.
-  private static func color(_ name: String) -> UIColor {
-    UIColor(named: "RobotoTheme/\(name)") ?? .systemPink
+  private static func color(_ name: String) -> Color {
+    Color("RobotoTheme/\(name)")
   }
 
-  private static var pageForeground: UIColor { color("PageForeground") }
-  private static var mutedForeground: UIColor { color("MutedForeground") }
-  private static var accent: UIColor { color("Accent") }
-  private static var accentSoft: UIColor { color("AccentSoft") }
-  private static var boldEmphasis: UIColor { color("BoldEmphasis") }
-  private static var codeForeground: UIColor { color("CodeForeground") }
-  private static var codeBackground: UIColor { color("CodeBackground") }
-  private static var codeUnderline: UIColor { color("CodeUnderline") }
-  private static var tableHeaderBackground: UIColor { color("TableHeaderBackground") }
-  private static var tableBorder: UIColor { color("TableBorder") }
+  private static var pageForeground: Color { color("PageForeground") }
+  private static var mutedForeground: Color { color("MutedForeground") }
+  private static var accent: Color { color("Accent") }
+  private static var accentSoft: Color { color("AccentSoft") }
+  private static var boldEmphasis: Color { color("BoldEmphasis") }
+  private static var codeForeground: Color { color("CodeForeground") }
+  private static var codeBackground: Color { color("CodeBackground") }
+  private static var codeUnderline: Color { color("CodeUnderline") }
+  private static var tableHeaderBackground: Color { color("TableHeaderBackground") }
+  private static var tableBorder: Color { color("TableBorder") }
 
   /// Background applied around the rendered content to make the Roboto theme
   /// pop visually. Exposed so `DemonstrationView` can paint the scroll view.
-  /// Backed by the same dark-mode-aware asset as everything else.
   static var pageBackground: Color { Color("RobotoTheme/PageBackground") }
 
   // MARK: - Fonts
