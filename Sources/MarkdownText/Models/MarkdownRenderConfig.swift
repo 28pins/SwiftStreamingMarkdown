@@ -111,11 +111,11 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     /// Foreground color applied to bold-emphasis runs.
     public let boldTextColor: Color
     /// Font used for link runs.
-    public let linkTextFont: UIFont
+    public let linkTextFont: MDFont
     /// Foreground color applied to link runs.
     public let linkTextColor: Color
     /// Font used for inline code spans.
-    public let codeTextFont: UIFont
+    public let codeTextFont: MDFont
     /// Foreground color applied to inline code spans.
     public let codeTextColor: Color
     /// Background fill behind inline code spans.
@@ -124,7 +124,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     public let codeUnderlineColor: Color
 
     /// Create an inline text style with the supplied fonts and color palette.
-    public init(boldTextColor: Color, linkTextFont: UIFont, linkTextColor: Color, codeTextFont: UIFont, codeTextColor: Color, codeBackgroundColor: Color, codeUnderlineColor: Color) {
+    public init(boldTextColor: Color, linkTextFont: MDFont, linkTextColor: Color, codeTextFont: MDFont, codeTextColor: Color, codeBackgroundColor: Color, codeUnderlineColor: Color) {
       self.boldTextColor = boldTextColor
       self.linkTextFont = linkTextFont
       self.linkTextColor = linkTextColor
@@ -142,7 +142,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     /// Encoder/decoder used to embed citation payloads into the markdown.
     public let coder: CitationCoder
     /// Font applied to the rendered citation chip.
-    public let font: UIFont
+    public let font: MDFont
     /// Foreground color of the citation chip text.
     public let textColor: Color
     /// Background fill of the citation chip.
@@ -158,7 +158,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     public init(
       isEnabled: Bool = true,
       coder: CitationCoder = .default,
-      font: UIFont,
+      font: MDFont,
       textColor: Color,
       backgroundColor: Color
     ) {
