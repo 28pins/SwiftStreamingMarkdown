@@ -171,7 +171,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
 
     /// Default citation styling derived from the bundled `Typography` and `Color.Theme` palette.
     public static let `default` = CitationConfig(
-      font: Typography.tripleExtraSmallCustom450.uiFont,
+      font: Typography.tripleExtraSmallCustom450.mdFont,
       textColor: Color.Theme.Foreground.Primary.Primary750,
       backgroundColor: Color.Theme.Overlay.Black.Black5
     )

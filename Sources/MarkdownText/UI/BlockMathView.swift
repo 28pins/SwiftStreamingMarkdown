@@ -11,7 +11,7 @@ struct BlockMathView: UIViewRepresentable {
   let color: Color
   let pointSize: CGFloat
 
-  init(latex: String, color: Color = Color.Theme.Foreground.Primary.Primary750, pointSize: CGFloat = Typography.base.uiFont.pointSize) {
+  init(latex: String, color: Color = Color.Theme.Foreground.Primary.Primary750, pointSize: CGFloat = Typography.base.mdFont.pointSize) {
     self.latex = latex
     self.color = color
     self.pointSize = pointSize

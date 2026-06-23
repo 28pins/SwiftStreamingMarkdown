@@ -5,10 +5,17 @@
 
 #if canImport(UIKit)
 import UIKit
-/// Cross-platform font type. Resolves to `UIFont` on iOS and `NSFont` on macOS.
+/// Cross-platform font type. Resolves to `UIFont` on UIKit platforms and `NSFont` on AppKit platforms.
 public typealias MDFont = UIFont
 #elseif canImport(AppKit)
 import AppKit
-/// Cross-platform font type. Resolves to `UIFont` on iOS and `NSFont` on macOS.
+/// Cross-platform font type. Resolves to `UIFont` on UIKit platforms and `NSFont` on AppKit platforms.
 public typealias MDFont = NSFont
+
+extension NSFont {
+  /// Approximate `UIFont.lineHeight` using font metrics available on AppKit.
+  var lineHeight: CGFloat {
+    ceil(ascender - descender + leading)
+  }
+}
 #endif

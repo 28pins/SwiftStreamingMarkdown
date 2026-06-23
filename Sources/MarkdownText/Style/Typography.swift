@@ -5,7 +5,11 @@
 
 import Foundation
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 enum Typography: CaseIterable, Sendable {
   case extraLargeStrong
@@ -41,7 +45,7 @@ enum Typography: CaseIterable, Sendable {
   case code
   case tripleExtraSmallCustom450
 
-  var uiFont: UIFont {
+  var mdFont: MDFont {
     return switch self {
     case .tripleExtraSmallCustom450: Self.systemFont(size: 10.0, weight: .regular)
     case .code: Self.systemMonospacedFont(size: 15.0, weight: .regular)
@@ -78,30 +82,44 @@ enum Typography: CaseIterable, Sendable {
     }
   }
 
-  private static func systemFont(size: CGFloat, weight: UIFont.Weight, italic: Bool = false) -> UIFont {
+  #if canImport(UIKit)
+  private static func systemFont(size: CGFloat, weight: MDFont.Weight, italic: Bool = false) -> MDFont {
     let scaledSize = UIFontMetrics.default.scaledValue(for: size)
-    let baseFont = UIFont.systemFont(ofSize: scaledSize, weight: weight)
+    let baseFont = MDFont.systemFont(ofSize: scaledSize, weight: weight)
     guard italic else {
       return baseFont
     }
     return baseFont.withItalicTrait()
   }
 
-  private static func systemMonospacedFont(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+  private static func systemMonospacedFont(size: CGFloat, weight: MDFont.Weight) -> MDFont {
     let scaledSize = UIFontMetrics.default.scaledValue(for: size)
-    return UIFont.monospacedSystemFont(ofSize: scaledSize, weight: weight)
+    return MDFont.monospacedSystemFont(ofSize: scaledSize, weight: weight)
+  }
+  #elseif canImport(AppKit)
+  private static func systemFont(size: CGFloat, weight: MDFont.Weight, italic: Bool = false) -> MDFont {
+    let baseFont = MDFont.systemFont(ofSize: size, weight: weight)
+    guard italic else {
+      return baseFont
+    }
+    return baseFont.withItalicTrait()
   }
 
+  private static func systemMonospacedFont(size: CGFloat, weight: MDFont.Weight) -> MDFont {
+    MDFont.monospacedSystemFont(ofSize: size, weight: weight)
+  }
+  #endif
+
   var font: Font {
-    return Font(uiFont)
+    return Font(mdFont)
   }
 
   static var extraLargeTextFonts: TextFonts {
     return TextFonts(
-      normal: Typography.extraLarge.uiFont,
-      italic: Typography.extraLargeItalic.uiFont,
-      bold: Typography.extraLargeStrong.uiFont,
-      boldItalic: Typography.extraLargeStrongItalic.uiFont,
+      normal: Typography.extraLarge.mdFont,
+      italic: Typography.extraLargeItalic.mdFont,
+      bold: Typography.extraLargeStrong.mdFont,
+      boldItalic: Typography.extraLargeStrongItalic.mdFont,
       preferredLetterSpacing: -0.28,
       preferredLineHeight: 32.0
     )
@@ -109,10 +127,10 @@ enum Typography: CaseIterable, Sendable {
 
   static var largeTextFonts: TextFonts {
     return TextFonts(
-      normal: Typography.large.uiFont,
-      italic: Typography.largeItalic.uiFont,
-      bold: Typography.largeStrong.uiFont,
-      boldItalic: Typography.largeStrongItalic.uiFont,
+      normal: Typography.large.mdFont,
+      italic: Typography.largeItalic.mdFont,
+      bold: Typography.largeStrong.mdFont,
+      boldItalic: Typography.largeStrongItalic.mdFont,
       preferredLetterSpacing: -0.24,
       preferredLineHeight: 32.0
     )
@@ -120,10 +138,10 @@ enum Typography: CaseIterable, Sendable {
 
   static var mediumTextFonts: TextFonts {
     return TextFonts(
-      normal: Typography.medium.uiFont,
-      italic: Typography.mediumItalic.uiFont,
-      bold: Typography.mediumStrong.uiFont,
-      boldItalic: Typography.mediumStrongItalic.uiFont,
+      normal: Typography.medium.mdFont,
+      italic: Typography.mediumItalic.mdFont,
+      bold: Typography.mediumStrong.mdFont,
+      boldItalic: Typography.mediumStrongItalic.mdFont,
       preferredLetterSpacing: -0.2,
       preferredLineHeight: 26.0
     )
@@ -131,10 +149,10 @@ enum Typography: CaseIterable, Sendable {
 
   static var baseTextFonts: TextFonts {
     return TextFonts(
-      normal: Typography.base.uiFont,
-      italic: Typography.baseItalic.uiFont,
-      bold: Typography.baseStrong.uiFont,
-      boldItalic: Typography.baseStrongItalic.uiFont,
+      normal: Typography.base.mdFont,
+      italic: Typography.baseItalic.mdFont,
+      bold: Typography.baseStrong.mdFont,
+      boldItalic: Typography.baseStrongItalic.mdFont,
       preferredLetterSpacing: 0.0,
       preferredLineHeight: 26.0
     )
@@ -142,10 +160,10 @@ enum Typography: CaseIterable, Sendable {
 
   static var smallTextFonts: TextFonts {
     return TextFonts(
-      normal: Typography.small.uiFont,
-      italic: Typography.smallItalic.uiFont,
-      bold: Typography.smallStrong.uiFont,
-      boldItalic: Typography.smallStrongItalic.uiFont,
+      normal: Typography.small.mdFont,
+      italic: Typography.smallItalic.mdFont,
+      bold: Typography.smallStrong.mdFont,
+      boldItalic: Typography.smallStrongItalic.mdFont,
       preferredLetterSpacing: 0.0,
       preferredLineHeight: 20.0
     )
@@ -153,10 +171,10 @@ enum Typography: CaseIterable, Sendable {
 
   static var extraSmallTextFonts: TextFonts {
     return TextFonts(
-      normal: Typography.extraSmall.uiFont,
-      italic: Typography.extraSmallItalic.uiFont,
-      bold: Typography.extraSmallStrong.uiFont,
-      boldItalic: Typography.extraSmallStrongItalic.uiFont,
+      normal: Typography.extraSmall.mdFont,
+      italic: Typography.extraSmallItalic.mdFont,
+      bold: Typography.extraSmallStrong.mdFont,
+      boldItalic: Typography.extraSmallStrongItalic.mdFont,
       preferredLetterSpacing: 0.0,
       preferredLineHeight: 20.0
     )
@@ -164,7 +182,7 @@ enum Typography: CaseIterable, Sendable {
 
   static var codeTextFonts: TextFonts {
     return TextFonts(
-      normal: Typography.code.uiFont,
+      normal: Typography.code.mdFont,
       italic: nil,
       bold: nil,
       boldItalic: nil,
@@ -174,6 +192,7 @@ enum Typography: CaseIterable, Sendable {
   }
 }
 
+#if canImport(UIKit)
 private extension UIFont {
   func withItalicTrait() -> UIFont {
     let traits = fontDescriptor.symbolicTraits.union(.traitItalic)
@@ -183,3 +202,11 @@ private extension UIFont {
     return UIFont(descriptor: descriptor, size: pointSize)
   }
 }
+#elseif canImport(AppKit)
+private extension NSFont {
+  func withItalicTrait() -> NSFont {
+    let descriptor = fontDescriptor.withSymbolicTraits(.italic)
+    return NSFont(descriptor: descriptor, size: pointSize) ?? self
+  }
+}
+#endif

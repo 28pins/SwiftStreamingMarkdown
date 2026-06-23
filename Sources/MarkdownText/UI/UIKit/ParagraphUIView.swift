@@ -450,7 +450,7 @@ final class LatexViewProvider: NSTextAttachmentViewProvider {
                          location: any NSTextLocation) {
 
     var tempLatex = ""
-    var tempFontSize = Typography.base.uiFont.pointSize
+    var tempFontSize = Typography.base.mdFont.pointSize
     var tempTextColor: UIColor = UIColor(Color.Theme.Foreground.Primary.Primary750)
     if let data = attachment.contents {
       if let attachmentData = try? Self.jsonDecoder.decode(LatexAttachmentData.self, from: data) {

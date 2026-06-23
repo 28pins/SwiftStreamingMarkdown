@@ -70,7 +70,7 @@ struct ListItemContentWrapper<Content: View>: View {
     if let font = firstUIFont(in: paragraphContents) {
       return font
     }
-    return Typography.base.uiFont
+    return Typography.base.mdFont
   }
 
   private func firstCharacterCitationAttachment(in attributedString: NSAttributedString) -> InlineCitationAttachment? {
