@@ -11,11 +11,4 @@ public typealias MDFont = UIFont
 import AppKit
 /// Cross-platform font type. Resolves to `UIFont` on UIKit platforms and `NSFont` on AppKit platforms.
 public typealias MDFont = NSFont
-
-extension NSFont {
-  /// Approximate `UIFont.lineHeight` using font metrics available on AppKit.
-  var lineHeight: CGFloat {
-    ceil(ascender - descender + leading)
-  }
-}
 #endif
