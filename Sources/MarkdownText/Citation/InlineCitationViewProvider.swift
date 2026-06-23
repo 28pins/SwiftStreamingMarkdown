@@ -14,8 +14,8 @@ private final class AttachmentCitationLabel: UILabel {
   init(
     title: String,
     font: MDFont,
-    textColor: UIColor,
-    backgroundColor: UIColor
+    textColor: MDColor,
+    backgroundColor: MDColor
   ) {
     super.init(frame: .zero)
     self.backgroundColor = backgroundColor

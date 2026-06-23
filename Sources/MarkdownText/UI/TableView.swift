@@ -5,7 +5,11 @@
 
 import Foundation
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 enum RowContent: Equatable {
   case text(string: AttributedString)
@@ -335,7 +339,7 @@ extension TableView {
     // Apply typography theming for table cells
     let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
     let fullRange = NSRange(location: 0, length: mutableAttributedString.length)
-    let themeColor = UIColor(config.tableStyle.regularTextColor)
+    let themeColor = MDColor(config.tableStyle.regularTextColor)
 
     // Apply theme color to text that doesn't already have a foreground color
     mutableAttributedString.enumerateAttribute(.foregroundColor, in: fullRange, options: []) { existingColor, range, _ in
@@ -588,7 +592,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
     complexContent.append(NSAttributedString(string: " and see "))
     let linkText = NSAttributedString(string: "documentation", attributes: [
       .link: docURL,
-      .foregroundColor: UIColor.systemBlue
+      .foregroundColor: MDColor.systemBlue
     ])
     complexContent.append(linkText)
     complexContent.append(NSAttributedString(string: " for details."))
@@ -638,7 +642,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
     complexContent.append(NSAttributedString(string: " and see "))
     let linkText = NSAttributedString(string: "documentation", attributes: [
       .link: docURL,
-      .foregroundColor: UIColor.systemBlue
+      .foregroundColor: MDColor.systemBlue
     ])
     complexContent.append(linkText)
     complexContent.append(NSAttributedString(string: " for details."))
