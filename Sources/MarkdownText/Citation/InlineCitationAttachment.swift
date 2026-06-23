@@ -13,7 +13,7 @@ final class InlineCitationAttachment: NSTextAttachment {
 
   /// Styling resolved from the active `CitationConfig`. Exposed so the live
   /// label provider can mirror the same look as the precomputed preview image.
-  let font: UIFont
+  let font: MDFont
   let textColor: UIColor
   let backgroundColor: UIColor
 
@@ -121,7 +121,7 @@ final class InlineCitationAttachment: NSTextAttachment {
   /// constants with `AttachmentCitationLabel` for visual consistency.
   private static func renderCitationImage(
     title: String,
-    font: UIFont,
+    font: MDFont,
     textColor: UIColor,
     backgroundColor: UIColor,
     traitCollection: UITraitCollection

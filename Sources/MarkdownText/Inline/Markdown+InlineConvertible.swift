@@ -22,7 +22,7 @@ extension Markdown.Emphasis: InlineConvertible {
     var newContainer = attributeContainer
 
     if let currentTextFonts = attributeContainer[.typography] as? TextFonts {
-      let currentFont = attributeContainer[.font] as? UIFont
+      let currentFont = attributeContainer[.font] as? MDFont
       newContainer[.font] = currentFont.map { currentTextFonts.italicize(font: $0) } ?? currentTextFonts.italic
     } else {
       newContainer[.font] = config.paragraphStyle.textFonts.italic ?? config.paragraphStyle.textFonts.normal
@@ -40,7 +40,7 @@ extension Markdown.Strong: InlineConvertible {
     let str = NSMutableAttributedString()
     var newContainer = attributeContainer
     if let currentTextFonts = attributeContainer[.typography] as? TextFonts {
-      let currentFont = attributeContainer[.font] as? UIFont
+      let currentFont = attributeContainer[.font] as? MDFont
       newContainer[.font] = currentFont.map { currentTextFonts.bold(font: $0) } ?? currentTextFonts.bold
     } else {
       newContainer[.font] = config.paragraphStyle.textFonts.bold ?? config.paragraphStyle.textFonts.normal
@@ -156,7 +156,7 @@ extension Markdown.InlineCode: InlineConvertible {
         .code
         .dropFirst(LaTexPreProcessorImpl.inlineCodePrefix.count)
         .dropLast(LaTexPreProcessorImpl.inlineCodeSuffix.count))
-      let font = attributeContainer[NSAttributedString.Key.font] as? UIFont ?? config.paragraphStyle.textFonts.normal
+      let font = attributeContainer[NSAttributedString.Key.font] as? MDFont ?? config.paragraphStyle.textFonts.normal
       let textColor = UIColor(config.paragraphStyle.textColor)
       let lightHex = textColor.resolvedColor(with: UITraitCollection(userInterfaceStyle: .light)).toHexString()
       let darkHex = textColor.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark)).toHexString()

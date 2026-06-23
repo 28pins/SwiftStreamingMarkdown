@@ -13,7 +13,7 @@ private final class AttachmentCitationLabel: UILabel {
 
   init(
     title: String,
-    font: UIFont,
+    font: MDFont,
     textColor: UIColor,
     backgroundColor: UIColor
   ) {

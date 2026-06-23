@@ -579,7 +579,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
   complexContent.append(NSAttributedString(string: " show "))
 
   let boldText = NSAttributedString(string: "significant improvement", attributes: [
-    .font: UIFont.boldSystemFont(ofSize: 14)
+    .font: MDFont.boldSystemFont(ofSize: 14)
   ])
   complexContent.append(boldText)
 
@@ -629,7 +629,7 @@ let tableviewRowsMock: [[NSMutableAttributedString]] =  [
   complexContent.append(NSAttributedString(string: " show "))
 
   let boldText = NSAttributedString(string: "significant improvement", attributes: [
-    .font: UIFont.boldSystemFont(ofSize: 14)
+    .font: MDFont.boldSystemFont(ofSize: 14)
   ])
   complexContent.append(boldText)
 
