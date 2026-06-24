@@ -164,7 +164,7 @@ class ParagraphNSView: NSTextView {
 
   private func setupView() {
     if NSTextAttachment.textAttachmentViewProviderClass(forFileType: UTType.data.identifier) == nil {
-      NSTextAttachment.registerViewProviderClass(LatexViewProviderMac.self, forFileType: UTType.data.identifier)
+      NSTextAttachment.registerViewProviderClass(LatexViewProvider.self, forFileType: UTType.data.identifier)
     }
     if NSTextAttachment.textAttachmentViewProviderClass(forFileType: UTType.url.identifier) == nil {
       NSTextAttachment.registerViewProviderClass(InlineCitationViewProviderMac.self, forFileType: UTType.url.identifier)
@@ -396,66 +396,6 @@ extension ParagraphNSView: NSTextViewDelegate {
   }
 }
 
-// MARK: - macOS Latex View Provider
-
-final class LatexViewProviderMac: NSTextAttachmentViewProvider {
-  private let latex: String
-  private let fontSize: CGFloat
-  private let textColor: NSColor
-  private static let jsonDecoder = JSONDecoder()
-
-  required override init(textAttachment attachment: NSTextAttachment,
-                         parentView: NSView?,
-                         textLayoutManager: NSTextLayoutManager?,
-                         location: any NSTextLocation) {
-    var tempLatex = ""
-    var tempFontSize = Typography.base.mdFont.pointSize
-    var tempTextColor: NSColor = NSColor(Color.Theme.Foreground.Primary.Primary750)
-    if let data = attachment.contents {
-      if let attachmentData = try? Self.jsonDecoder.decode(LatexAttachmentData.self, from: data) {
-        tempLatex = attachmentData.latex
-        tempFontSize = attachmentData.fontSize
-        tempTextColor = attachmentData.resolvedTextColor
-      }
-    }
-    latex = tempLatex
-    fontSize = tempFontSize
-    textColor = tempTextColor
-
-    super.init(textAttachment: attachment,
-               parentView: parentView,
-               textLayoutManager: textLayoutManager,
-               location: location)
-
-    tracksTextAttachmentViewBounds = true
-  }
-
-  override func loadView() {
-    let label = MTMathUILabel()
-    label.latex = latex
-    label.textColor = textColor
-    label.displayErrorInline = false
-    label.fontSize = fontSize
-    label.setContentHuggingPriority(.defaultHigh, for: .vertical)
-    self.view = label
-  }
-
-  override func attachmentBounds(for attributes: [NSAttributedString.Key: Any],
-                                 location: any NSTextLocation,
-                                 textContainer: NSTextContainer?,
-                                 proposedLineFragment: CGRect,
-                                 position: CGPoint) -> CGRect {
-    guard let mathLabel = view as? MTMathUILabel else {
-      return .zero
-    }
-    let intrinsicSize = mathLabel.intrinsicContentSize
-    let height = intrinsicSize.height.rounded(.up) + 1.0
-    let font = attributes[.font] as? NSFont ?? NSFont.systemFont(ofSize: fontSize)
-    let yOffset = (font.xHeight - height) / 2.0
-    return CGRect(x: 0, y: yOffset, width: intrinsicSize.width.rounded(.up), height: height)
-  }
-}
-
 // MARK: - macOS Inline Citation View Provider
 
 final class InlineCitationViewProviderMac: NSTextAttachmentViewProvider {
@@ -474,22 +414,6 @@ final class InlineCitationViewProviderMac: NSTextAttachmentViewProvider {
     // Citation attachments use image-based rendering on macOS (via InlineCitationAttachment)
     // so we don't need a custom view — the attachment's image property handles display.
     self.view = nil
-  }
-}
-
-// MARK: - LatexAttachmentData macOS Extension
-
-extension LatexAttachmentData {
-  var resolvedTextColor: NSColor {
-    let fallback = NSColor(Color.Theme.Foreground.Primary.Primary750)
-    guard let lightColor = NSColor(hex: lightTextColor),
-          let darkColor = NSColor(hex: darkTextColor) else {
-      return fallback
-    }
-    return NSColor(name: nil) { appearance in
-      let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-      return isDark ? darkColor : lightColor
-    }
   }
 }
 #endif

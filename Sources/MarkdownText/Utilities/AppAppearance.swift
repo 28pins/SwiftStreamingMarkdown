@@ -47,6 +47,8 @@ enum AppAppearance {
   }
 
   static func update(appearance: NSAppearance) {
+    // bestMatch resolves all dark variants (vibrantDark, accessibilityHighContrastDarkAqua, etc.)
+    // to .darkAqua and all light variants to .aqua.
     let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
     $current.mutate { $0 = isDark ? .dark : .light }
   }
