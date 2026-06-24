@@ -30,13 +30,8 @@ final class InlineCitationAttachment: NSTextAttachment {
 
   // MARK: - Shared Layout
 
-  static let textInsetTop: CGFloat = 2
-  static let textInsetLeft: CGFloat = 4
-  static let textInsetBottom: CGFloat = 2
-  static let textInsetRight: CGFloat = 4
+  static let textInsets = MDEdgeInsets(top: 2, left: 4, bottom: 2, right: 4)
   static let cornerRadius: CGFloat = 6
-
-  static let textInsets = MDEdgeInsets(top: textInsetTop, left: textInsetLeft, bottom: textInsetBottom, right: textInsetRight)
 
   #if canImport(UIKit)
   override var image: UIImage? {
@@ -122,8 +117,8 @@ final class InlineCitationAttachment: NSTextAttachment {
     let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: resolvedTextColor]
     let textSize = (title as NSString).size(withAttributes: attributes)
     let totalSize = CGSize(
-      width: ceil(textSize.width) + textInsetLeft + textInsetRight,
-      height: ceil(textSize.height) + textInsetTop + textInsetBottom
+      width: ceil(textSize.width) + textInsets.left + textInsets.right,
+      height: ceil(textSize.height) + textInsets.top + textInsets.bottom
     )
 
     let renderer = UIGraphicsImageRenderer(size: totalSize)
@@ -133,7 +128,7 @@ final class InlineCitationAttachment: NSTextAttachment {
       resolvedBackgroundColor.setFill()
       path.fill()
 
-      let textRect = CGRect(x: textInsetLeft, y: textInsetTop,
+      let textRect = CGRect(x: textInsets.left, y: textInsets.top,
                             width: ceil(textSize.width), height: ceil(textSize.height))
       (title as NSString).draw(in: textRect, withAttributes: attributes)
     }
@@ -155,8 +150,8 @@ final class InlineCitationAttachment: NSTextAttachment {
     let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: resolvedTextColor]
     let textSize = (title as NSString).size(withAttributes: attributes)
     let totalSize = CGSize(
-      width: ceil(textSize.width) + textInsetLeft + textInsetRight,
-      height: ceil(textSize.height) + textInsetTop + textInsetBottom
+      width: ceil(textSize.width) + textInsets.left + textInsets.right,
+      height: ceil(textSize.height) + textInsets.top + textInsets.bottom
     )
 
     let image = NSImage(size: totalSize, flipped: false) { rect in
@@ -164,7 +159,7 @@ final class InlineCitationAttachment: NSTextAttachment {
       resolvedBackgroundColor.setFill()
       path.fill()
 
-      let textRect = CGRect(x: Self.textInsetLeft, y: Self.textInsetBottom,
+      let textRect = CGRect(x: Self.textInsets.left, y: Self.textInsets.bottom,
                             width: ceil(textSize.width), height: ceil(textSize.height))
       (title as NSString).draw(in: textRect, withAttributes: attributes)
       return true
