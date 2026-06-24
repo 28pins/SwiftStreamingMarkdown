@@ -4,9 +4,9 @@
 //
 
 import SwiftUI
+import iosMath
 
 #if canImport(UIKit)
-import iosMath
 
 struct BlockMathView: UIViewRepresentable {
   let latex: String
@@ -44,21 +44,36 @@ struct BlockMathView: UIViewRepresentable {
 
 #elseif canImport(AppKit)
 
-/// macOS placeholder — displays LaTeX source as monospaced text.
-/// A full iosMath-backed implementation is planned for a future PR.
-struct BlockMathView: View {
+struct BlockMathView: NSViewRepresentable {
   let latex: String
   let color: Color
+  let pointSize: CGFloat
 
   init(latex: String, color: Color = Color.Theme.Foreground.Primary.Primary750, pointSize: CGFloat = Typography.base.mdFont.pointSize) {
     self.latex = latex
     self.color = color
+    self.pointSize = pointSize
   }
 
-  var body: some View {
-    Text(latex)
-      .font(.system(.body, design: .monospaced))
-      .foregroundColor(color)
+  func makeNSView(context: Context) -> MTMathUILabel {
+    let label = MTMathUILabel()
+    label.latex = latex
+    label.textColor = NSColor(color)
+    label.displayErrorInline = false
+    label.fontSize = pointSize
+    label.setContentHuggingPriority(.defaultHigh, for: .vertical)
+    return label
+  }
+
+  func updateNSView(_ nsView: MTMathUILabel, context: Context) {
+    nsView.textColor = NSColor(color)
+    nsView.latex = latex
+  }
+
+  func sizeThatFits(_ proposal: ProposedViewSize, nsView: MTMathUILabel, context: Context) -> CGSize? {
+    let size = nsView.intrinsicContentSize
+    return CGSize(width: size.width.rounded(.up), height: size.height.rounded(.up) + 1)
   }
 }
+
 #endif
