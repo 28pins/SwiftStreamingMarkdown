@@ -104,15 +104,24 @@ final class InlineCitationAttachment: NSTextAttachment {
 
   // MARK: - Preview Image Rendering
 
-  #if canImport(UIKit)
   private static func renderCitationImage(
     title: String, font: MDFont,
     textColor: MDColor, backgroundColor: MDColor,
     appearance: AppAppearance
-  ) -> UIImage {
+  ) -> MDImage {
+    // Resolve colors for the target appearance
+    #if canImport(UIKit)
     let traitCollection = UITraitCollection(userInterfaceStyle: appearance.platformType)
     let resolvedTextColor = textColor.resolvedColor(with: traitCollection)
     let resolvedBackgroundColor = backgroundColor.resolvedColor(with: traitCollection)
+    #elseif canImport(AppKit)
+    var resolvedTextColor = textColor
+    var resolvedBackgroundColor = backgroundColor
+    appearance.platformType?.performAsCurrentDrawingAppearance {
+      resolvedTextColor = textColor.usingColorSpace(.sRGB) ?? textColor
+      resolvedBackgroundColor = backgroundColor.usingColorSpace(.sRGB) ?? backgroundColor
+    }
+    #endif
 
     let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: resolvedTextColor]
     let textSize = (title as NSString).size(withAttributes: attributes)
@@ -121,6 +130,8 @@ final class InlineCitationAttachment: NSTextAttachment {
       height: ceil(textSize.height) + textInsets.top + textInsets.bottom
     )
 
+    // Render the citation pill image
+    #if canImport(UIKit)
     let renderer = UIGraphicsImageRenderer(size: totalSize)
     return renderer.image { _ in
       let rect = CGRect(origin: .zero, size: totalSize)
@@ -132,29 +143,8 @@ final class InlineCitationAttachment: NSTextAttachment {
                             width: ceil(textSize.width), height: ceil(textSize.height))
       (title as NSString).draw(in: textRect, withAttributes: attributes)
     }
-  }
-  #elseif canImport(AppKit)
-  private static func renderCitationImage(
-    title: String, font: MDFont,
-    textColor: MDColor, backgroundColor: MDColor,
-    appearance: AppAppearance
-  ) -> NSImage {
-    let appearance = appearance.platformType
-    var resolvedTextColor = textColor
-    var resolvedBackgroundColor = backgroundColor
-    appearance?.performAsCurrentDrawingAppearance {
-      resolvedTextColor = textColor.usingColorSpace(.sRGB) ?? textColor
-      resolvedBackgroundColor = backgroundColor.usingColorSpace(.sRGB) ?? backgroundColor
-    }
-
-    let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: resolvedTextColor]
-    let textSize = (title as NSString).size(withAttributes: attributes)
-    let totalSize = CGSize(
-      width: ceil(textSize.width) + textInsets.left + textInsets.right,
-      height: ceil(textSize.height) + textInsets.top + textInsets.bottom
-    )
-
-    let image = NSImage(size: totalSize, flipped: false) { rect in
+    #elseif canImport(AppKit)
+    return NSImage(size: totalSize, flipped: false) { rect in
       let path = NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius)
       resolvedBackgroundColor.setFill()
       path.fill()
@@ -164,7 +154,6 @@ final class InlineCitationAttachment: NSTextAttachment {
       (title as NSString).draw(in: textRect, withAttributes: attributes)
       return true
     }
-    return image
+    #endif
   }
-  #endif
 }
