@@ -26,12 +26,29 @@ enum AppAppearance {
     case .light: return UIUserInterfaceStyle.light
     }
   }
+
+  static func update(style: UIUserInterfaceStyle) {
+    $current.mutate { value in
+      value = switch style {
+      case .dark:
+          .dark
+      default:
+          .light
+      }
+    }
+  }
+
   #elseif canImport(AppKit)
   var platformType: NSAppearance? {
     switch self {
     case .dark: return NSAppearance(named: .darkAqua)
     case .light: return NSAppearance(named: .aqua)
     }
+  }
+
+  static func update(appearance: NSAppearance) {
+    let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    $current.mutate { $0 = isDark ? .dark : .light }
   }
   #endif
 }

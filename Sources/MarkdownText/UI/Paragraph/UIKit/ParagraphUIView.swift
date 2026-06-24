@@ -71,9 +71,7 @@ class ParagraphUIView: UITextView {
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
     super.traitCollectionDidChange(previousTraitCollection)
     if traitCollection.userInterfaceStyle != previousTraitCollection?.userInterfaceStyle {
-      AppAppearance.$current.mutate { app in
-        app = traitCollection.userInterfaceStyle == .dark ? .dark : .light
-      }
+      AppAppearance.update(style: traitCollection.userInterfaceStyle)
     }
   }
 
@@ -104,9 +102,7 @@ class ParagraphUIView: UITextView {
   func setParagraphContents(_ newContents: NSMutableAttributedString, lineSpacing: CGFloat? = nil, animatedByWord: Bool) {
     // Keep the cached interface style up to date for citation preview rendering.
     // This runs on the main thread so it's safe to read traitCollection here.
-    AppAppearance.$current.mutate { app in
-      app = traitCollection.userInterfaceStyle == .dark ? .dark : .light
-    }
+    AppAppearance.update(style: traitCollection.userInterfaceStyle)
 
     guard paragraphContents != newContents || self.lineSpacing != lineSpacing else {
       return

@@ -60,8 +60,7 @@ class ParagraphNSView: NSTextView {
 
   override func viewDidChangeEffectiveAppearance() {
     super.viewDidChangeEffectiveAppearance()
-    let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-    AppAppearance.$current.mutate { $0 = isDark ? .dark : .light }
+    AppAppearance.update(appearance: effectiveAppearance)
   }
 
   // MARK: - Intrinsic Content Size
@@ -97,8 +96,7 @@ class ParagraphNSView: NSTextView {
   // MARK: - Content Update
 
   func setParagraphContents(_ newContents: NSMutableAttributedString, lineSpacing: CGFloat? = nil, animatedByWord: Bool) {
-    let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-    AppAppearance.$current.mutate { $0 = isDark ? .dark : .light }
+    AppAppearance.update(appearance: effectiveAppearance)
 
     guard paragraphContents != newContents || self.lineSpacing != lineSpacing else {
       return
