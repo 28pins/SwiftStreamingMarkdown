@@ -1,3 +1,8 @@
+//
+//  Copyright (c) Microsoft Corporation. All rights reserved.
+//  Licensed under the MIT License. See LICENSE in the project root for license information.
+//
+
 import Foundation
 #if canImport(UIKit)
 import UIKit
@@ -13,7 +18,7 @@ enum AppAppearance {
 
   @WithLock
   static var current: AppAppearance = .dark
-  
+
   #if canImport(UIKit)
   var platformType: UIUserInterfaceStyle {
     switch self {

@@ -21,7 +21,6 @@ final class InlineCitationAttachment: NSTextAttachment {
   let textColor: MDColor
   let backgroundColor: MDColor
 
-
   // MARK: - Precomputed preview images
 
   private var lightPreviewImage: MDImage?
