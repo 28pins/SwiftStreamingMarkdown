@@ -10,13 +10,6 @@ import QuartzCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct FadeAnimationData {
-  let id: UUID = UUID()
-  let startTime: CFTimeInterval
-  let duration: CFTimeInterval
-  let range: NSRange
-}
-
 private struct CachedParagraphNSViewSize {
   let size: CGSize
   let targetWidth: CGFloat
@@ -24,7 +17,7 @@ private struct CachedParagraphNSViewSize {
 
 class ParagraphNSView: NSTextView {
   private static let jsonEncoder = JSONEncoder()
-  static let animationDuration: CFTimeInterval = 0.5
+  static let animationDuration: CFTimeInterval = ParagraphAnimationConstants.fadeInDuration
 
   private(set) var paragraphContents: NSMutableAttributedString = NSMutableAttributedString()
   private(set) var lineSpacing: CGFloat?
@@ -135,7 +128,7 @@ class ParagraphNSView: NSTextView {
       let newContentRange = NSRange(location: oldLength, length: newContentLength)
       let wordRanges = finalString.splitIntoWords(withIn: newContentRange)
       let wordCount = wordRanges.count
-      let delayBetweenWords: Double = 0.1 / Double(max(wordCount, 1))
+      let delayBetweenWords: Double = ParagraphAnimationConstants.delayBetweenWordsRatio / Double(max(wordCount, 1))
       let baseStartTime = CACurrentMediaTime()
       for (index, wordRange) in wordRanges.enumerated() {
         let animationData = FadeAnimationData(
@@ -234,18 +227,6 @@ class ParagraphNSView: NSTextView {
 
   // MARK: - Fade Animation
 
-  private func easeOut(_ t: CGFloat) -> CGFloat {
-    let c2: CGFloat = 0.1
-    let c4: CGFloat = 1.0
-
-    let t2 = t * t
-    let t3 = t2 * t
-    let mt = 1 - t
-    let mt2 = mt * mt
-
-    return 3 * mt2 * t * c2 + 3 * mt * t2 * c4 + t3
-  }
-
   @objc private func updateFadeAnimation() {
     let currentTime = CACurrentMediaTime()
     var completedAnimations: [UUID] = []
@@ -284,7 +265,7 @@ class ParagraphNSView: NSTextView {
         animatedAlpha = 0.0
       } else {
         let progress = min(max(elapsed / animation.duration, 0.0), 1.0)
-        let easedProgress = easeOut(progress)
+        let easedProgress = paragraphEaseOut(progress)
         animatedAlpha = easedProgress
       }
 
