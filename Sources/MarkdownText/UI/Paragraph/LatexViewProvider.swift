@@ -46,12 +46,19 @@ final class LatexViewProvider: NSTextAttachmentViewProvider {
   private let textColor: MDColor
   private static let jsonDecoder = JSONDecoder()
 
+  private struct DecodedAttachment {
+    var latex: String = ""
+    var fontSize: CGFloat = Typography.base.mdFont.pointSize
+    var textColor: MDColor = MDColor(Color.Theme.Foreground.Primary.Primary750)
+  }
+
   #if canImport(UIKit)
   required override init(textAttachment attachment: NSTextAttachment,
                          parentView: UIView?,
                          textLayoutManager: NSTextLayoutManager?,
                          location: any NSTextLocation) {
-    (latex, fontSize, textColor) = Self.decode(attachment: attachment)
+    let decoded = Self.decode(attachment: attachment)
+    (latex, fontSize, textColor) = (decoded.latex, decoded.fontSize, decoded.textColor)
     super.init(textAttachment: attachment, parentView: parentView,
                textLayoutManager: textLayoutManager, location: location)
     tracksTextAttachmentViewBounds = true
@@ -61,25 +68,23 @@ final class LatexViewProvider: NSTextAttachmentViewProvider {
                          parentView: NSView?,
                          textLayoutManager: NSTextLayoutManager?,
                          location: any NSTextLocation) {
-    (latex, fontSize, textColor) = Self.decode(attachment: attachment)
+    let decoded = Self.decode(attachment: attachment)
+    (latex, fontSize, textColor) = (decoded.latex, decoded.fontSize, decoded.textColor)
     super.init(textAttachment: attachment, parentView: parentView,
                textLayoutManager: textLayoutManager, location: location)
     tracksTextAttachmentViewBounds = true
   }
   #endif
 
-  // swiftlint:disable:next large_tuple
-  private static func decode(attachment: NSTextAttachment) -> (String, CGFloat, MDColor) {
-    var latex = ""
-    var fontSize = Typography.base.mdFont.pointSize
-    var textColor: MDColor = MDColor(Color.Theme.Foreground.Primary.Primary750)
+  private static func decode(attachment: NSTextAttachment) -> DecodedAttachment {
+    var result = DecodedAttachment()
     if let data = attachment.contents,
        let attachmentData = try? jsonDecoder.decode(LatexAttachmentData.self, from: data) {
-      latex = attachmentData.latex
-      fontSize = attachmentData.fontSize
-      textColor = attachmentData.resolvedTextColor
+      result.latex = attachmentData.latex
+      result.fontSize = attachmentData.fontSize
+      result.textColor = attachmentData.resolvedTextColor
     }
-    return (latex, fontSize, textColor)
+    return result
   }
 
   override func loadView() {
