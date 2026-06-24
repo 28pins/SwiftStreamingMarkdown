@@ -3,8 +3,10 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
-import iosMath
 import SwiftUI
+
+#if canImport(UIKit)
+import iosMath
 
 struct BlockMathView: UIViewRepresentable {
   let latex: String
@@ -39,3 +41,24 @@ struct BlockMathView: UIViewRepresentable {
     return CGSize(width: size.width.rounded(.up), height: size.height.rounded(.up) + 1)
   }
 }
+
+#elseif canImport(AppKit)
+
+/// macOS placeholder — displays LaTeX source as monospaced text.
+/// A full iosMath-backed implementation is planned for a future PR.
+struct BlockMathView: View {
+  let latex: String
+  let color: Color
+
+  init(latex: String, color: Color = Color.Theme.Foreground.Primary.Primary750, pointSize: CGFloat = Typography.base.mdFont.pointSize) {
+    self.latex = latex
+    self.color = color
+  }
+
+  var body: some View {
+    Text(latex)
+      .font(.system(.body, design: .monospaced))
+      .foregroundColor(color)
+  }
+}
+#endif

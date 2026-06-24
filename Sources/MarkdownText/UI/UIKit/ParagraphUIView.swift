@@ -3,6 +3,7 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if canImport(UIKit)
 import iosMath
 import SwiftUI
 import UIKit
@@ -418,12 +419,7 @@ fileprivate extension NSMutableAttributedString {
   }
 }
 
-struct LatexAttachmentData: Codable {
-  let latex: String
-  let fontSize: CGFloat
-  let lightTextColor: String
-  let darkTextColor: String
-}
+// LatexAttachmentData struct is defined in Models/LatexAttachmentData.swift
 
 extension LatexAttachmentData {
   var resolvedTextColor: UIColor {
@@ -497,3 +493,4 @@ final class LatexViewProvider: NSTextAttachmentViewProvider {
     return CGRect(x: 0, y: yOffset, width: mathLabel.bounds.width.rounded(.up), height: height)
   }
 }
+#endif

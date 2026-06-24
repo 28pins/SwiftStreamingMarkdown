@@ -5,6 +5,7 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
 struct ParagraphView: UIViewRepresentable {
   @Environment(\.openURL) var openURL
   @Environment(\.markdownConfig) var config: MarkdownRenderConfig
@@ -88,3 +89,24 @@ extension ParagraphView: Equatable {
     lhs.contents == rhs.contents && lhs.lineSpacing == rhs.lineSpacing
   }
 }
+
+#elseif canImport(AppKit)
+
+/// macOS placeholder — renders paragraph content as plain attributed text.
+/// A full NSTextView-backed implementation is planned for a future PR.
+struct ParagraphView: View {
+  var contents: NSMutableAttributedString
+  var lineSpacing: CGFloat?
+
+  var body: some View {
+    Text(AttributedString(contents))
+      .textSelection(.enabled)
+  }
+}
+
+extension ParagraphView: Equatable {
+  static func == (lhs: ParagraphView, rhs: ParagraphView) -> Bool {
+    lhs.contents == rhs.contents && lhs.lineSpacing == rhs.lineSpacing
+  }
+}
+#endif

@@ -3,7 +3,11 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if canImport(UIKit)
 import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 /// Configuration for the edit menu that appears on text selection.
 public struct TextContextMenu: Hashable, Sendable {
@@ -15,6 +19,7 @@ public struct TextContextMenu: Hashable, Sendable {
     self.menuGroups = menuGroups
   }
 
+  #if canImport(UIKit)
   /// Build the `UIMenu` to present on text selection by merging the standard
   /// system edit actions with the configured custom groups. Used by
   /// `MarkdownViewController` and is rarely called directly by consumers.
@@ -59,4 +64,5 @@ public struct TextContextMenu: Hashable, Sendable {
     }
     return UIMenu(children: filteredSuggestedActions + customMenu)
   }
+  #endif
 }

@@ -111,7 +111,12 @@ struct CodeBlockView: View {
             .foregroundStyle(Color.Static.Stone.Stone350)
             .onTapGesture {
               copied = true
+              #if canImport(UIKit)
               UIPasteboard.general.string = code
+              #elseif canImport(AppKit)
+              NSPasteboard.general.clearContents()
+              NSPasteboard.general.setString(code, forType: .string)
+              #endif
               if let onCodeCopied {
                 onCodeCopied()
               }

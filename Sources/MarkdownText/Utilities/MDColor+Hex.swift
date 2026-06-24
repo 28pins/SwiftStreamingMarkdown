@@ -61,10 +61,10 @@ extension MDColor {
     var alpha: CGFloat = 0
 
     #if canImport(AppKit) && !canImport(UIKit)
-    let rgbColor = usingColorSpace(.sRGB) ?? self
-    guard rgbColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+    guard let rgbColor = usingColorSpace(.sRGB) else {
       return "#000000"
     }
+    rgbColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
     #else
     guard getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
       return "#000000"
