@@ -21,38 +21,6 @@ final class InlineCitationAttachment: NSTextAttachment {
   let textColor: MDColor
   let backgroundColor: MDColor
 
-  // MARK: - Interface style tracking
-
-  #if canImport(UIKit)
-  private static var currentInterfaceStyle: UIUserInterfaceStyle = .dark
-  #elseif canImport(AppKit)
-  private static var currentAppearanceIsDark: Bool = true
-  #endif
-  private static let styleLock = NSLock()
-
-  #if canImport(UIKit)
-  static func updateInterfaceStyle(_ style: UIUserInterfaceStyle) {
-    styleLock.lock()
-    defer { styleLock.unlock() }
-    currentInterfaceStyle = style
-  }
-  #elseif canImport(AppKit)
-  static func updateAppearanceIsDark(_ isDark: Bool) {
-    styleLock.lock()
-    defer { styleLock.unlock() }
-    currentAppearanceIsDark = isDark
-  }
-  #endif
-
-  private static var isDarkMode: Bool {
-    styleLock.lock()
-    defer { styleLock.unlock() }
-    #if canImport(UIKit)
-    return currentInterfaceStyle == .dark
-    #elseif canImport(AppKit)
-    return currentAppearanceIsDark
-    #endif
-  }
 
   // MARK: - Precomputed preview images
 
@@ -68,17 +36,17 @@ final class InlineCitationAttachment: NSTextAttachment {
   static let textInsetRight: CGFloat = 4
   static let cornerRadius: CGFloat = 6
 
-  #if canImport(UIKit)
-  static let textInsets = UIEdgeInsets(top: textInsetTop, left: textInsetLeft, bottom: textInsetBottom, right: textInsetRight)
-  #elseif canImport(AppKit)
-  static let textInsets = NSEdgeInsets(top: textInsetTop, left: textInsetLeft, bottom: textInsetBottom, right: textInsetRight)
-  #endif
+  static let textInsets = MDEdgeInsets(top: textInsetTop, left: textInsetLeft, bottom: textInsetBottom, right: textInsetRight)
 
   #if canImport(UIKit)
   override var image: UIImage? {
     get {
       if let assignedImage { return assignedImage }
-      return Self.isDarkMode ? darkPreviewImage : lightPreviewImage
+      let app = AppAppearance.$current.read({ $0 })
+      switch app {
+      case .dark: return darkPreviewImage
+      case .light: return lightPreviewImage
+      }
     }
     set { assignedImage = newValue }
   }
@@ -86,7 +54,11 @@ final class InlineCitationAttachment: NSTextAttachment {
   override var image: NSImage? {
     get {
       if let assignedImage { return assignedImage }
-      return Self.isDarkMode ? darkPreviewImage : lightPreviewImage
+      let app = AppAppearance.$current.read({ $0 })
+      switch app {
+      case .dark: return darkPreviewImage
+      case .light: return lightPreviewImage
+      }
     }
     set { assignedImage = newValue }
   }
@@ -107,12 +79,12 @@ final class InlineCitationAttachment: NSTextAttachment {
       self.lightPreviewImage = Self.renderCitationImage(
         title: title, font: self.font,
         textColor: self.textColor, backgroundColor: self.backgroundColor,
-        isDark: false
+        appearance: .light
       )
       self.darkPreviewImage = Self.renderCitationImage(
         title: title, font: self.font,
         textColor: self.textColor, backgroundColor: self.backgroundColor,
-        isDark: true
+        appearance: .dark
       )
     } else {
       self.lightPreviewImage = nil
@@ -141,9 +113,9 @@ final class InlineCitationAttachment: NSTextAttachment {
   private static func renderCitationImage(
     title: String, font: MDFont,
     textColor: MDColor, backgroundColor: MDColor,
-    isDark: Bool
+    appearance: AppAppearance
   ) -> UIImage {
-    let traitCollection = UITraitCollection(userInterfaceStyle: isDark ? .dark : .light)
+    let traitCollection = UITraitCollection(userInterfaceStyle: appearance.platformType)
     let resolvedTextColor = textColor.resolvedColor(with: traitCollection)
     let resolvedBackgroundColor = backgroundColor.resolvedColor(with: traitCollection)
 
@@ -170,9 +142,9 @@ final class InlineCitationAttachment: NSTextAttachment {
   private static func renderCitationImage(
     title: String, font: MDFont,
     textColor: MDColor, backgroundColor: MDColor,
-    isDark: Bool
+    appearance: AppAppearance
   ) -> NSImage {
-    let appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+    let appearance = appearance.platformType
     var resolvedTextColor = textColor
     var resolvedBackgroundColor = backgroundColor
     appearance?.performAsCurrentDrawingAppearance {
