@@ -17,7 +17,6 @@ public struct MacVariant {
   let colorScheme: ColorScheme
 
   enum WindowSize: String {
-    case narrow     // ~400pt, sidebar-like
     case standard   // ~800pt, typical window
     case wide       // ~1200pt, full-width
   }
@@ -25,7 +24,7 @@ public struct MacVariant {
 
 extension MacVariant {
   var name: String {
-    "\(title.rawValue)-\(colorScheme.macDescription)"
+    "macOS-\(title.rawValue)-\(colorScheme.macDescription)"
   }
 }
 
@@ -42,20 +41,6 @@ private extension ColorScheme {
 // MARK: - Factory Methods
 
 extension MacVariant {
-  static func narrow(
-    colorScheme: ColorScheme = .light,
-    precision: Float = 1,
-    perceptualPrecision: Float = 1
-  ) -> MacVariant {
-    let size = CGSize(width: 400, height: 800)
-    return MacVariant(
-      title: .narrow,
-      size: size,
-      snapshot: .image(precision: precision, perceptualPrecision: perceptualPrecision, size: size),
-      colorScheme: colorScheme
-    )
-  }
-
   static func standard(
     colorScheme: ColorScheme = .light,
     precision: Float = 1,
@@ -88,27 +73,14 @@ extension MacVariant {
 // MARK: - Standard Collections
 
 extension Collection where Element == MacVariant {
-  /// Standard macOS variants: narrow light/dark, standard light/dark
+  /// Standard macOS variants: standard light/dark
   public static func standard(
     precision: Float = 1,
     perceptualPrecision: Float = 1.0
   ) -> [MacVariant] {
     [
-      .narrow(colorScheme: .light, precision: precision, perceptualPrecision: perceptualPrecision),
-      .narrow(colorScheme: .dark, precision: precision, perceptualPrecision: perceptualPrecision),
       .standard(colorScheme: .light, precision: precision, perceptualPrecision: perceptualPrecision),
       .standard(colorScheme: .dark, precision: precision, perceptualPrecision: perceptualPrecision)
-    ]
-  }
-
-  /// Narrow variants only (light and dark)
-  public static func narrowOnly(
-    precision: Float = 1,
-    perceptualPrecision: Float = 1.0
-  ) -> [MacVariant] {
-    [
-      .narrow(colorScheme: .light, precision: precision, perceptualPrecision: perceptualPrecision),
-      .narrow(colorScheme: .dark, precision: precision, perceptualPrecision: perceptualPrecision)
     ]
   }
 
