@@ -261,14 +261,6 @@ class ParagraphUIView: UITextView {
     }
   }
 
-  /// Configure visual styling for citations (separate from accessibility)
-  private func configureVisualStyling(for attributedString: NSAttributedString) {
-    // This method handles visual styling that should always be applied
-    // regardless of accessibility configuration
-    // Currently, the visual styling is handled during attachment creation
-    // but this method is a placeholder for any future visual processing
-  }
-
   @objc private func updateFadeAnimation() {
     let currentTime = CACurrentMediaTime()
     var completedAnimations: [UUID] = []

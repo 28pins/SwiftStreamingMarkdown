@@ -166,9 +166,6 @@ class ParagraphNSView: NSTextView {
     if NSTextAttachment.textAttachmentViewProviderClass(forFileType: UTType.data.identifier) == nil {
       NSTextAttachment.registerViewProviderClass(LatexViewProvider.self, forFileType: UTType.data.identifier)
     }
-    if NSTextAttachment.textAttachmentViewProviderClass(forFileType: UTType.url.identifier) == nil {
-      NSTextAttachment.registerViewProviderClass(InlineCitationViewProviderMac.self, forFileType: UTType.url.identifier)
-    }
 
     isEditable = false
     isSelectable = true
@@ -393,27 +390,6 @@ extension ParagraphNSView: NSTextViewDelegate {
       return true
     }
     return false
-  }
-}
-
-// MARK: - macOS Inline Citation View Provider
-
-final class InlineCitationViewProviderMac: NSTextAttachmentViewProvider {
-  required override init(textAttachment attachment: NSTextAttachment,
-                         parentView: NSView?,
-                         textLayoutManager: NSTextLayoutManager?,
-                         location: any NSTextLocation) {
-    super.init(textAttachment: attachment,
-               parentView: parentView,
-               textLayoutManager: textLayoutManager,
-               location: location)
-    tracksTextAttachmentViewBounds = true
-  }
-
-  override func loadView() {
-    // Citation attachments use image-based rendering on macOS (via InlineCitationAttachment)
-    // so we don't need a custom view — the attachment's image property handles display.
-    self.view = nil
   }
 }
 #endif
