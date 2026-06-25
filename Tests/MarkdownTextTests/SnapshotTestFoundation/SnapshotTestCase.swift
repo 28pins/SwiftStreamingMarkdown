@@ -11,11 +11,13 @@
 import SnapshotTesting
 import SwiftUI
 import XCTest
+@testable import SwiftStreamingMarkdown
 
 open class SnapshotTestCase: XCTestCase {
   override open func setUp() {
     super.setUp()
     SnapshotTesting.diffTool = "diff-image"
+    ParagraphViewCache.shared.clearCache()
     // isRecording = true
   }
 

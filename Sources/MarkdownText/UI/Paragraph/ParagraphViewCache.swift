@@ -25,6 +25,10 @@ class ParagraphViewCache {
     return newView
   }
 
+  func clearCache() {
+    $cachedViews.mutate { $0.removeAll() }
+  }
+
   private func findAvailableCachedView() -> MDParagraphView? {
     $cachedViews.read(closure: { cachedView in
       cachedView.first { view in
