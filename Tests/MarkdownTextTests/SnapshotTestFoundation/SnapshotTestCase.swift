@@ -19,6 +19,7 @@ open class SnapshotTestCase: XCTestCase {
     // isRecording = true
   }
 
+  #if canImport(UIKit)
   /* Function to perform snapshot tests. Embeds all views in a ViewController for.
    - Parameters:
    - view: View to be tested
@@ -46,8 +47,31 @@ open class SnapshotTestCase: XCTestCase {
       )
     }
   }
-
+  #elseif canImport(AppKit)
+  /// Perform snapshot tests on macOS using window-size-based variants.
+  public func assert<V: View>(
+    _ view: V,
+    variants: [MacVariant] = .standard(precision: 0.99, perceptualPrecision: 1.00),
+    testName: String = #function,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    variants.forEach { variant in
+      assertSnapshot(
+        of: view.environment(\.colorScheme, variant.colorScheme).asViewController,
+        as: variant.snapshot,
+        named: variant.name,
+        file: file,
+        testName: testName,
+        line: line
+      )
+    }
+  }
+  #endif
 }
+
+#if canImport(UIKit)
+import UIKit
 
 private extension View {
   var asViewController: UIViewController {
@@ -56,3 +80,15 @@ private extension View {
     return vc
   }
 }
+#elseif canImport(AppKit)
+import AppKit
+
+private extension View {
+  var asViewController: NSViewController {
+    let vc = NSHostingController(rootView: self)
+    vc.view.wantsLayer = true
+    vc.view.layer?.backgroundColor = NSColor.clear.cgColor
+    return vc
+  }
+}
+#endif

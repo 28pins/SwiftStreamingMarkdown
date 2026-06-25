@@ -3,6 +3,7 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if canImport(UIKit)
 import SnapshotTesting
 import SwiftUI
 import XCTest
@@ -183,3 +184,4 @@ extension Collection where Element == DeviceVariant {
     ]
   }
 }
+#endif

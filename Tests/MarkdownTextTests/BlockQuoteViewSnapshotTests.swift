@@ -3,6 +3,7 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if canImport(UIKit)
 import Markdown
 @testable import SwiftStreamingMarkdown
 import XCTest
@@ -151,3 +152,4 @@ final class BlockQuoteViewSnapshotTests: SnapshotTestCase {
     assert(view)
   }
 }
+#endif

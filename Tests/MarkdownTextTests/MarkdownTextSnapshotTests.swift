@@ -3,6 +3,7 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+#if canImport(UIKit)
 import Markdown
 @testable import SwiftStreamingMarkdown
 import SwiftUI
@@ -306,3 +307,4 @@ final class MarkdownTextSnapshotTests: SnapshotTestCase {
     assert(view)
   }
 }
+#endif
