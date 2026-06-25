@@ -3,66 +3,33 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
-#if canImport(UIKit)
-import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif
+import Foundation
 
 class ParagraphViewCache {
-  #if canImport(UIKit)
   @WithLock
-  private var cachedViews: [ParagraphUIView] = []
-  #elseif canImport(AppKit)
-  @WithLock
-  private var cachedViews: [ParagraphNSView] = []
-  #endif
-
+  private var cachedViews: [MDParagraphView] = []
   private let maxCacheSize = 50
 
   private init() {}
 
   static let shared: ParagraphViewCache = .init()
 
-  #if canImport(UIKit)
-  func createOrReuseView(contents: NSMutableAttributedString, lineSpacing: CGFloat?) -> ParagraphUIView {
+  func createOrReuseView(contents: NSMutableAttributedString, lineSpacing: CGFloat?) -> MDParagraphView {
     if let availableView = findAvailableCachedView() {
       return availableView
     }
-    let newView = ParagraphUIView()
+    let newView = MDParagraphView()
     if $cachedViews.read(closure: { $0.count }) < maxCacheSize {
       $cachedViews.mutate { $0.append(newView) }
     }
     return newView
   }
-  #elseif canImport(AppKit)
-  func createOrReuseView(contents: NSMutableAttributedString, lineSpacing: CGFloat?) -> ParagraphNSView {
-    if let availableView = findAvailableCachedView() {
-      return availableView
-    }
-    let newView = ParagraphNSView()
-    if $cachedViews.read(closure: { $0.count }) < maxCacheSize {
-      $cachedViews.mutate { $0.append(newView) }
-    }
-    return newView
-  }
-  #endif
 
-  #if canImport(UIKit)
-  private func findAvailableCachedView() -> ParagraphUIView? {
+  private func findAvailableCachedView() -> MDParagraphView? {
     $cachedViews.read(closure: { cachedView in
       cachedView.first { view in
         view.superview == nil && view.window == nil
       }
     })
   }
-  #elseif canImport(AppKit)
-  private func findAvailableCachedView() -> ParagraphNSView? {
-    $cachedViews.read(closure: { cachedView in
-      cachedView.first { view in
-        view.superview == nil && view.window == nil
-      }
-    })
-  }
-  #endif
 }
