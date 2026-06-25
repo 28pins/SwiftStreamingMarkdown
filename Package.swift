@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
   name: "SwiftStreamingMarkdown",
   defaultLocalization: "en",
-  platforms: [.iOS(.v16)],
+  platforms: [.iOS(.v16), .macOS(.v14)],
   products: [
     .library(
       name: "SwiftStreamingMarkdown",
@@ -17,7 +17,7 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.18.1"),
     .package(url: "https://github.com/swiftlang/swift-markdown.git", exact: "0.7.3"),
     .package(url: "https://github.com/appstefan/highlightswift", revision: "99c431b38a1444a5fd6a4978307fbbefe3a7af53"),
-    .package(url: "https://github.com/maitbayev/iosMath", revision: "066ba2f8353782a644889efe9ceb884ea844180b")
+    .package(url: "https://github.com/kostub/iosMath", exact: "2.3.1")
   ],
   targets: [
     .target(
