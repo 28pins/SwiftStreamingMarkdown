@@ -174,9 +174,6 @@ class ParagraphUIView: UITextView {
     if NSTextAttachment.textAttachmentViewProviderClass(forFileType: UTType.data.identifier) == nil {
       NSTextAttachment.registerViewProviderClass(LatexViewProvider.self, forFileType: UTType.data.identifier)
     }
-    if NSTextAttachment.textAttachmentViewProviderClass(forFileType: UTType.url.identifier) == nil {
-      NSTextAttachment.registerViewProviderClass(InlineCitationViewProvider.self, forFileType: UTType.url.identifier)
-    }
 
     isEditable = false
     isSelectable = true
