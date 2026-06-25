@@ -20,7 +20,7 @@ struct ParagraphView: UIViewRepresentable {
 
   func makeUIView(context: Context) -> ParagraphUIView {
     let openUrlFunction = openURL.callAsFunction(_:)
-    let view = ParagraphUIViewCache.shared.createOrReuseParagraphUIView(contents: contents, lineSpacing: lineSpacing)
+    let view = ParagraphViewCache.shared.createOrReuseView(contents: contents, lineSpacing: lineSpacing)
     view.onUrlTap = openUrlFunction
     view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
     view.setTextContextMenu(config.textContextMenu)
