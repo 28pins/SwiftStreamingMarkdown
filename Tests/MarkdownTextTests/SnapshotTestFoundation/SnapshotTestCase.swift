@@ -33,7 +33,7 @@ open class SnapshotTestCase: XCTestCase {
 
   public func assert<V: View>(
     _ view: V,
-    variants: [DeviceVariant] = .standard(precision: 0.99, perceptualPrecision: 1.00),
+    variants: [DeviceiOSVariant] = .standard(precision: 0.99, perceptualPrecision: 1.00),
     testName: String = #function,
     file: StaticString = #file,
     line: UInt = #line

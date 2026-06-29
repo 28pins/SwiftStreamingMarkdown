@@ -86,7 +86,7 @@ struct ParagraphView: NSViewRepresentable {
 
 extension ParagraphView: Equatable {
   static func == (lhs: ParagraphView, rhs: ParagraphView) -> Bool {
-    lhs.contents == rhs.contents && lhs.lineSpacing == rhs.lineSpacing
+    lhs.contents.isEqual(to: rhs.contents) && lhs.lineSpacing == rhs.lineSpacing
   }
 }
 #endif

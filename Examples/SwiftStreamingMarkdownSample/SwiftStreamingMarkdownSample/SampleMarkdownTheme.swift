@@ -37,11 +37,7 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
     case .automatic:
       demonstration.automaticBackgroundColor
     case .system:
-      #if canImport(UIKit)
-      Color(.systemBackground)
-      #elseif canImport(AppKit)
-      Color(nsColor: .windowBackgroundColor)
-      #endif
+      Color.systemBackground
     case .roboto:
       RobotoTheme.pageBackground
     case .presentation:
@@ -191,19 +187,6 @@ private struct Palette {
 }
 
 private extension Color {
-  static func dynamic(light: Color, dark: Color) -> Color {
-    #if canImport(UIKit)
-    Color(UIColor { traitCollection in
-      traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
-    })
-    #elseif canImport(AppKit)
-    Color(nsColor: NSColor(name: nil) { appearance in
-      appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        ? NSColor(dark) : NSColor(light)
-    })
-    #endif
-  }
-
   static func sampleRGB(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> Color {
     Color(red: red, green: green, blue: blue)
   }

@@ -305,7 +305,7 @@ class ParagraphNSView: NSTextView {
   override func clicked(onLink link: Any, at charIndex: Int) {
     if let url = link as? URL {
       onUrlTap(url)
-    } else if let string = link as? String, let url = URL(string: string) {
+    } else if let string = link as? String, let url = URL.fromMixedEncodingString(string) {
       onUrlTap(url)
     }
   }
@@ -377,19 +377,4 @@ private struct ContextMenuAction {
   let selectedText: String
 }
 
-// MARK: - NSTextViewDelegate
-
-extension ParagraphNSView: NSTextViewDelegate {
-  // swiftlint:disable:next no_any
-  func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
-    if let url = link as? URL {
-      onUrlTap(url)
-      return true
-    } else if let string = link as? String, let url = URL(string: string) {
-      onUrlTap(url)
-      return true
-    }
-    return false
-  }
-}
 #endif

@@ -48,11 +48,7 @@ enum Demonstration: String, CaseIterable, Identifiable, Hashable {
   var customContextMenu: TextContextMenu? {
     switch self {
     case .multiParagraph:
-      #if canImport(UIKit)
-      let image = MDImage(systemName: "square.and.arrow.up")
-      #elseif canImport(AppKit)
-      let image = MDImage(systemSymbolName: "square.and.arrow.up", accessibilityDescription: nil)
-      #endif
+      let image = MDImage(sfSymbol: "square.and.arrow.up")
       return TextContextMenu(menuGroups: [
         .init(title: "Group 1", image: image, displayInline: false, items: [
           .init(id: "1", title: "Item 1"),
@@ -70,11 +66,7 @@ enum Demonstration: String, CaseIterable, Identifiable, Hashable {
   var automaticBackgroundColor: Color {
     switch self {
     case .robotoTheme: RobotoTheme.pageBackground
-    #if canImport(UIKit)
-    default: Color(.systemBackground)
-    #elseif canImport(AppKit)
-    default: Color(nsColor: .windowBackgroundColor)
-    #endif
+    default: Color.systemBackground
     }
   }
 }

@@ -10,13 +10,13 @@ import XCTest
 
 /// Device variant model needed for Snapshot testing
 
-public struct DeviceVariant {
+public struct DeviceiOSVariant {
   let title: DeviceName
   let snapshot: Snapshotting<UIViewController, UIImage>
   let colorScheme: ColorScheme
 }
 
-extension DeviceVariant {
+extension DeviceiOSVariant {
   var regionCode: String {
     "US"
   }
@@ -45,7 +45,7 @@ private extension ColorScheme {
   }
 }
 
-extension DeviceVariant {
+extension DeviceiOSVariant {
   /// All snapshot devices in Portait mode
 
   enum Vertical {
@@ -54,8 +54,8 @@ extension DeviceVariant {
       colorScheme: ColorScheme = .light,
       precision: Float = 1,
       perceptualPrecision: Float = 1
-    ) -> DeviceVariant {
-      DeviceVariant(
+    ) -> DeviceiOSVariant {
+      DeviceiOSVariant(
         title: .iPhone16,
         snapshot: .image(on: .init(config: ViewImageConfig.iPhone16(.portrait), height: size), precision: precision, perceptualPrecision: perceptualPrecision),
         colorScheme: colorScheme
@@ -67,8 +67,8 @@ extension DeviceVariant {
       colorScheme: ColorScheme = .light,
       precision: Float = 1,
       perceptualPrecision: Float = 1
-    ) -> DeviceVariant {
-      DeviceVariant(
+    ) -> DeviceiOSVariant {
+      DeviceiOSVariant(
         title: .iPadPro11,
         snapshot: .image(on: .init(config: .iPadPro11(.portrait), height: size), precision: precision, perceptualPrecision: perceptualPrecision),
         colorScheme: colorScheme
@@ -84,8 +84,8 @@ extension DeviceVariant {
       colorScheme: ColorScheme = .light,
       precision: Float = 1,
       perceptualPrecision: Float = 1
-    ) -> DeviceVariant {
-      DeviceVariant(
+    ) -> DeviceiOSVariant {
+      DeviceiOSVariant(
         title: .iPadPro11Landscape,
         snapshot: .image(on: .init(config: .iPadPro11(.landscape), height: size), precision: precision, perceptualPrecision: perceptualPrecision),
         colorScheme: colorScheme
@@ -100,7 +100,7 @@ extension DeviceVariant {
   }
 }
 
-extension Collection where Element == DeviceVariant {
+extension Collection where Element == DeviceiOSVariant {
   /// Standard device variant list – one iPhone light / dark, one iPad light / dark
   /// - Parameters:
   ///   - height: An optional height for the virtual device. If not provided, a default height will be used.
@@ -112,7 +112,7 @@ extension Collection where Element == DeviceVariant {
     height: CGFloat? = nil,
     precision: Float = 1,
     perceptualPrecision: Float = 1.0
-  ) -> [DeviceVariant] {
+  ) -> [DeviceiOSVariant] {
     iPhoneOnly(
       height: height,
       precision: precision,
@@ -135,17 +135,17 @@ extension Collection where Element == DeviceVariant {
     height: CGFloat? = nil,
     precision: Float = 1,
     perceptualPrecision: Float = 1.0
-  ) -> [DeviceVariant] {
+  ) -> [DeviceiOSVariant] {
     [
       // iPhone 16, light
-      DeviceVariant.Vertical.iPhone16(
+      DeviceiOSVariant.Vertical.iPhone16(
         size: height,
         colorScheme: .light,
         precision: precision,
         perceptualPrecision: perceptualPrecision
       ),
       // iPhone 16, dark
-      DeviceVariant.Vertical.iPhone16(
+      DeviceiOSVariant.Vertical.iPhone16(
         size: height,
         colorScheme: .dark,
         precision: precision,
@@ -165,17 +165,17 @@ extension Collection where Element == DeviceVariant {
     height: CGFloat? = nil,
     precision: Float = 1,
     perceptualPrecision: Float = 1.0
-  ) -> [DeviceVariant] {
+  ) -> [DeviceiOSVariant] {
     [
       // iPad Pro 11 in portrait (light)
-      DeviceVariant.Vertical.iPadPro11(
+      DeviceiOSVariant.Vertical.iPadPro11(
         size: height,
         colorScheme: .light,
         precision: precision,
         perceptualPrecision: perceptualPrecision
       ),
       // iPad Pro 11 in landscape (dark)
-      DeviceVariant.Horizontal.iPadPro11(
+      DeviceiOSVariant.Horizontal.iPadPro11(
         size: height,
         colorScheme: .dark,
         precision: precision,
