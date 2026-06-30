@@ -44,6 +44,14 @@ jobs:
             -destination "platform=iOS Simulator,OS=26.4.1,name=iPhone 17" \
             -skipMacroValidation
 
+      - name: Upload failed snapshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-snapshots-iOS
+          path: ~/Library/Developer/CoreSimulator/Devices/**/tmp/**/*.png
+          retention-days: 7
+
   spm-unit-tests-macos:
     name: SPM Unit Tests (macOS)
     runs-on: macos-26
@@ -58,6 +66,14 @@ jobs:
             -scheme SwiftStreamingMarkdown \
             -destination "platform=macOS" \
             -skipMacroValidation
+
+      - name: Upload failed snapshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-snapshots-macOS
+          path: /var/folders/**/T/**/*.png
+          retention-days: 7
 
   sample-app-build:
     name: Sample App Build
