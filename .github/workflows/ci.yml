@@ -44,13 +44,21 @@ jobs:
             -destination "platform=iOS Simulator,OS=26.4.1,name=iPhone 17" \
             -skipMacroValidation
 
+      - name: Collect failed snapshots
+        if: failure()
+        run: |
+          mkdir -p /tmp/failed-snapshots
+          find ~/Library/Developer/CoreSimulator/Devices -path "*tmp/*SnapshotTests*" -name "*.png" -exec cp {} /tmp/failed-snapshots/ \; 2>/dev/null || true
+          ls /tmp/failed-snapshots/ 2>/dev/null || echo "No snapshots found"
+
       - name: Upload failed snapshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: failed-snapshots-iOS
-          path: ~/Library/Developer/CoreSimulator/Devices/**/tmp/**/*.png
+          path: /tmp/failed-snapshots/
           retention-days: 7
+          if-no-files-found: ignore
 
   spm-unit-tests-macos:
     name: SPM Unit Tests (macOS)
@@ -67,13 +75,21 @@ jobs:
             -destination "platform=macOS" \
             -skipMacroValidation
 
+      - name: Collect failed snapshots
+        if: failure()
+        run: |
+          mkdir -p /tmp/failed-snapshots
+          find /var/folders -path "*/T/*SnapshotTests*" -name "*.png" -exec cp {} /tmp/failed-snapshots/ \; 2>/dev/null || true
+          ls /tmp/failed-snapshots/ 2>/dev/null || echo "No snapshots found"
+
       - name: Upload failed snapshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: failed-snapshots-macOS
-          path: /var/folders/**/T/**/*.png
+          path: /tmp/failed-snapshots/
           retention-days: 7
+          if-no-files-found: ignore
 
   sample-app-build:
     name: Sample App Build
