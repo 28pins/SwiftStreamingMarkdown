@@ -30,9 +30,27 @@ jobs:
         run: swiftlint --strict
 
   spm-unit-tests:
-    name: SPM Unit Tests (iOS)
+    name: SPM Unit Tests (${{ matrix.platform }})
     runs-on: macos-26
     timeout-minutes: 30
+    strategy:
+      matrix:
+        include:
+          - platform: iOS
+            destination: "platform=iOS Simulator,OS=26.4.1,name=iPhone 17"
+            skip-testing: ""
+          - platform: macOS
+            destination: "platform=macOS"
+            # Snapshot tests are skipped on macOS CI because they use
+            # CGWindowListCreateImage, which requires Screen Recording
+            # permission unavailable on CI runners.
+            skip-testing: >-
+              -skip-testing:SwiftStreamingMarkdownTests/MarkdownTextSnapshotTests
+              -skip-testing:SwiftStreamingMarkdownTests/BlockQuoteViewSnapshotTests
+              -skip-testing:SwiftStreamingMarkdownTests/TableViewSnapshotTests
+              -skip-testing:SwiftStreamingMarkdownTests/TableViewTests
+              -skip-testing:SwiftStreamingMarkdownTests/OrderedListViewTests
+              -skip-testing:SwiftStreamingMarkdownTests/UnorderedListViewTests
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -41,56 +59,23 @@ jobs:
         run: |
           xcodebuild test \
             -scheme SwiftStreamingMarkdown \
-            -destination "platform=iOS Simulator,OS=26.4.1,name=iPhone 17" \
-            -skipMacroValidation
-
-  spm-unit-tests-macos:
-    name: SPM Unit Tests (macOS)
-    runs-on: macos-26
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      # Snapshot tests are skipped on macOS CI because they use
-      # CGWindowListCreateImage, which requires Screen Recording permission
-      # that is unavailable on CI runners.
-      - name: Run package tests with xcodebuild
-        run: |
-          xcodebuild test \
-            -scheme SwiftStreamingMarkdown \
-            -destination "platform=macOS" \
+            -destination "${{ matrix.destination }}" \
             -skipMacroValidation \
-            -skip-testing:SwiftStreamingMarkdownTests/MarkdownTextSnapshotTests \
-            -skip-testing:SwiftStreamingMarkdownTests/BlockQuoteViewSnapshotTests \
-            -skip-testing:SwiftStreamingMarkdownTests/TableViewSnapshotTests \
-            -skip-testing:SwiftStreamingMarkdownTests/TableViewTests \
-            -skip-testing:SwiftStreamingMarkdownTests/OrderedListViewTests \
-            -skip-testing:SwiftStreamingMarkdownTests/UnorderedListViewTests
+            ${{ matrix.skip-testing }}
 
   sample-app-build:
-    name: Sample App Build (iOS)
+    name: Sample App Build (${{ matrix.platform }})
     runs-on: macos-26
     timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install XcodeGen if missing
-        run: |
-          if ! command -v xcodegen >/dev/null 2>&1; then
-            echo "XcodeGen not found, installing via Homebrew..."
-            brew install xcodegen
-          fi
-          xcodegen --version
-
-      - name: Build sample app
-        run: make build-sample
-
-  sample-app-build-macos:
-    name: Sample App Build (macOS)
-    runs-on: macos-26
-    timeout-minutes: 30
+    strategy:
+      matrix:
+        include:
+          - platform: iOS
+            scheme: SwiftStreamingMarkdownSample
+            destination: "platform=iOS Simulator,OS=26.4.1,name=iPhone 17"
+          - platform: macOS
+            scheme: SwiftStreamingMarkdownSampleMac
+            destination: "platform=macOS"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -106,12 +91,12 @@ jobs:
       - name: Generate sample app project
         run: make generate-sample-project
 
-      - name: Build macOS sample app
+      - name: Build sample app
         run: |
           GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=all \
           xcodebuild build \
             -project Examples/SwiftStreamingMarkdownSample/SwiftStreamingMarkdownSample.xcodeproj \
-            -scheme SwiftStreamingMarkdownSampleMac \
-            -destination "platform=macOS" \
+            -scheme "${{ matrix.scheme }}" \
+            -destination "${{ matrix.destination }}" \
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO
