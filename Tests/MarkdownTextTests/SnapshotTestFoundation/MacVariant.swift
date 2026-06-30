@@ -92,7 +92,7 @@ extension Snapshotting where Value == NSView, Format == NSImage {
           bounds,
           .optionIncludingWindow,
           windowID,
-          [.boundsIgnoreFraming, .bestResolution]
+          [.boundsIgnoreFraming, .nominalResolution]
         ) else {
           fatalError("CGWindowListCreateImage failed")
         }
