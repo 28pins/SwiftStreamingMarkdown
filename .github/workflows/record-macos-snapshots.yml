@@ -41,4 +41,4 @@ jobs:
         with:
           name: macos-snapshots
           path: /tmp/recorded-snapshots/
-          retention-days: 30
+          retention-days: 3
