@@ -53,7 +53,7 @@ open class SnapshotTestCase: XCTestCase {
   /// Perform snapshot tests on macOS using window-size-based variants.
   public func assert<V: View>(
     _ view: V,
-    variants: [MacVariant] = .standard(precision: 0.99, perceptualPrecision: 0.98),
+    variants: [MacVariant] = .standard(precision: 0.99, perceptualPrecision: 1.00),
     testName: String = #function,
     file: StaticString = #file,
     line: UInt = #line
