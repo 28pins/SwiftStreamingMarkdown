@@ -1,3 +1,8 @@
+---
+name: snapshot-tests
+description: "Record and validate swift-snapshot-testing snapshots in the SwiftStreamingMarkdown package: regenerate reference PNGs, run snapshot tests, and diff failed snapshots."
+---
+
 # Snapshot Tests Skill
 
 Workflow for recording and validating swift-snapshot-testing snapshots in
