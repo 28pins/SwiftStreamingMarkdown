@@ -10,30 +10,30 @@ import SwiftUI
 /// to style a run of text.
 public struct TextFonts: Hashable, Sendable {
   /// Regular variant. Always required.
-  public var normal: MDFont { _normal.font }
+  public var normal: MDFont { internalNormal.font }
   /// Italic variant, or `nil` to fall back to `normal` for emphasis.
-  public var italic: MDFont? { _italic?.font }
+  public var italic: MDFont? { internalItalic?.font }
   /// Bold variant, or `nil` to fall back to `normal` for strong runs.
-  public var bold: MDFont? { _bold?.font }
+  public var bold: MDFont? { internalBold?.font }
   /// Bold-italic variant, or `nil` to fall back to `bold` then `italic`.
-  public var boldItalic: MDFont? { _boldItalic?.font }
+  public var boldItalic: MDFont? { internalBoldItalic?.font }
   /// Optional kerning override applied via `NSAttributedString.Key.kern`.
   public let preferredLetterSpacing: CGFloat?
   /// Optional preferred line height in points. When greater than the font's
   /// natural line height, the renderer adds the difference as line spacing.
   public let preferredLineHeight: CGFloat?
 
-  private let _normal: SendableFont
-  private let _italic: SendableFont?
-  private let _bold: SendableFont?
-  private let _boldItalic: SendableFont?
+  private let internalNormal: SendableFont
+  private let internalItalic: SendableFont?
+  private let internalBold: SendableFont?
+  private let internalBoldItalic: SendableFont?
 
   /// Create a font set with explicit variants and optional spacing overrides.
   public init(normal: MDFont, italic: MDFont?, bold: MDFont?, boldItalic: MDFont?, preferredLetterSpacing: CGFloat?, preferredLineHeight: CGFloat?) {
-    self._normal = SendableFont(normal)
-    self._italic = italic.map(SendableFont.init)
-    self._bold = bold.map(SendableFont.init)
-    self._boldItalic = boldItalic.map(SendableFont.init)
+    self.internalNormal = SendableFont(normal)
+    self.internalItalic = italic.map(SendableFont.init)
+    self.internalBold = bold.map(SendableFont.init)
+    self.internalBoldItalic = boldItalic.map(SendableFont.init)
     self.preferredLetterSpacing = preferredLetterSpacing
     self.preferredLineHeight = preferredLineHeight
   }
