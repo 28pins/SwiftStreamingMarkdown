@@ -32,6 +32,8 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   public let textContextMenu: TextContextMenu?
   /// Configuration that controls inline citation parsing and rendering.
   public let citationConfig: CitationConfig
+  /// Configuration that controls code-block syntax-highlighting styling.
+  public let codeBlockConfig: CodeBlockConfig
   /// Vertical spacing between adjacent blocks (paragraphs, headings,
   /// code blocks, lists, etc.). Defaults to 30.
   public let blockSpacing: CGFloat
@@ -243,6 +245,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     inlineStyle: MarkdownInlineTextStyle = MarkdownRenderConfig.defaultInlineStyle,
     textContextMenu: TextContextMenu? = nil,
     citationConfig: CitationConfig = .default,
+    codeBlockConfig: CodeBlockConfig = .default,
     blockSpacing: CGFloat = MarkdownRenderConfig.defaultBlockSpacing
   ) {
     self.shouldAnimateText = shouldAnimateText
@@ -254,6 +257,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     self.inlineStyle = inlineStyle
     self.textContextMenu = textContextMenu
     self.citationConfig = citationConfig
+    self.codeBlockConfig = codeBlockConfig
     self.blockSpacing = blockSpacing
   }
 

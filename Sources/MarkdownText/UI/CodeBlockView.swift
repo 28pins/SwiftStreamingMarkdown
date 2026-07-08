@@ -15,10 +15,12 @@ private actor HighlightTaskManager: ObservableObject {
   private static let sharedHighlight = Highlight()
 
   private var latestCode: String?
+  private var latestColors: HighlightColors?
   private var isProcessing = false
 
-  func enqueueCode(_ code: String, completion: @escaping (AttributedString) -> Void) {
+  func enqueueCode(_ code: String, colors: HighlightColors, completion: @escaping (AttributedString) -> Void) {
     latestCode = code
+    latestColors = colors
 
     if !isProcessing {
       Task {
@@ -32,11 +34,10 @@ private actor HighlightTaskManager: ObservableObject {
 
     isProcessing = true
 
-    while let codeToProcess = latestCode {
+    while let codeToProcess = latestCode, let colors = latestColors {
       latestCode = nil
 
-      let css: String = await CodeBlockView.syntaxHighlightingCss
-      if let result = try? await Self.sharedHighlight.attributedText(codeToProcess, colors: .custom(css: css, background: "")) {
+      if let result = try? await Self.sharedHighlight.attributedText(codeToProcess, colors: colors) {
         await MainActor.run {
           completion(result)
         }
@@ -48,6 +49,9 @@ private actor HighlightTaskManager: ObservableObject {
 }
 
 struct CodeBlockView: View {
+
+  @Environment(\.markdownConfig) private var config: MarkdownRenderConfig
+  @Environment(\.colorScheme) private var colorScheme
 
   let language: String
   let code: String
@@ -64,7 +68,8 @@ struct CodeBlockView: View {
   }
 
   private func updateAttributedString(code: String) async {
-    await taskManager.enqueueCode(code) { newAttributedString in
+    let colors = config.codeBlockConfig.theme.highlightColors(for: colorScheme)
+    await taskManager.enqueueCode(code, colors: colors) { newAttributedString in
       self.attributedString = newAttributedString
     }
   }
@@ -156,6 +161,16 @@ struct CodeBlockView: View {
     .onChange(of: code, perform: { value in
       Task {
         await updateAttributedString(code: value)
+      }
+    })
+    .onChange(of: colorScheme, perform: { _ in
+      Task {
+        await updateAttributedString(code: code)
+      }
+    })
+    .onChange(of: config.codeBlockConfig, perform: { _ in
+      Task {
+        await updateAttributedString(code: code)
       }
     })
     .onAppear(perform: {

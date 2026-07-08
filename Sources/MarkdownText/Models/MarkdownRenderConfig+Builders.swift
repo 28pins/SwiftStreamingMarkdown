@@ -18,6 +18,7 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -34,6 +35,7 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -50,6 +52,7 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -66,6 +69,7 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -82,6 +86,7 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -98,6 +103,7 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -114,6 +120,7 @@ extension MarkdownRenderConfig {
       inlineStyle: value,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -131,6 +138,7 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: value,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing
     )
   }
@@ -147,7 +155,25 @@ extension MarkdownRenderConfig {
       inlineStyle: inlineStyle,
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
       blockSpacing: value
+    )
+  }
+
+  /// Returns a copy with `codeBlockConfig` replaced.
+  public func withCodeBlockConfig(value: CodeBlockConfig) -> MarkdownRenderConfig {
+    MarkdownRenderConfig(
+      shouldAnimateText: shouldAnimateText,
+      blockQuoteStyle: blockQuoteStyle,
+      headingStyle: headingStyle,
+      orderedListStyle: orderedListStyle,
+      paragraphStyle: paragraphStyle,
+      tableStyle: tableStyle,
+      inlineStyle: inlineStyle,
+      textContextMenu: textContextMenu,
+      citationConfig: citationConfig,
+      codeBlockConfig: value,
+      blockSpacing: blockSpacing
     )
   }
 }
