@@ -74,15 +74,34 @@ class ParagraphNSView: NSTextView {
       targetWidth = NSScreen.main?.frame.width ?? 800
     }
 
-    guard let textContainer, let layoutManager = textContainer.layoutManager else {
+    let measuredSize = measureSize(fittingWidth: targetWidth)
+    cachedSize = CachedParagraphNSViewSize(size: measuredSize, targetWidth: targetWidth)
+    return measuredSize
+  }
+
+  /// Measures the size required to lay out the current content within `width`.
+  ///
+  /// Uses a dedicated, throwaway layout stack instead of the view's own text container.
+  /// The display container has `widthTracksTextView = true`, so its width follows the
+  /// view's frame width regardless of any `containerSize` we set. When the view is
+  /// measured before it has been given a frame (e.g. mid navigation transition) that
+  /// tracked width is `0`, which yields a zero height and collapses the paragraph. A
+  /// standalone container whose width we set directly always measures correctly.
+  func measureSize(fittingWidth width: CGFloat) -> CGSize {
+    guard let textStorage, textStorage.length > 0, width > 0, width.isFinite else {
       return .zero
     }
-    textContainer.containerSize = NSSize(width: targetWidth, height: CGFloat.greatestFiniteMagnitude)
-    layoutManager.ensureLayout(for: textContainer)
-    let usedRect = layoutManager.usedRect(for: textContainer)
-    let roundedUpSize = CGSize(width: usedRect.width.rounded(.up), height: usedRect.height.rounded(.up))
-    cachedSize = CachedParagraphNSViewSize(size: roundedUpSize, targetWidth: targetWidth)
-    return roundedUpSize
+    let measuringTextStorage = NSTextStorage(attributedString: textStorage)
+    let measuringLayoutManager = NSLayoutManager()
+    let measuringContainer = NSTextContainer(size: NSSize(width: width, height: CGFloat.greatestFiniteMagnitude))
+    measuringContainer.lineFragmentPadding = 0
+    measuringContainer.maximumNumberOfLines = 0
+    measuringContainer.lineBreakMode = .byWordWrapping
+    measuringLayoutManager.addTextContainer(measuringContainer)
+    measuringTextStorage.addLayoutManager(measuringLayoutManager)
+    measuringLayoutManager.ensureLayout(for: measuringContainer)
+    let usedRect = measuringLayoutManager.usedRect(for: measuringContainer)
+    return CGSize(width: usedRect.width.rounded(.up), height: usedRect.height.rounded(.up))
   }
 
   override func layout() {

@@ -63,15 +63,7 @@ struct ParagraphView: NSViewRepresentable {
       return cachedSize
     }
 
-    guard let textContainer = nsView.textContainer,
-          let layoutManager = textContainer.layoutManager else {
-      return nil
-    }
-
-    textContainer.containerSize = NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
-    layoutManager.ensureLayout(for: textContainer)
-    let usedRect = layoutManager.usedRect(for: textContainer)
-    let calculatedSize = CGSize(width: usedRect.width.rounded(.up), height: usedRect.height.rounded(.up))
+    let calculatedSize = nsView.measureSize(fittingWidth: width)
 
     context.coordinator.sizeCache[cacheKey] = calculatedSize
     return calculatedSize
