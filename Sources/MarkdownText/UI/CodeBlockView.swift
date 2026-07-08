@@ -74,8 +74,8 @@ struct CodeBlockView: View {
     }
   }
 
-  private var backgroundColor: Color {
-    config.codeBlockConfig.backgroundColor ?? .clear
+  private var backgroundColor: Color? {
+    config.codeBlockConfig.backgroundColor
   }
 
   @ViewBuilder
@@ -135,7 +135,7 @@ struct CodeBlockView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-          backgroundColor
+          Color.Theme.Component.CodeBlock.Background.Background750
             .clipShape(.rect(
               topLeadingRadius: 20,
               bottomLeadingRadius: 0,
@@ -146,14 +146,17 @@ struct CodeBlockView: View {
       codeblock
         .fixedSize(horizontal: false, vertical: true)
         .scrollIndicators(.automatic)
-        .background(backgroundColor
-          .clipShape(.rect(
-            topLeadingRadius: 0,
-            bottomLeadingRadius: 20,
-            bottomTrailingRadius: 20,
-            topTrailingRadius: 0
-          ))
-        )
+        .if(backgroundColor != nil, content: { view in
+          let color = backgroundColor ?? Color.clear
+          return view.background(color
+            .clipShape(.rect(
+              topLeadingRadius: 0,
+              bottomLeadingRadius: 20,
+              bottomTrailingRadius: 20,
+              topTrailingRadius: 0
+            ))
+          )
+        })
     }.onChange(of: copied, perform: { isCopied in
       if isCopied {
         Task {
