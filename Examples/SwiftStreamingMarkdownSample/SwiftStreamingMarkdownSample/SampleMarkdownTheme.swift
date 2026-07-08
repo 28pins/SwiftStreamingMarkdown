@@ -130,7 +130,7 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
         textColor: palette.foreground,
         backgroundColor: palette.softAccent
       ),
-      codeBlockConfig: .init(theme: palette.codeBlockTheme)
+      codeBlockConfig: .init(theme: palette.codeBlockTheme, backgroundColor: palette.codeBlockBackground)
     )
   }
 }
@@ -147,6 +147,9 @@ private struct Palette {
   let tableHeaderBackground: Color
   let border: Color
   let codeBlockTheme: CodeBlockConfig.Theme
+  /// Chrome background for the code block, matching the highlight theme's own
+  /// light/dark background so syntax colors sit on the intended surface.
+  let codeBlockBackground: Color
 
   static let presentation = Palette(
     background: .dynamic(light: .sampleRGB(0.95, 0.98, 1.00), dark: .sampleRGB(0.03, 0.07, 0.13)),
@@ -159,7 +162,8 @@ private struct Palette {
     codeBackground: .dynamic(light: .sampleRGB(0.88, 0.94, 1.00), dark: .sampleRGB(0.08, 0.12, 0.20)),
     tableHeaderBackground: .dynamic(light: .sampleRGB(0.82, 0.91, 1.00), dark: .sampleRGB(0.10, 0.17, 0.28)),
     border: .dynamic(light: .sampleRGB(0.58, 0.72, 0.91), dark: .sampleRGB(0.22, 0.34, 0.50)),
-    codeBlockTheme: .github
+    codeBlockTheme: .github,
+    codeBlockBackground: .dynamic(light: .sampleRGB(1.00, 1.00, 1.00), dark: .sampleRGB(0.051, 0.067, 0.090))
   )
 
   static let midnight = Palette(
@@ -173,7 +177,8 @@ private struct Palette {
     codeBackground: .dynamic(light: .sampleRGB(0.84, 0.90, 0.99), dark: .sampleRGB(0.10, 0.12, 0.19)),
     tableHeaderBackground: .dynamic(light: .sampleRGB(0.78, 0.86, 0.98), dark: .sampleRGB(0.12, 0.16, 0.25)),
     border: .dynamic(light: .sampleRGB(0.55, 0.66, 0.84), dark: .sampleRGB(0.22, 0.29, 0.42)),
-    codeBlockTheme: .tokyoNight
+    codeBlockTheme: .tokyoNight,
+    codeBlockBackground: .dynamic(light: .sampleRGB(0.835, 0.839, 0.859), dark: .sampleRGB(0.102, 0.106, 0.149))
   )
 
   static let sepia = Palette(
@@ -187,7 +192,8 @@ private struct Palette {
     codeBackground: .dynamic(light: .sampleRGB(0.93, 0.84, 0.66), dark: .sampleRGB(0.20, 0.13, 0.07)),
     tableHeaderBackground: .dynamic(light: .sampleRGB(0.90, 0.78, 0.58), dark: .sampleRGB(0.24, 0.16, 0.08)),
     border: .dynamic(light: .sampleRGB(0.72, 0.57, 0.36), dark: .sampleRGB(0.48, 0.33, 0.17)),
-    codeBlockTheme: .kimbie
+    codeBlockTheme: .kimbie,
+    codeBlockBackground: .dynamic(light: .sampleRGB(0.984, 0.922, 0.831), dark: .sampleRGB(0.133, 0.102, 0.059))
   )
 }
 

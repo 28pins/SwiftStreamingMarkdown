@@ -135,7 +135,7 @@ struct CodeBlockView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-          Color.Theme.Component.CodeBlock.Background.Background750
+          backgroundColor
             .clipShape(.rect(
               topLeadingRadius: 20,
               bottomLeadingRadius: 0,
