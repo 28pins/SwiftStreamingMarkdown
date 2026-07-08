@@ -68,17 +68,32 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
   }
 
   private func resolvedConfig(for demonstration: Demonstration) -> MarkdownRenderConfig {
-    switch resolvedTheme(for: demonstration) {
+    let resolved = resolvedTheme(for: demonstration)
+    let base: MarkdownRenderConfig
+    switch resolved {
     case .automatic, .system:
-      .default
+      base = .default
     case .roboto:
-      RobotoTheme.renderConfig
+      base = RobotoTheme.renderConfig
     case .presentation:
-      Self.paletteConfig(.presentation)
+      base = Self.paletteConfig(.presentation)
     case .midnight:
-      Self.paletteConfig(.midnight)
+      base = Self.paletteConfig(.midnight)
     case .sepia:
-      Self.paletteConfig(.sepia)
+      base = Self.paletteConfig(.sepia)
+    }
+    return base.withCodeBlockConfig(value: CodeBlockConfig(theme: resolved.codeBlockTheme))
+  }
+
+  /// Distinct code-block syntax-highlighting theme paired with each markdown
+  /// theme. `.system` keeps the library default.
+  private var codeBlockTheme: CodeBlockConfig.Theme {
+    switch self {
+    case .automatic, .system: .default
+    case .roboto: .atomOne
+    case .presentation: .github
+    case .midnight: .tokyoNight
+    case .sepia: .kimbie
     }
   }
 
