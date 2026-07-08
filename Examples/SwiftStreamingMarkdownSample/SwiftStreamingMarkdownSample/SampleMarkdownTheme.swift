@@ -68,32 +68,17 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
   }
 
   private func resolvedConfig(for demonstration: Demonstration) -> MarkdownRenderConfig {
-    let resolved = resolvedTheme(for: demonstration)
-    let base: MarkdownRenderConfig
-    switch resolved {
+    switch resolvedTheme(for: demonstration) {
     case .automatic, .system:
-      base = .default
+      .default
     case .roboto:
-      base = RobotoTheme.renderConfig
+      RobotoTheme.renderConfig
     case .presentation:
-      base = Self.paletteConfig(.presentation)
+      Self.paletteConfig(.presentation)
     case .midnight:
-      base = Self.paletteConfig(.midnight)
+      Self.paletteConfig(.midnight)
     case .sepia:
-      base = Self.paletteConfig(.sepia)
-    }
-    return base.withCodeBlockConfig(value: CodeBlockConfig(theme: resolved.codeBlockTheme))
-  }
-
-  /// Distinct code-block syntax-highlighting theme paired with each markdown
-  /// theme. `.system` keeps the library default.
-  private var codeBlockTheme: CodeBlockConfig.Theme {
-    switch self {
-    case .automatic, .system: .default
-    case .roboto: .atomOne
-    case .presentation: .github
-    case .midnight: .tokyoNight
-    case .sepia: .kimbie
+      Self.paletteConfig(.sepia)
     }
   }
 
@@ -144,7 +129,8 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
         font: MarkdownRenderConfig.default.citationConfig.font,
         textColor: palette.foreground,
         backgroundColor: palette.softAccent
-      )
+      ),
+      codeBlockConfig: .init(theme: palette.codeBlockTheme)
     )
   }
 }
@@ -160,6 +146,7 @@ private struct Palette {
   let codeBackground: Color
   let tableHeaderBackground: Color
   let border: Color
+  let codeBlockTheme: CodeBlockConfig.Theme
 
   static let presentation = Palette(
     background: .dynamic(light: .sampleRGB(0.95, 0.98, 1.00), dark: .sampleRGB(0.03, 0.07, 0.13)),
@@ -171,7 +158,8 @@ private struct Palette {
     codeForeground: .dynamic(light: .sampleRGB(0.02, 0.24, 0.44), dark: .sampleRGB(0.78, 0.90, 1.00)),
     codeBackground: .dynamic(light: .sampleRGB(0.88, 0.94, 1.00), dark: .sampleRGB(0.08, 0.12, 0.20)),
     tableHeaderBackground: .dynamic(light: .sampleRGB(0.82, 0.91, 1.00), dark: .sampleRGB(0.10, 0.17, 0.28)),
-    border: .dynamic(light: .sampleRGB(0.58, 0.72, 0.91), dark: .sampleRGB(0.22, 0.34, 0.50))
+    border: .dynamic(light: .sampleRGB(0.58, 0.72, 0.91), dark: .sampleRGB(0.22, 0.34, 0.50)),
+    codeBlockTheme: .github
   )
 
   static let midnight = Palette(
@@ -184,7 +172,8 @@ private struct Palette {
     codeForeground: .dynamic(light: .sampleRGB(0.07, 0.24, 0.43), dark: .sampleRGB(0.82, 0.93, 1.00)),
     codeBackground: .dynamic(light: .sampleRGB(0.84, 0.90, 0.99), dark: .sampleRGB(0.10, 0.12, 0.19)),
     tableHeaderBackground: .dynamic(light: .sampleRGB(0.78, 0.86, 0.98), dark: .sampleRGB(0.12, 0.16, 0.25)),
-    border: .dynamic(light: .sampleRGB(0.55, 0.66, 0.84), dark: .sampleRGB(0.22, 0.29, 0.42))
+    border: .dynamic(light: .sampleRGB(0.55, 0.66, 0.84), dark: .sampleRGB(0.22, 0.29, 0.42)),
+    codeBlockTheme: .tokyoNight
   )
 
   static let sepia = Palette(
@@ -197,7 +186,8 @@ private struct Palette {
     codeForeground: .dynamic(light: .sampleRGB(0.43, 0.18, 0.07), dark: .sampleRGB(0.98, 0.73, 0.45)),
     codeBackground: .dynamic(light: .sampleRGB(0.93, 0.84, 0.66), dark: .sampleRGB(0.20, 0.13, 0.07)),
     tableHeaderBackground: .dynamic(light: .sampleRGB(0.90, 0.78, 0.58), dark: .sampleRGB(0.24, 0.16, 0.08)),
-    border: .dynamic(light: .sampleRGB(0.72, 0.57, 0.36), dark: .sampleRGB(0.48, 0.33, 0.17))
+    border: .dynamic(light: .sampleRGB(0.72, 0.57, 0.36), dark: .sampleRGB(0.48, 0.33, 0.17)),
+    codeBlockTheme: .kimbie
   )
 }
 

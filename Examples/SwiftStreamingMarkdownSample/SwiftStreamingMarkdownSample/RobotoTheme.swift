@@ -122,6 +122,7 @@ enum RobotoTheme {
       font: roboto(12, weight: "Medium"),
       textColor: pageForeground,
       backgroundColor: accentSoft
-    )
+    ),
+    codeBlockConfig: .init(theme: .atomOne)
   )
 }
