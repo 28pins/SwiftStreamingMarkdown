@@ -168,6 +168,11 @@ struct CodeBlockView: View {
         await updateAttributedString(code: code)
       }
     })
+    .onChange(of: config, perform: { _ in
+      Task {
+        await updateAttributedString(code: code)
+      }
+    })
     .onAppear(perform: {
       Task {
         await updateAttributedString(code: code)
