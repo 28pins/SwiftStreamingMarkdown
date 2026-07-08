@@ -24,14 +24,15 @@ If we close an issue and link back to this section, it usually means one of thes
 
 PRs are very welcome. To keep the review loop short, please follow these steps before opening one:
 
-1. Run `make dev-setup` once on your machine so you have the tools used by CI and local helper targets (SwiftLint, XcodeGen, `cloc`, ImageMagick, `diff-image`).
+1. Run `make dev-setup` once on your machine so you have the required tools used by CI and local helper targets (SwiftLint, XcodeGen). ImageMagick and `diff-image` are optional snapshot diff helpers; `make dev-setup` offers to download `diff-image` into `~/.local/bin` for you.
 2. Fork the repo and branch from the most recent `main` to minimize merge conflicts.
 3. Keep the change focused — one logical change per PR is much easier to review than a grab-bag.
 4. If you are adding behavior, add a test. The package uses XCTest under `Tests/`; many UI surfaces are covered by snapshot tests.
 5. If you change a public API, update the DocC comments and the README where it shows up.
-6. If you touch rendered output, update the snapshot fixtures and review the `diff-image` output yourself before pushing.
+6. If you touch rendered output, update the snapshot fixtures and review the visual snapshot differences yourself before pushing. When the optional `diff-image` helper is installed, use its output for that review.
 7. Run `make ci` before pushing. Use `make lint`, `make test`, or `make build-sample` for targeted checks while iterating.
 8. Use `make project` to open the Swift package in Xcode or `make sample-project` to generate and open the sample app. Use `make cloc` when you need a Git-backed line-count report.
+9. As you iterate on your PR, please resolve reviewer comments as you fix them, especially AI reviewer comments. Your AI agent can do this automatically via the `gh` CLI tool. 
 
 If you are unsure whether a feature is in scope, open an issue first to talk through the design. It is much less frustrating to align on the approach before you have spent an afternoon implementing it.
 

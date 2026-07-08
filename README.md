@@ -98,6 +98,7 @@ The renderer targets the subset of CommonMark + GitHub-flavored Markdown that LL
 - [x] Block quotes (with nested inlines, lists, and citations)
 - [x] Ordered lists
 - [x] Unordered lists (with nesting)
+- [x] Task lists (`- [ ]` / `- [x]`), display-only
 - [x] Thematic breaks (`---`)
 - [x] Tables with `:---`, `:---:`, `---:` column alignment
 - [x] Inline LaTeX math via `\( … \)`
@@ -107,7 +108,6 @@ The renderer targets the subset of CommonMark + GitHub-flavored Markdown that LL
 ### Not yet supported
 
 - [ ] Images (`![alt](url)`) — alt text only
-- [ ] Task lists (`- [ ]` / `- [x]`)
 - [ ] Footnotes (`[^1]`)
 - [ ] Highlight (`==text==`), superscript (`^x^`), subscript (`~x~`)
 - [ ] Raw HTML (`<details>`, `<kbd>`, `<aside>`, …) — kept inline as text
@@ -288,7 +288,7 @@ targets are:
 
 | Command | Purpose |
 | --- | --- |
-| `make dev-setup` | Verify local tools such as Xcode, SwiftLint, XcodeGen, `cloc`, ImageMagick, and `diff-image`. |
+| `make dev-setup` | Verify required local tools such as Xcode, SwiftLint, and XcodeGen; warn about optional snapshot diff helpers ImageMagick and `diff-image`. |
 | `make project` | Resolve Swift package dependencies and open the package in Xcode. |
 | `make generate-sample-project` | Generate the sample app project with XcodeGen. |
 | `make sample-project` | Generate and open the sample app project in Xcode. |
