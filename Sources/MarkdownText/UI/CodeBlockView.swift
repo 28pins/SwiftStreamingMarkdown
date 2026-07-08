@@ -74,6 +74,10 @@ struct CodeBlockView: View {
     }
   }
 
+  private var backgroundColor: Color {
+    config.codeBlockConfig.backgroundColor ?? .clear
+  }
+
   @ViewBuilder
   var codeblock: some View {
     ScrollView(.horizontal) {
@@ -131,7 +135,7 @@ struct CodeBlockView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-          Color.Theme.Component.CodeBlock.Background.Background750
+          backgroundColor
             .clipShape(.rect(
               topLeadingRadius: 20,
               bottomLeadingRadius: 0,
@@ -142,7 +146,7 @@ struct CodeBlockView: View {
       codeblock
         .fixedSize(horizontal: false, vertical: true)
         .scrollIndicators(.automatic)
-        .background(Color.Theme.Component.CodeBlock.Background.Background750
+        .background(backgroundColor
           .clipShape(.rect(
             topLeadingRadius: 0,
             bottomLeadingRadius: 20,

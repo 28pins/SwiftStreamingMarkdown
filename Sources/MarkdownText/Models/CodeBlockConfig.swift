@@ -65,14 +65,26 @@ public struct CodeBlockConfig: Hashable, Sendable {
   /// The syntax-highlighting theme applied to code blocks.
   public let theme: Theme
 
+  /// Background color applied behind the code block chrome. `nil` leaves the
+  /// background unset so the surrounding content shows through; this is the
+  /// default for any non-default theme.
+  public let backgroundColor: Color?
+
   /// Create a code-block configuration.
-  /// - Parameter theme: See `theme`. Defaults to `Theme.default`.
-  public init(theme: Theme = .default) {
+  /// - Parameters:
+  ///   - theme: See `theme`. Defaults to `Theme.default`.
+  ///   - backgroundColor: See `backgroundColor`. Defaults to `nil` (unset).
+  public init(theme: Theme = .default, backgroundColor: Color? = nil) {
     self.theme = theme
+    self.backgroundColor = backgroundColor
   }
 
-  /// The default code-block configuration.
-  public static let `default` = CodeBlockConfig()
+  /// The default code-block configuration, which keeps the bundled dark
+  /// code-block background.
+  public static let `default` = CodeBlockConfig(
+    theme: .default,
+    backgroundColor: Color.Theme.Component.CodeBlock.Background.Background750
+  )
 }
 
 extension CodeBlockConfig.Theme {
