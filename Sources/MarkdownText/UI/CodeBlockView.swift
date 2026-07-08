@@ -7,47 +7,6 @@ import Foundation
 import HighlightSwift
 import SwiftUI
 
-private actor HighlightTaskManager: ObservableObject {
-  /// Shared Highlight instance to avoid creating multiple JSContext/HLJS instances.
-  /// Each Highlight() creates its own JSContext and evaluates highlight.min.js (~600KB).
-  /// When multiple CodeBlockViews render concurrently, N separate JSContexts cause
-  /// JavaScriptCore OOM crashes (COPILOT-IOS-3F9C, 3F7Z, 3FSQ).
-  private static let sharedHighlight = Highlight()
-
-  private var latestCode: String?
-  private var latestColors: HighlightColors?
-  private var isProcessing = false
-
-  func enqueueCode(_ code: String, colors: HighlightColors, completion: @escaping (AttributedString) -> Void) {
-    latestCode = code
-    latestColors = colors
-
-    if !isProcessing {
-      Task {
-        await processQueue(completion: completion)
-      }
-    }
-  }
-
-  private func processQueue(completion: @escaping (AttributedString) -> Void) async {
-    guard !isProcessing else { return }
-
-    isProcessing = true
-
-    while let codeToProcess = latestCode, let colors = latestColors {
-      latestCode = nil
-
-      if let result = try? await Self.sharedHighlight.attributedText(codeToProcess, colors: colors) {
-        await MainActor.run {
-          completion(result)
-        }
-      }
-    }
-
-    isProcessing = false
-  }
-}
-
 struct CodeBlockView: View {
 
   @Environment(\.markdownConfig) private var config: MarkdownRenderConfig
@@ -67,8 +26,8 @@ struct CodeBlockView: View {
     self.onCodeCopied = onCodeCopied
   }
 
-  private func updateAttributedString(code: String) async {
-    let colors = config.codeBlockConfig.theme.highlightColors(for: colorScheme)
+  private func updateAttributedString(code: String, scheme: ColorScheme) async {
+    let colors = config.codeBlockConfig.theme.highlightColors(for: scheme)
     await taskManager.enqueueCode(code, colors: colors) { newAttributedString in
       self.attributedString = newAttributedString
     }
@@ -76,6 +35,10 @@ struct CodeBlockView: View {
 
   private var backgroundColor: Color? {
     config.codeBlockConfig.backgroundColor
+  }
+
+  private var foregroundColor: Color {
+    config.codeBlockConfig.foregroundColor ?? Color.Static.Stone.Stone350
   }
 
   @ViewBuilder
@@ -108,16 +71,16 @@ struct CodeBlockView: View {
       HStack(alignment: .top) {
         Text(language)
           .font(Typography.smallTextFonts)
-          .foregroundStyle(Color.Static.Stone.Stone350)
+          .foregroundStyle(foregroundColor)
         Spacer()
         HStack(alignment: .firstTextBaseline, spacing: 6.0) {
           Image("copyIcon14", bundle: .module)
             .renderingMode(.template)
-            .foregroundStyle(Color.Static.Stone.Stone350)
+            .foregroundStyle(foregroundColor)
           Text(copied ? String.codeCopiedLabel : String.codeCopyLabel)
             .accessibilityAddTraits(.isButton)
             .font(Typography.smallTextFonts)
-            .foregroundStyle(Color.Static.Stone.Stone350)
+            .foregroundStyle(foregroundColor)
             .onTapGesture {
               copied = true
               #if canImport(UIKit)
@@ -167,22 +130,22 @@ struct CodeBlockView: View {
     })
     .onChange(of: code, perform: { value in
       Task {
-        await updateAttributedString(code: value)
+        await updateAttributedString(code: value, scheme: colorScheme)
       }
     })
-    .onChange(of: colorScheme, perform: { _ in
+    .onChange(of: colorScheme, perform: { newValue in
       Task {
-        await updateAttributedString(code: code)
+        await updateAttributedString(code: code, scheme: newValue)
       }
     })
     .onChange(of: config, perform: { _ in
       Task {
-        await updateAttributedString(code: code)
+        await updateAttributedString(code: code, scheme: colorScheme)
       }
     })
     .onAppear(perform: {
       Task {
-        await updateAttributedString(code: code)
+        await updateAttributedString(code: code, scheme: colorScheme)
       }
     })
   }

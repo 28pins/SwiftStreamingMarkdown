@@ -70,13 +70,23 @@ public struct CodeBlockConfig: Hashable, Sendable {
   /// default for any non-default theme.
   public let backgroundColor: Color?
 
+  /// Foreground color applied to the code block chrome (language label and
+  /// copy control). `nil` falls back to the bundled `Stone350`.
+  public let foregroundColor: Color?
+
   /// Create a code-block configuration.
   /// - Parameters:
   ///   - theme: See `theme`. Defaults to `Theme.default`.
   ///   - backgroundColor: See `backgroundColor`. Defaults to `nil` (unset).
-  public init(theme: Theme = .default, backgroundColor: Color? = nil) {
+  ///   - foregroundColor: See `foregroundColor`. Defaults to `nil` (`Stone350`).
+  public init(
+    theme: Theme = .default,
+    backgroundColor: Color? = nil,
+    foregroundColor: Color? = nil
+  ) {
     self.theme = theme
     self.backgroundColor = backgroundColor
+    self.foregroundColor = foregroundColor
   }
 
   /// The default code-block configuration, which keeps the bundled dark
