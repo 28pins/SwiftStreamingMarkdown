@@ -20,7 +20,11 @@ struct ParagraphView: NSViewRepresentable {
 
   func makeNSView(context: Context) -> ParagraphNSView {
     let openUrlFunction = openURL.callAsFunction(_:)
-    let view = ParagraphViewCache.shared.createOrReuseView(contents: contents, lineSpacing: lineSpacing)
+    // Do not reuse paragraph views on macOS. Reused NSTextView instances can retain
+    // stale attachment subviews (e.g. LaTeX views vended by LatexViewProvider) from a
+    // previously displayed document, which then render at the wrong positions. Each
+    // paragraph gets its own view instead.
+    let view = ParagraphNSView()
     view.onUrlTap = openUrlFunction
     view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
     view.setTextContextMenu(config.textContextMenu)
