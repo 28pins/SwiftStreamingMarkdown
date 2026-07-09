@@ -29,6 +29,7 @@ struct ParagraphView: NSViewRepresentable {
     view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
     view.setTextContextMenu(config.textContextMenu)
     view.setMarkdownController(markdownController)
+    view.setTextSelectionEnabled(config.isTextSelectionEnabled)
 
     if config.shouldAnimateText {
       view.alphaValue = 0
@@ -48,6 +49,7 @@ struct ParagraphView: NSViewRepresentable {
     }
     view.setTextContextMenu(config.textContextMenu)
     view.setMarkdownController(markdownController)
+    view.setTextSelectionEnabled(config.isTextSelectionEnabled)
   }
 
   func sizeThatFits(_ proposal: ProposedViewSize, nsView: ParagraphNSView, context: Context) -> CGSize? {

@@ -19,7 +19,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -36,7 +37,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -53,7 +55,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -70,7 +73,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -87,7 +91,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -104,7 +109,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -121,7 +127,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -139,7 +146,8 @@ extension MarkdownRenderConfig {
       textContextMenu: value,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -156,7 +164,8 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      blockSpacing: value
+      blockSpacing: value,
+      isTextSelectionEnabled: isTextSelectionEnabled
     )
   }
 
@@ -173,7 +182,27 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: value,
-      blockSpacing: blockSpacing
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: isTextSelectionEnabled
+    )
+  }
+
+  /// Returns a copy with `isTextSelectionEnabled` replaced. Pass `false` to
+  /// hide the built-in "Select more text" edit-menu action.
+  public func withTextSelectionEnabled(value: Bool) -> MarkdownRenderConfig {
+    MarkdownRenderConfig(
+      shouldAnimateText: shouldAnimateText,
+      blockQuoteStyle: blockQuoteStyle,
+      headingStyle: headingStyle,
+      orderedListStyle: orderedListStyle,
+      paragraphStyle: paragraphStyle,
+      tableStyle: tableStyle,
+      inlineStyle: inlineStyle,
+      textContextMenu: textContextMenu,
+      citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
+      blockSpacing: blockSpacing,
+      isTextSelectionEnabled: value
     )
   }
 }

@@ -27,6 +27,7 @@ class ParagraphNSView: NSTextView {
 
   var textContextMenu: TextContextMenu?
   var markdownController: MarkdownController?
+  var isTextSelectionEnabled: Bool = true
 
   var onUrlTap: (URL) -> Void = { NSWorkspace.shared.open($0) }
 
@@ -318,6 +319,10 @@ class ParagraphNSView: NSTextView {
     markdownController = controller
   }
 
+  func setTextSelectionEnabled(_ enabled: Bool) {
+    isTextSelectionEnabled = enabled
+  }
+
   // MARK: - Link Clicks
 
   // swiftlint:disable:next no_any
@@ -332,7 +337,7 @@ class ParagraphNSView: NSTextView {
   // MARK: - Context Menu
 
   override func menu(for event: NSEvent) -> NSMenu? {
-    guard let textContextMenu, let textStorage else {
+    guard textContextMenu != nil || isTextSelectionEnabled, let textStorage else {
       return super.menu(for: event)
     }
 
@@ -348,39 +353,52 @@ class ParagraphNSView: NSTextView {
     menu.addItem(.separator())
 
     // Add custom groups
-    for group in textContextMenu.menuGroups {
-      if group.displayInline {
-        for item in group.items {
-          let menuItem = NSMenuItem(title: item.title, action: #selector(contextMenuItemTapped(_:)), keyEquivalent: "")
-          menuItem.representedObject = ContextMenuAction(id: item.id, selectedText: selectedText)
-          menuItem.target = self
-          menu.addItem(menuItem)
+    if let textContextMenu {
+      for group in textContextMenu.menuGroups {
+        if group.displayInline {
+          for item in group.items {
+            let menuItem = NSMenuItem(title: item.title, action: #selector(contextMenuItemTapped(_:)), keyEquivalent: "")
+            menuItem.representedObject = ContextMenuAction(id: item.id, selectedText: selectedText)
+            menuItem.target = self
+            menu.addItem(menuItem)
+          }
+        } else {
+          let submenu = NSMenu(title: group.title ?? "")
+          for item in group.items {
+            let menuItem = NSMenuItem(title: item.title, action: #selector(contextMenuItemTapped(_:)), keyEquivalent: "")
+            menuItem.representedObject = ContextMenuAction(id: item.id, selectedText: selectedText)
+            menuItem.target = self
+            submenu.addItem(menuItem)
+          }
+          let submenuItem = NSMenuItem(title: group.title ?? "", action: nil, keyEquivalent: "")
+          submenuItem.submenu = submenu
+          menu.addItem(submenuItem)
         }
-      } else {
-        let submenu = NSMenu(title: group.title ?? "")
-        for item in group.items {
-          let menuItem = NSMenuItem(title: item.title, action: #selector(contextMenuItemTapped(_:)), keyEquivalent: "")
-          menuItem.representedObject = ContextMenuAction(id: item.id, selectedText: selectedText)
-          menuItem.target = self
-          submenu.addItem(menuItem)
-        }
-        let submenuItem = NSMenuItem(title: group.title ?? "", action: nil, keyEquivalent: "")
-        submenuItem.submenu = submenu
-        menu.addItem(submenuItem)
+        menu.addItem(.separator())
       }
-      menu.addItem(.separator())
+
+      // Notify controller of menu appearance
+      if let markdownController {
+        for group in textContextMenu.menuGroups {
+          for item in group.items {
+            markdownController.onContextMenuAppear(id: item.id, selectedContent: selectedText)
+          }
+        }
+      }
     }
 
-    // Notify controller of menu appearance
-    if let markdownController {
-      for group in textContextMenu.menuGroups {
-        for item in group.items {
-          markdownController.onContextMenuAppear(id: item.id, selectedContent: selectedText)
-        }
-      }
+    // Add the built-in "Select more text" action
+    if isTextSelectionEnabled {
+      let selectMoreItem = NSMenuItem(title: String.selectMoreTextLabel, action: #selector(selectMoreTextTapped), keyEquivalent: "")
+      selectMoreItem.target = self
+      menu.addItem(selectMoreItem)
     }
 
     return menu
+  }
+
+  @objc private func selectMoreTextTapped() {
+    markdownController?.requestTextSelection()
   }
 
   @objc private func contextMenuItemTapped(_ sender: NSMenuItem) {

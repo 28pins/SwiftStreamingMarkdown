@@ -19,8 +19,17 @@ public final class MarkdownController: ObservableObject {
   private var continuation: AsyncStream<RenderableDocument>.Continuation?
   private var listenerTask: Task<Void, Never>?
 
+  /// Set to `true` when the built-in "Select more text" edit-menu action is
+  /// tapped. `DocumentView` observes this to present the text selection modal.
+  @Published var isTextSelectionRequested = false
+
   init(listener: MarkdownListener?) {
     self.listener = listener
+  }
+
+  /// Request presentation of the full-document text selection modal.
+  func requestTextSelection() {
+    isTextSelectionRequested = true
   }
 
   func onAppear(markdown: RenderableDocument) {

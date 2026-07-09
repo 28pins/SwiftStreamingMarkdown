@@ -911,6 +911,30 @@
         }
       }
     },
+    "a11y_task_list_item_checked": {
+      "comment": "Accessibility suffix for a completed task list item",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "checked"
+          }
+        }
+      }
+    },
+    "a11y_task_list_item_unchecked": {
+      "comment": "Accessibility suffix for an incomplete task list item",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "unchecked"
+          }
+        }
+      }
+    },
     "code_block_copied": {
       "comment": "Button label shown after a code block has been copied to clipboard",
       "extractionState": "extracted_with_value",
@@ -1595,26 +1619,26 @@
         }
       }
     },
-    "a11y_task_list_item_checked": {
-      "comment": "Accessibility suffix for a completed task list item",
+    "select_more_text": {
+      "comment": "Edit-menu action and modal title for selecting the full document text",
       "extractionState": "extracted_with_value",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "new",
-            "value": "checked"
+            "value": "Select more text"
           }
         }
       }
     },
-    "a11y_task_list_item_unchecked": {
-      "comment": "Accessibility suffix for an incomplete task list item",
+    "text_selection_close": {
+      "comment": "Accessibility label for the button that dismisses the text selection modal",
       "extractionState": "extracted_with_value",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "new",
-            "value": "unchecked"
+            "value": "Close"
           }
         }
       }

@@ -31,6 +31,7 @@ class ParagraphUIView: UITextView {
 
   var textContextMenu: TextContextMenu?
   var markdownController: MarkdownController?
+  var isTextSelectionEnabled: Bool = true
 
   // To override the behaviour of this property, do so on ParagraphView's SwiftUI wrapper.
   var onUrlTap: (URL) -> Void = { UIApplication.shared.open($0) }
@@ -337,6 +338,10 @@ class ParagraphUIView: UITextView {
   func setMarkdownController(_ controller: MarkdownController?) {
     markdownController = controller
   }
+
+  func setTextSelectionEnabled(_ enabled: Bool) {
+    isTextSelectionEnabled = enabled
+  }
 }
 
 // MARK: - UITextViewDelegate
@@ -358,12 +363,31 @@ extension ParagraphUIView: UITextViewDelegate {
   }
 
   func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
-    return textContextMenu?.buildUIMenu(
-      textView: textView,
-      selectedRange: range,
-      suggestedActions: suggestedActions,
-      markdownController: markdownController
-    )
+    let selectMoreTextAction = makeSelectMoreTextAction()
+
+    if let textContextMenu {
+      let menu = textContextMenu.buildUIMenu(
+        textView: textView,
+        selectedRange: range,
+        suggestedActions: suggestedActions,
+        markdownController: markdownController
+      )
+      guard let selectMoreTextAction else { return menu }
+      return menu.replacingChildren(menu.children + [selectMoreTextAction])
+    }
+
+    guard let selectMoreTextAction else { return nil }
+    let systemEditActions = suggestedActions.filter { element in
+      (element as? UIMenu)?.identifier == .standardEdit
+    }
+    return UIMenu(children: systemEditActions + [selectMoreTextAction])
+  }
+
+  private func makeSelectMoreTextAction() -> UIAction? {
+    guard isTextSelectionEnabled else { return nil }
+    return UIAction(title: String.selectMoreTextLabel) { [weak self] _ in
+      self?.markdownController?.requestTextSelection()
+    }
   }
 
   func textView(_ textView: UITextView, willPresentEditMenuWith animator: any UIEditMenuInteractionAnimating) {

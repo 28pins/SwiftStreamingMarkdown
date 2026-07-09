@@ -46,6 +46,11 @@ public struct DocumentView: View {
     .onDisappear {
       controller.onDisappear()
     }
+    .sheet(isPresented: $controller.isTextSelectionRequested) {
+      TextSelectionView(text: renderableDocument.plainText) {
+        controller.isTextSelectionRequested = false
+      }
+    }
   }
 }
 
