@@ -340,20 +340,18 @@ class ParagraphNSView: NSTextView {
     let clampedRange = NSIntersectionRange(selectedRange, NSRange(location: 0, length: textStorage.length))
     let selectedText = textStorage.attributedSubstring(from: clampedRange).string
 
-    let menu = NSMenu()
+    // Start from the native context menu so system items (Copy, Look Up,
+    // Translate, Share, Services, …) are preserved, then inject the configured
+    // groups right after the system Copy item.
+    let menu = super.menu(for: event) ?? NSMenu()
 
-    // Add standard Copy item
-    let copyItem = NSMenuItem(title: "Copy", action: #selector(copy(_:)), keyEquivalent: "c")
-    menu.addItem(copyItem)
-    menu.addItem(.separator())
-
-    // Add the configured groups. The built-in "Select more text" group (when
-    // enabled) is prepended by `MarkdownRenderConfig.resolvedTextContextMenu`, so
-    // it renders right after Copy without any special-casing here.
+    var injected: [NSMenuItem] = []
+    // The built-in "Select more text" group (when enabled) is prepended by
+    // `MarkdownRenderConfig.resolvedTextContextMenu`, so it renders first.
     for group in textContextMenu.menuGroups {
       if group.displayInline {
         for item in group.items {
-          menu.addItem(makeMenuItem(for: item, selectedText: selectedText))
+          injected.append(makeMenuItem(for: item, selectedText: selectedText))
         }
       } else {
         let submenu = NSMenu(title: group.title ?? "")
@@ -362,9 +360,26 @@ class ParagraphNSView: NSTextView {
         }
         let submenuItem = NSMenuItem(title: group.title ?? "", action: nil, keyEquivalent: "")
         submenuItem.submenu = submenu
-        menu.addItem(submenuItem)
+        injected.append(submenuItem)
       }
-      menu.addItem(.separator())
+      injected.append(.separator())
+    }
+    // Drop the trailing separator; the system menu already separates Copy's
+    // group from the following items.
+    if injected.last?.isSeparatorItem == true {
+      injected.removeLast()
+    }
+
+    let copyIndex = menu.indexOfItem(withTarget: nil, andAction: #selector(NSText.copy(_:)))
+    var insertAt = copyIndex >= 0 ? copyIndex + 1 : 0
+    if copyIndex >= 0 {
+      // Separate our injected block from the Copy item above it.
+      menu.insertItem(.separator(), at: insertAt)
+      insertAt += 1
+    }
+    for item in injected {
+      menu.insertItem(item, at: insertAt)
+      insertAt += 1
     }
 
     // Notify controller of menu appearance (excluding the built-in item)
