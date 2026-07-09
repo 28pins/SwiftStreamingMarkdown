@@ -31,18 +31,20 @@ private struct TextSelectionHeader: View {
   let title: String
   let onDismiss: () -> Void
 
+  @Environment(\.markdownConfig) var markdownConfig: MarkdownRenderConfig
+
   var body: some View {
     ZStack {
       Text(title)
-        .font(Typography.baseTextFonts, bold: true)
-        .foregroundStyle(Color.Theme.Foreground.Primary.Primary800)
+        .font(Font(markdownConfig.headingStyle.h3Font.bold ?? markdownConfig.headingStyle.h3Font.normal))
+        .foregroundStyle(markdownConfig.headingStyle.textColor)
         .accessibilityAddTraits(.isHeader)
 
       HStack {
         Spacer()
         Button(action: onDismiss) {
           Image(systemName: "xmark")
-            .foregroundStyle(Color.Theme.Foreground.Primary.Primary750)
+            .foregroundStyle(markdownConfig.headingStyle.textColor)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(String.textSelectionCloseLabel))
@@ -53,7 +55,7 @@ private struct TextSelectionHeader: View {
     .overlay(
       Rectangle()
         .frame(height: 1)
-        .foregroundStyle(Color.Theme.Stroke.Default.Default250),
+        .foregroundStyle(markdownConfig.paragraphStyle.textColor),
       alignment: .bottom
     )
   }

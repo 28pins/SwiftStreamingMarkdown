@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 extension MarkdownRenderConfig {
   /// Returns a copy with `shouldAnimateText` replaced.
@@ -20,7 +21,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -38,7 +40,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -56,7 +59,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -74,7 +78,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -92,7 +97,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -110,7 +116,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -128,7 +135,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -147,7 +155,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -165,7 +174,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: value,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -183,7 +193,8 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: value,
       blockSpacing: blockSpacing,
-      textSelectionConfig: textSelectionConfig
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
     )
   }
 
@@ -202,7 +213,27 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      textSelectionConfig: value
+      textSelectionConfig: value,
+      thematicBreakColor: thematicBreakColor
+    )
+  }
+
+  /// Returns a copy with `thematicBreakColor` replaced.
+  public func withThematicBreakColor(value: Color) -> MarkdownRenderConfig {
+    MarkdownRenderConfig(
+      shouldAnimateText: shouldAnimateText,
+      blockQuoteStyle: blockQuoteStyle,
+      headingStyle: headingStyle,
+      orderedListStyle: orderedListStyle,
+      paragraphStyle: paragraphStyle,
+      tableStyle: tableStyle,
+      inlineStyle: inlineStyle,
+      textContextMenu: textContextMenu,
+      citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
+      blockSpacing: blockSpacing,
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: value
     )
   }
 }

@@ -130,6 +130,7 @@ enum RobotoTheme {
         dark: Color(red: 0.157, green: 0.173, blue: 0.204)
       )
     ),
-    textSelectionConfig: .init(backgroundColor: pageBackground)
+    textSelectionConfig: .init(backgroundColor: pageBackground),
+    thematicBreakColor: tableBorder
   )
 }

@@ -40,6 +40,8 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   /// Configuration for the built-in "Select more text" edit-menu action and the
   /// modal it presents. Enabled by default.
   public let textSelectionConfig: TextSelectionConfig
+  /// Color of the horizontal rule rendered for a thematic break (`---`).
+  public let thematicBreakColor: Color
 
   /// Font and color style for a uniformly-styled run of markdown text.
   public struct MarkdownTextStyle: Hashable, Sendable {
@@ -184,7 +186,8 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
 
   /// Default inter-block spacing.
   public static let defaultBlockSpacing: CGFloat = 30
-
+  /// Default color for `thematicBreakColor`.
+  public static let defaultThematicBreakColor: Color = Color.Theme.Stroke.Default.Default300
   /// Default styling for `blockQuoteStyle`.
   public static let defaultBlockQuoteStyle = MarkdownTextStyle(
     textFonts: Typography.baseTextFonts,
@@ -250,7 +253,8 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     citationConfig: CitationConfig = .default,
     codeBlockConfig: CodeBlockConfig = .default,
     blockSpacing: CGFloat = MarkdownRenderConfig.defaultBlockSpacing,
-    textSelectionConfig: TextSelectionConfig = .default
+    textSelectionConfig: TextSelectionConfig = .default,
+    thematicBreakColor: Color = MarkdownRenderConfig.defaultThematicBreakColor
   ) {
     self.shouldAnimateText = shouldAnimateText
     self.blockQuoteStyle = blockQuoteStyle
@@ -264,6 +268,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     self.codeBlockConfig = codeBlockConfig
     self.blockSpacing = blockSpacing
     self.textSelectionConfig = textSelectionConfig
+    self.thematicBreakColor = thematicBreakColor
   }
 
   /// The default render config, equivalent to calling `init()` with no
