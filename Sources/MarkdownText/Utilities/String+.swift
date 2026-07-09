@@ -81,7 +81,7 @@ extension String {
   )
 
   static let textSelectionCloseLabel = NSLocalizedString(
-    "text_selection_close",
+    "a11y_text_selection_close",
     bundle: .module,
     value: "Close",
     comment: "Accessibility label for the button that dismisses the text selection modal"
