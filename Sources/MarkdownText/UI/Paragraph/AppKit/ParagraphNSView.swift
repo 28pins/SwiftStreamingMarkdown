@@ -342,7 +342,7 @@ class ParagraphNSView: NSTextView {
 
     // Start from the native context menu so system items (Copy, Look Up,
     // Translate, Share, Services, …) are preserved, then inject the configured
-    // groups right after the system Copy item.
+    // groups at the top, above the system items.
     let menu = super.menu(for: event) ?? NSMenu()
 
     var injected: [NSMenuItem] = []
@@ -364,19 +364,10 @@ class ParagraphNSView: NSTextView {
       }
       injected.append(.separator())
     }
-    // Drop the trailing separator; the system menu already separates Copy's
-    // group from the following items.
-    if injected.last?.isSeparatorItem == true {
-      injected.removeLast()
-    }
 
-    let copyIndex = menu.indexOfItem(withTarget: nil, andAction: #selector(NSText.copy(_:)))
-    var insertAt = copyIndex >= 0 ? copyIndex + 1 : 0
-    if copyIndex >= 0 {
-      // Separate our injected block from the Copy item above it.
-      menu.insertItem(.separator(), at: insertAt)
-      insertAt += 1
-    }
+    // Insert the block in order at the top; its trailing separator divides it
+    // from the native items (Copy, …) that follow.
+    var insertAt = 0
     for item in injected {
       menu.insertItem(item, at: insertAt)
       insertAt += 1
