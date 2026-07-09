@@ -10,6 +10,7 @@ import SwiftUI
 /// when the built-in "Select more text" edit-menu action is invoked.
 struct TextSelectionView: View {
   let text: String
+  let backgroundColor: Color
   let onDismiss: () -> Void
 
   var body: some View {
@@ -19,7 +20,7 @@ struct TextSelectionView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 18)
     }
-    .background(Color.Theme.Background.Page.Chat.Flat.ignoresSafeArea())
+    .background(backgroundColor.ignoresSafeArea())
     #if os(macOS)
     .frame(minWidth: 520, idealWidth: 640, minHeight: 480, idealHeight: 680)
     #endif
@@ -62,6 +63,7 @@ private struct TextSelectionHeader: View {
 #Preview {
   TextSelectionView(
     text: "The quick brown fox jumps over the lazy dog.\n\nSecond paragraph for selection.",
+    backgroundColor: Color.Theme.Background.Page.Chat.Flat,
     onDismiss: {}
   )
 }

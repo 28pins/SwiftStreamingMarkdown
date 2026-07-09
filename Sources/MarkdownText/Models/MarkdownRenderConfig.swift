@@ -37,10 +37,9 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   /// Vertical spacing between adjacent blocks (paragraphs, headings,
   /// code blocks, lists, etc.). Defaults to 30.
   public let blockSpacing: CGFloat
-  /// When `true`, the text selection edit menu includes a built-in
-  /// "Select more text" action that presents a modal for selecting the full
-  /// document text. Defaults to `true`; set to `false` to opt out.
-  public let isTextSelectionEnabled: Bool
+  /// Configuration for the built-in "Select more text" edit-menu action and the
+  /// modal it presents. Enabled by default.
+  public let textSelectionConfig: TextSelectionConfig
 
   /// Font and color style for a uniformly-styled run of markdown text.
   public struct MarkdownTextStyle: Hashable, Sendable {
@@ -251,7 +250,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     citationConfig: CitationConfig = .default,
     codeBlockConfig: CodeBlockConfig = .default,
     blockSpacing: CGFloat = MarkdownRenderConfig.defaultBlockSpacing,
-    isTextSelectionEnabled: Bool = true
+    textSelectionConfig: TextSelectionConfig = .default
   ) {
     self.shouldAnimateText = shouldAnimateText
     self.blockQuoteStyle = blockQuoteStyle
@@ -264,7 +263,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     self.citationConfig = citationConfig
     self.codeBlockConfig = codeBlockConfig
     self.blockSpacing = blockSpacing
-    self.isTextSelectionEnabled = isTextSelectionEnabled
+    self.textSelectionConfig = textSelectionConfig
   }
 
   /// The default render config, equivalent to calling `init()` with no

@@ -20,7 +20,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -38,7 +38,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -56,7 +56,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -74,7 +74,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -92,7 +92,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -110,7 +110,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -128,7 +128,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -147,7 +147,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -165,7 +165,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: value,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
@@ -183,13 +183,13 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: value,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: isTextSelectionEnabled
+      textSelectionConfig: textSelectionConfig
     )
   }
 
-  /// Returns a copy with `isTextSelectionEnabled` replaced. Pass `false` to
-  /// hide the built-in "Select more text" edit-menu action.
-  public func withTextSelectionEnabled(value: Bool) -> MarkdownRenderConfig {
+  /// Returns a copy with `textSelectionConfig` replaced. Pass a config with
+  /// `isEnabled: false` to hide the built-in "Select more text" edit-menu action.
+  public func withTextSelectionConfig(value: TextSelectionConfig) -> MarkdownRenderConfig {
     MarkdownRenderConfig(
       shouldAnimateText: shouldAnimateText,
       blockQuoteStyle: blockQuoteStyle,
@@ -202,7 +202,7 @@ extension MarkdownRenderConfig {
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
-      isTextSelectionEnabled: value
+      textSelectionConfig: value
     )
   }
 }

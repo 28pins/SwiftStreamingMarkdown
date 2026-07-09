@@ -47,7 +47,10 @@ public struct DocumentView: View {
       controller.onDisappear()
     }
     .sheet(isPresented: $controller.isTextSelectionRequested) {
-      TextSelectionView(text: renderableDocument.plainText) {
+      TextSelectionView(
+        text: renderableDocument.plainText,
+        backgroundColor: config.textSelectionConfig.backgroundColor ?? Color.Theme.Background.Page.Chat.Flat
+      ) {
         controller.isTextSelectionRequested = false
       }
     }
