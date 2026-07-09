@@ -55,7 +55,7 @@ private struct TextSelectionHeader: View {
     .overlay(
       Rectangle()
         .frame(height: 1)
-        .foregroundStyle(markdownConfig.paragraphStyle.textColor),
+        .foregroundStyle(markdownConfig.thematicBreakColor),
       alignment: .bottom
     )
   }
