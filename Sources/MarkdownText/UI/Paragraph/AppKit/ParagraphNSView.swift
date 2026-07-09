@@ -352,6 +352,15 @@ class ParagraphNSView: NSTextView {
     menu.addItem(copyItem)
     menu.addItem(.separator())
 
+    // Add the built-in "Select more text" action right after Copy, ahead of any
+    // custom context-menu groups.
+    if isTextSelectionEnabled {
+      let selectMoreItem = NSMenuItem(title: String.selectMoreTextLabel, action: #selector(selectMoreTextTapped), keyEquivalent: "")
+      selectMoreItem.target = self
+      menu.addItem(selectMoreItem)
+      menu.addItem(.separator())
+    }
+
     // Add custom groups
     if let textContextMenu {
       for group in textContextMenu.menuGroups {
@@ -385,13 +394,6 @@ class ParagraphNSView: NSTextView {
           }
         }
       }
-    }
-
-    // Add the built-in "Select more text" action
-    if isTextSelectionEnabled {
-      let selectMoreItem = NSMenuItem(title: String.selectMoreTextLabel, action: #selector(selectMoreTextTapped), keyEquivalent: "")
-      selectMoreItem.target = self
-      menu.addItem(selectMoreItem)
     }
 
     return menu

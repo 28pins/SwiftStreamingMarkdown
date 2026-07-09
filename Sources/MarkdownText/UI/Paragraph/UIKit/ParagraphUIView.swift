@@ -373,7 +373,11 @@ extension ParagraphUIView: UITextViewDelegate {
         markdownController: markdownController
       )
       guard let selectMoreTextAction else { return menu }
-      return menu.replacingChildren(menu.children + [selectMoreTextAction])
+      // Insert right after the system edit group (which holds Copy) and ahead
+      // of any custom context-menu groups.
+      var children = menu.children
+      children.insert(selectMoreTextAction, at: children.isEmpty ? 0 : 1)
+      return menu.replacingChildren(children)
     }
 
     guard let selectMoreTextAction else { return nil }

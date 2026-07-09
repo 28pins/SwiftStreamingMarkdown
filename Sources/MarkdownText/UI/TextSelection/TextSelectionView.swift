@@ -20,6 +20,9 @@ struct TextSelectionView: View {
         .padding(.horizontal, 18)
     }
     .background(Color.Theme.Background.Page.Chat.Flat.ignoresSafeArea())
+    #if os(macOS)
+    .frame(minWidth: 520, idealWidth: 640, minHeight: 480, idealHeight: 680)
+    #endif
   }
 }
 
