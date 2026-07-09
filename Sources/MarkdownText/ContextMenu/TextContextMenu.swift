@@ -42,7 +42,11 @@ public struct TextContextMenu: Hashable, Sendable {
           subtitle: item.subtitle,
           image: item.image?.withRenderingMode(.alwaysTemplate),
         ) { _ in
-          markdownController?.onContextMenuTap(id: item.id, selectedContent: selectedText)
+          if item.id == TextSelectionConfig.selectMoreItemID {
+            markdownController?.requestTextSelection()
+          } else {
+            markdownController?.onContextMenuTap(id: item.id, selectedContent: selectedText)
+          }
         }
         groupActions.append(uiAction)
       }

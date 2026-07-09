@@ -27,7 +27,6 @@ class ParagraphNSView: NSTextView {
 
   var textContextMenu: TextContextMenu?
   var markdownController: MarkdownController?
-  var isTextSelectionEnabled: Bool = true
 
   var onUrlTap: (URL) -> Void = { NSWorkspace.shared.open($0) }
 
@@ -319,10 +318,6 @@ class ParagraphNSView: NSTextView {
     markdownController = controller
   }
 
-  func setTextSelectionEnabled(_ enabled: Bool) {
-    isTextSelectionEnabled = enabled
-  }
-
   // MARK: - Link Clicks
 
   // swiftlint:disable:next no_any
@@ -337,7 +332,7 @@ class ParagraphNSView: NSTextView {
   // MARK: - Context Menu
 
   override func menu(for event: NSEvent) -> NSMenu? {
-    guard textContextMenu != nil || isTextSelectionEnabled, let textStorage else {
+    guard let textContextMenu, let textStorage else {
       return super.menu(for: event)
     }
 
@@ -352,51 +347,48 @@ class ParagraphNSView: NSTextView {
     menu.addItem(copyItem)
     menu.addItem(.separator())
 
-    // Add the built-in "Select more text" action right after Copy, ahead of any
-    // custom context-menu groups.
-    if isTextSelectionEnabled {
-      let selectMoreItem = NSMenuItem(title: String.selectMoreTextLabel, action: #selector(selectMoreTextTapped), keyEquivalent: "")
-      selectMoreItem.target = self
-      menu.addItem(selectMoreItem)
+    // Add the configured groups. The built-in "Select more text" group (when
+    // enabled) is prepended by `MarkdownRenderConfig.resolvedTextContextMenu`, so
+    // it renders right after Copy without any special-casing here.
+    for group in textContextMenu.menuGroups {
+      if group.displayInline {
+        for item in group.items {
+          menu.addItem(makeMenuItem(for: item, selectedText: selectedText))
+        }
+      } else {
+        let submenu = NSMenu(title: group.title ?? "")
+        for item in group.items {
+          submenu.addItem(makeMenuItem(for: item, selectedText: selectedText))
+        }
+        let submenuItem = NSMenuItem(title: group.title ?? "", action: nil, keyEquivalent: "")
+        submenuItem.submenu = submenu
+        menu.addItem(submenuItem)
+      }
       menu.addItem(.separator())
     }
 
-    // Add custom groups
-    if let textContextMenu {
+    // Notify controller of menu appearance (excluding the built-in item)
+    if let markdownController {
       for group in textContextMenu.menuGroups {
-        if group.displayInline {
-          for item in group.items {
-            let menuItem = NSMenuItem(title: item.title, action: #selector(contextMenuItemTapped(_:)), keyEquivalent: "")
-            menuItem.representedObject = ContextMenuAction(id: item.id, selectedText: selectedText)
-            menuItem.target = self
-            menu.addItem(menuItem)
-          }
-        } else {
-          let submenu = NSMenu(title: group.title ?? "")
-          for item in group.items {
-            let menuItem = NSMenuItem(title: item.title, action: #selector(contextMenuItemTapped(_:)), keyEquivalent: "")
-            menuItem.representedObject = ContextMenuAction(id: item.id, selectedText: selectedText)
-            menuItem.target = self
-            submenu.addItem(menuItem)
-          }
-          let submenuItem = NSMenuItem(title: group.title ?? "", action: nil, keyEquivalent: "")
-          submenuItem.submenu = submenu
-          menu.addItem(submenuItem)
-        }
-        menu.addItem(.separator())
-      }
-
-      // Notify controller of menu appearance
-      if let markdownController {
-        for group in textContextMenu.menuGroups {
-          for item in group.items {
-            markdownController.onContextMenuAppear(id: item.id, selectedContent: selectedText)
-          }
+        for item in group.items where item.id != TextSelectionConfig.selectMoreItemID {
+          markdownController.onContextMenuAppear(id: item.id, selectedContent: selectedText)
         }
       }
     }
 
     return menu
+  }
+
+  private func makeMenuItem(for item: TextContextMenuItem, selectedText: String) -> NSMenuItem {
+    if item.id == TextSelectionConfig.selectMoreItemID {
+      let menuItem = NSMenuItem(title: item.title, action: #selector(selectMoreTextTapped), keyEquivalent: "")
+      menuItem.target = self
+      return menuItem
+    }
+    let menuItem = NSMenuItem(title: item.title, action: #selector(contextMenuItemTapped(_:)), keyEquivalent: "")
+    menuItem.representedObject = ContextMenuAction(id: item.id, selectedText: selectedText)
+    menuItem.target = self
+    return menuItem
   }
 
   @objc private func selectMoreTextTapped() {

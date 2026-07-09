@@ -23,9 +23,8 @@ struct ParagraphView: UIViewRepresentable {
     let view = ParagraphViewCache.shared.createOrReuseView(contents: contents, lineSpacing: lineSpacing)
     view.onUrlTap = openUrlFunction
     view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
-    view.setTextContextMenu(config.textContextMenu)
+    view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
-    view.setTextSelectionEnabled(config.textSelectionConfig.isEnabled)
 
     if config.shouldAnimateText {
       view.alpha = 0
@@ -42,9 +41,8 @@ struct ParagraphView: UIViewRepresentable {
       let shouldAnimate = view.window != nil && config.shouldAnimateText // only animate when visible
       view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: shouldAnimate)
     }
-    view.setTextContextMenu(config.textContextMenu)
+    view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
-    view.setTextSelectionEnabled(config.textSelectionConfig.isEnabled)
   }
 
   // If we don't implement this function, the snapshot tests will fail with incorrect sizing.

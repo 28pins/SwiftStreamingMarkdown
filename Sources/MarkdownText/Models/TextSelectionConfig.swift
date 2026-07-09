@@ -35,4 +35,11 @@ public struct TextSelectionConfig: Hashable, Sendable {
   public static let `default` = TextSelectionConfig(
     backgroundColor: Color.Theme.Background.Page.Chat.Flat
   )
+
+  /// Reserved identifier for the built-in "Select more text" menu item that is
+  /// injected into `MarkdownRenderConfig.resolvedTextContextMenu`. The paragraph
+  /// menu builders recognize this id and route its tap to
+  /// `MarkdownController.requestTextSelection()` instead of the consumer's
+  /// `onContextMenuTap`.
+  static let selectMoreItemID = "com.microsoft.SwiftStreamingMarkdown.textSelection.selectMore"
 }

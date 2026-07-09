@@ -274,4 +274,25 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   /// The default render config, equivalent to calling `init()` with no
   /// arguments.
   public static let `default` = MarkdownRenderConfig(shouldAnimateText: false)
+
+  /// The context menu actually rendered on text selection: the consumer-supplied
+  /// `textContextMenu` with the built-in "Select more text" group prepended (so
+  /// it sits right after the system Copy group) when
+  /// `textSelectionConfig.isEnabled` is `true`. Returns the raw `textContextMenu`
+  /// unchanged when text selection is disabled.
+  var resolvedTextContextMenu: TextContextMenu? {
+    guard textSelectionConfig.isEnabled else { return textContextMenu }
+    let selectMoreGroup = TextContextMenuGroup(
+      title: nil,
+      image: nil,
+      displayInline: true,
+      items: [
+        TextContextMenuItem(
+          id: TextSelectionConfig.selectMoreItemID,
+          title: String.selectMoreTextLabel
+        )
+      ]
+    )
+    return TextContextMenu(menuGroups: [selectMoreGroup] + (textContextMenu?.menuGroups ?? []))
+  }
 }

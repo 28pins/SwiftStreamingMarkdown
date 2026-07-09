@@ -27,9 +27,8 @@ struct ParagraphView: NSViewRepresentable {
     let view = ParagraphNSView()
     view.onUrlTap = openUrlFunction
     view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
-    view.setTextContextMenu(config.textContextMenu)
+    view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
-    view.setTextSelectionEnabled(config.textSelectionConfig.isEnabled)
 
     if config.shouldAnimateText {
       view.alphaValue = 0
@@ -47,9 +46,8 @@ struct ParagraphView: NSViewRepresentable {
       let shouldAnimate = view.window != nil && config.shouldAnimateText
       view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: shouldAnimate)
     }
-    view.setTextContextMenu(config.textContextMenu)
+    view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
-    view.setTextSelectionEnabled(config.textSelectionConfig.isEnabled)
   }
 
   func sizeThatFits(_ proposal: ProposedViewSize, nsView: ParagraphNSView, context: Context) -> CGSize? {

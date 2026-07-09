@@ -31,7 +31,6 @@ class ParagraphUIView: UITextView {
 
   var textContextMenu: TextContextMenu?
   var markdownController: MarkdownController?
-  var isTextSelectionEnabled: Bool = true
 
   // To override the behaviour of this property, do so on ParagraphView's SwiftUI wrapper.
   var onUrlTap: (URL) -> Void = { UIApplication.shared.open($0) }
@@ -338,10 +337,6 @@ class ParagraphUIView: UITextView {
   func setMarkdownController(_ controller: MarkdownController?) {
     markdownController = controller
   }
-
-  func setTextSelectionEnabled(_ enabled: Bool) {
-    isTextSelectionEnabled = enabled
-  }
 }
 
 // MARK: - UITextViewDelegate
@@ -363,35 +358,13 @@ extension ParagraphUIView: UITextViewDelegate {
   }
 
   func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
-    let selectMoreTextAction = makeSelectMoreTextAction()
-
-    if let textContextMenu {
-      let menu = textContextMenu.buildUIMenu(
-        textView: textView,
-        selectedRange: range,
-        suggestedActions: suggestedActions,
-        markdownController: markdownController
-      )
-      guard let selectMoreTextAction else { return menu }
-      // Insert right after the system edit group (which holds Copy) and ahead
-      // of any custom context-menu groups.
-      var children = menu.children
-      children.insert(selectMoreTextAction, at: children.isEmpty ? 0 : 1)
-      return menu.replacingChildren(children)
-    }
-
-    guard let selectMoreTextAction else { return nil }
-    let systemEditActions = suggestedActions.filter { element in
-      (element as? UIMenu)?.identifier == .standardEdit
-    }
-    return UIMenu(children: systemEditActions + [selectMoreTextAction])
-  }
-
-  private func makeSelectMoreTextAction() -> UIAction? {
-    guard isTextSelectionEnabled else { return nil }
-    return UIAction(title: String.selectMoreTextLabel) { [weak self] _ in
-      self?.markdownController?.requestTextSelection()
-    }
+    guard let textContextMenu else { return nil }
+    return textContextMenu.buildUIMenu(
+      textView: textView,
+      selectedRange: range,
+      suggestedActions: suggestedActions,
+      markdownController: markdownController
+    )
   }
 
   func textView(_ textView: UITextView, willPresentEditMenuWith animator: any UIEditMenuInteractionAnimating) {
@@ -399,7 +372,7 @@ extension ParagraphUIView: UITextViewDelegate {
     let clampedRange = NSIntersectionRange(textView.selectedRange, NSRange(location: 0, length: textView.attributedText.length))
     let selectedText = textView.attributedText.attributedSubstring(from: clampedRange).string
     for group in textContextMenu.menuGroups {
-      for item in group.items {
+      for item in group.items where item.id != TextSelectionConfig.selectMoreItemID {
         markdownController.onContextMenuAppear(id: item.id, selectedContent: selectedText)
       }
     }
