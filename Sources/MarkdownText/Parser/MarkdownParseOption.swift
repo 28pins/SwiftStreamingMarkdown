@@ -12,13 +12,25 @@ public struct MarkdownParseOption {
   /// Specify how to parse latex
   public let latexMatchingRules: [LatexMatching]
 
+  /// Whether to enable rendering Markdown images as block-level content.
+  ///
+  /// - Important: Image support is **experimental**. The behavior, API, and
+  ///   rendering output may change in future releases. Defaults to `false`.
+  public let imageSupport: Bool
+
   /// Create a new parse option.
   /// - Parameters:
   ///   - speculativeRewrite: See `speculativeRewrite`.
   ///   - latexMatchingRules: See `latexMatchingRules`. Defaults to every supported rule.
-  public init(speculativeRewrite: Bool, latexMatchingRules: [LatexMatching] = LatexMatching.allCases) {
+  ///   - imageSupport: See `imageSupport`. Experimental; defaults to `false`.
+  public init(
+    speculativeRewrite: Bool,
+    latexMatchingRules: [LatexMatching] = LatexMatching.allCases,
+    imageSupport: Bool = false
+  ) {
     self.speculativeRewrite = speculativeRewrite
     self.latexMatchingRules = latexMatchingRules
+    self.imageSupport = imageSupport
   }
 
   /// The set of delimiter forms the LaTeX preprocessor will recognize. Omitting
