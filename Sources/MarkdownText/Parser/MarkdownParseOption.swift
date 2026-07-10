@@ -12,10 +12,16 @@ public struct MarkdownParseOption {
   /// Specify how to parse latex
   public let latexMatchingRules: [LatexMatching]
 
-  /// Whether to enable rendering Markdown images as block-level content.
+  /// Whether to enable experimental block-level handling of Markdown images.
   ///
-  /// - Important: Image support is **experimental**. The behavior, API, and
-  ///   rendering output may change in future releases. Defaults to `false`.
+  /// When enabled, the parser rewrites paragraphs that contain images so each
+  /// image is isolated into its own block-level paragraph.
+  ///
+  /// - Important: Image support is **experimental** and incomplete. There is no
+  ///   image renderer yet, so an isolated image paragraph currently renders as
+  ///   empty; enabling this only changes the parsed document structure. The
+  ///   behavior, API, and rendering output may change in future releases.
+  ///   Defaults to `false`.
   public let imageSupport: Bool
 
   /// Create a new parse option.

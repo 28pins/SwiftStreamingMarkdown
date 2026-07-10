@@ -35,8 +35,7 @@ final class ImageBlockRewriter: MarkupRewriter {
       return nil
     }
 
-    let imageChildren = paragraph.children.filter { $0 is Image }.compactMap { $0 as? Image }
-    guard !imageChildren.isEmpty else {
+    guard paragraph.children.contains(where: { $0 is Image }) else {
       return nil
     }
 
