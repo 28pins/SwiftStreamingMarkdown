@@ -100,6 +100,8 @@ extension MarkdownRenderable {
       return item.quoteType.plainText
     case .thematicBreak:
       return nil
+    case .image(_, let data):
+      return data.alt.isEmpty ? nil : data.alt
     }
   }
 }

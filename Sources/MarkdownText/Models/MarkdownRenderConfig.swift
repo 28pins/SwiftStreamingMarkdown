@@ -43,6 +43,16 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   /// Color of the horizontal rule rendered for a thematic break (`---`).
   public let thematicBreakColor: Color
 
+  /// Whether to render Markdown images as block-level content.
+  ///
+  /// When enabled, image-only paragraphs are rendered as block images (loaded
+  /// asynchronously). Pair with `MarkdownParseOption.imageSupport` so that
+  /// images embedded alongside text are split out into their own blocks.
+  ///
+  /// - Important: Image support is **experimental**. The behavior, API, and
+  ///   rendering output may change in future releases. Defaults to `false`.
+  public let imageSupport: Bool
+
   /// Font and color style for a uniformly-styled run of markdown text.
   public struct MarkdownTextStyle: Hashable, Sendable {
     /// Font set used for normal, bold, and italic variants.
@@ -254,7 +264,8 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     codeBlockConfig: CodeBlockConfig = .default,
     blockSpacing: CGFloat = MarkdownRenderConfig.defaultBlockSpacing,
     textSelectionConfig: TextSelectionConfig = .default,
-    thematicBreakColor: Color = MarkdownRenderConfig.defaultThematicBreakColor
+    thematicBreakColor: Color = MarkdownRenderConfig.defaultThematicBreakColor,
+    imageSupport: Bool = false
   ) {
     self.shouldAnimateText = shouldAnimateText
     self.blockQuoteStyle = blockQuoteStyle
@@ -269,6 +280,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     self.blockSpacing = blockSpacing
     self.textSelectionConfig = textSelectionConfig
     self.thematicBreakColor = thematicBreakColor
+    self.imageSupport = imageSupport
   }
 
   /// The default render config, equivalent to calling `init()` with no

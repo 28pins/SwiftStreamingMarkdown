@@ -15,6 +15,9 @@ import AppKit
 extension Paragraph: BlockConvertible {
 
   func convert(attributeContainer: NSAttributeContainer, config: MarkdownRenderConfig) -> MarkdownRenderable {
+    if config.imageSupport, let image = self.imageOnlyChild {
+      return .image(id: self.id, data: ImageData(image: image))
+    }
     var container = attributeContainer
     container[.font] = config.paragraphStyle.textFonts.normal
     container[.typography] = config.paragraphStyle.textFonts
@@ -24,6 +27,17 @@ extension Paragraph: BlockConvertible {
     container[.foregroundColor] = MDColor(config.paragraphStyle.textColor)
     let paragraphContent: NSMutableAttributedString = self.buildParagraphContent(container: container, config: config)
     return MarkdownRenderable.paragraph(id: self.id, content: paragraphContent)
+  }
+
+  /// The single `Image` child when this paragraph wraps nothing but an image,
+  /// otherwise `nil`. Image-only paragraphs are produced either directly (a
+  /// standalone `![alt](url)`) or by `ImageBlockRewriter` splitting a mixed
+  /// paragraph.
+  private var imageOnlyChild: Markdown.Image? {
+    guard self.childCount == 1 else {
+      return nil
+    }
+    return self.child(at: 0) as? Markdown.Image
   }
 }
 
