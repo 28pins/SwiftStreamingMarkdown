@@ -13,6 +13,8 @@ public final class MarkdownParserImpl: MarkdownParser {
     PartialTableMarkupPostParsingRewriter()
   ]
 
+  private let imageBlockRewriter = ImageBlockMarkupPostParsingRewriter()
+
   private let latexPreprocessor: LaTexPreProcessor
 
   /// Create a new parser instance using the default LaTeX preprocessor.
@@ -34,6 +36,15 @@ public final class MarkdownParserImpl: MarkdownParser {
         if let rewrittenDoc = rewriter.rewriteIfApplicable(document: result.document) {
           result = MarkdownParseResult(document: rewrittenDoc, speculativeRewritten: true)
         }
+      }
+    }
+
+    if option.imageSupport {
+      if let rewrittenDoc = imageBlockRewriter.rewriteIfApplicable(document: result.document) {
+        result = MarkdownParseResult(
+          document: rewrittenDoc,
+          speculativeRewritten: result.speculativeRewritten
+        )
       }
     }
     return result
