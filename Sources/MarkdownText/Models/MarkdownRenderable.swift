@@ -43,7 +43,7 @@ indirect enum MarkdownRenderable: Identifiable, Equatable, @unchecked Sendable {
   case blockQuote(id: String, item: BlockQuoteRenderable)
 
   /// To be rendered as a block-level image. Experimental; see
-  /// `MarkdownRenderConfig.imageSupport`.
+  /// `MarkdownRenderConfig.imageConfig`.
   case image(id: String, data: ImageData)
 
   var id: String {

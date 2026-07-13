@@ -15,7 +15,7 @@ import AppKit
 extension Paragraph: BlockConvertible {
 
   func convert(attributeContainer: NSAttributeContainer, config: MarkdownRenderConfig) -> MarkdownRenderable {
-    if config.imageSupport, let image = self.imageOnlyChild {
+    if config.imageConfig.enabled, let image = self.imageOnlyChild {
       return .image(id: self.id, data: ImageData(image: image))
     }
     var container = attributeContainer

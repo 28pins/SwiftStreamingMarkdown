@@ -237,8 +237,8 @@ extension MarkdownRenderConfig {
     )
   }
 
-  /// Returns a copy with `imageSupport` replaced. Image support is experimental.
-  public func withImageSupport(enabled: Bool) -> MarkdownRenderConfig {
+  /// Returns a copy with `imageConfig` replaced. Image support is experimental.
+  public func withImageConfig(_ value: ImageConfig) -> MarkdownRenderConfig {
     MarkdownRenderConfig(
       shouldAnimateText: shouldAnimateText,
       blockQuoteStyle: blockQuoteStyle,
@@ -253,7 +253,7 @@ extension MarkdownRenderConfig {
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
       thematicBreakColor: thematicBreakColor,
-      imageSupport: enabled
+      imageConfig: value
     )
   }
 }

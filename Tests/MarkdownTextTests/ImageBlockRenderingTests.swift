@@ -15,7 +15,7 @@ final class ImageBlockRenderingTests: XCTestCase {
     imageSupport: Bool
   ) async -> [MarkdownRenderable] {
     let parser = MarkdownParserImpl()
-    let config = MarkdownRenderConfig(imageSupport: imageSupport)
+    let config = MarkdownRenderConfig(imageConfig: ImageConfig(enabled: imageSupport))
     let document = await parser.parse(
       text: text,
       option: .init(speculativeRewrite: false, imageSupport: imageSupport)

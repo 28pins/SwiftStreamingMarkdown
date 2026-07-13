@@ -9,29 +9,40 @@ import SwiftUI
 /// Renders a block-level Markdown image, loading it asynchronously from its URL.
 ///
 /// - Important: Image support is **experimental**. See
-///   `MarkdownRenderConfig.imageSupport`.
+///   `MarkdownRenderConfig.imageConfig`.
 struct BlockImageView: View {
+
+  @Environment(\.markdownConfig) private var config: MarkdownRenderConfig
 
   let data: ImageData
 
   var body: some View {
-    AsyncImage(url: data.url) { phase in
-      switch phase {
-      case .success(let image):
-        image
-          .resizable()
-          .scaledToFit()
-      case .failure:
-        placeholder(systemImage: "photo")
-      case .empty:
-        placeholder(systemImage: "photo")
-      @unknown default:
-        placeholder(systemImage: "photo")
+    imageContent
+      .containerRelativeFrameCompat(.horizontal) { width, _ in width * 2 / 3 }
+      .accessibilityLabel(data.alt.isEmpty ? Text(verbatim: "Image") : Text(data.alt))
+      .transition(.opacity)
+  }
+
+  @ViewBuilder
+  private var imageContent: some View {
+    if config.imageConfig.allowsImage(from: data.url) {
+      AsyncImage(url: data.url) { phase in
+        switch phase {
+        case .success(let image):
+          image
+            .resizable()
+            .scaledToFit()
+        case .failure:
+          placeholder(systemImage: "photo")
+        case .empty:
+          placeholder(systemImage: "photo")
+        @unknown default:
+          placeholder(systemImage: "photo")
+        }
       }
+    } else {
+      placeholder(systemImage: "photo")
     }
-    .containerRelativeFrameCompat(.horizontal) { width, _ in width * 2 / 3 }
-    .accessibilityLabel(data.alt.isEmpty ? Text("Image") : Text(data.alt))
-    .transition(.opacity)
   }
 
   private func placeholder(systemImage: String) -> some View {

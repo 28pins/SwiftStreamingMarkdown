@@ -10,7 +10,7 @@ import Markdown
 /// during pre-rendering.
 ///
 /// - Important: Image support is **experimental**. See
-///   `MarkdownRenderConfig.imageSupport`.
+///   `MarkdownRenderConfig.imageConfig`.
 struct ImageData: Equatable, Sendable {
 
   /// The resolved image source URL, or `nil` when the source is missing or
