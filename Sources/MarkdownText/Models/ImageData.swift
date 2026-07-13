@@ -59,7 +59,7 @@ struct ImageData: Equatable, Sendable {
 
     let url = URL.fromMixedEncodingString(rawSource)
     switch url?.scheme?.lowercased() {
-    case "http", "https":
+    case "https":
       guard let url, imageConfig.allowsImage(from: url) else { return nil }
       return .remote(url)
     case "assets":
