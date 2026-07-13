@@ -198,7 +198,7 @@ $$
 
 Bundled SVG asset:
 
-![Streaming Markdown SVG sample](Images/streaming-markdown.svg)
+![Streaming Markdown SVG sample](assets://Images/streaming-markdown)
 
 Remote(trusted) markdown:
 

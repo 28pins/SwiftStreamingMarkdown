@@ -55,7 +55,7 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
       .withShouldAnimateText(value: isStreaming)
       .withImageConfig(ImageConfig(
         enabled: true,
-        allowedImageTypes: [.remote(allowedDomains: ["markdownguide.org"])]
+        allowedImageTypes: [.remote(allowedDomains: ["markdownguide.org"]), .assetCatalog]
       ))
   }
 
