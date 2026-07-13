@@ -196,9 +196,13 @@ $$
 
 ## Images and HTML fallback
 
-Bundled SVG asset:
+Asset-catalog image (bundled SVG, loaded by name):
 
-![Streaming Markdown SVG sample](assets://Images/streaming-markdown)
+![Mountain lake landscape](assets://Images/mountain-lake)
+
+Bundled resource file (loaded from the app bundle):
+
+![Coastal sunset over the sea](coastal-sunset.png)
 
 Remote(trusted) markdown:
 

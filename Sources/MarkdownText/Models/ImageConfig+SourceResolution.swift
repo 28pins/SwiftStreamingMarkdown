@@ -7,19 +7,8 @@ import Foundation
 
 extension ImageConfig {
 
-  /// Resolves a Markdown image source string into a permitted `ImageData.Source`.
-  ///
-  /// The source's URL scheme determines its type:
-  /// - `https` → `.remote`, validated against the remote allowlist. Plain
-  ///   `http` and all other explicit schemes are rejected.
-  /// - `assets` → `.assetCatalog`, with the asset name taken from the URL's
-  ///   host and path (e.g. `assets://Images/logo` → `Images/logo`).
-  /// - no scheme (a relative path) → `.bundledResource`, split into its base
-  ///   file name and extension (e.g. `./logo.png` → `logo` + `png`). Nested
-  ///   paths and sources without an extension are rejected.
-  ///
-  /// Returns `nil` when image support is disabled, the source is empty, or the
-  /// resolved type is not among `allowedImageTypes`.
+  /// Resolves a Markdown image source into a permitted `ImageData.Source`, or
+  /// `nil` when the source is empty, malformed, or not allowed by the config.
   func resolvedSource(for rawSource: String?) -> ImageData.Source? {
     guard enabled, let rawSource, !rawSource.isEmpty,
       let url = URL.fromMixedEncodingString(rawSource) else {
@@ -28,35 +17,56 @@ extension ImageConfig {
 
     switch url.scheme?.lowercased() {
     case "https":
-      guard allowsImage(from: url) else { return nil }
+      guard allowsRemoteImage(host: url.host(percentEncoded: false)) else { return nil }
       return .remote(url)
     case "assets":
-      guard allowsAssetCatalog, let name = Self.assetCatalogName(from: url) else { return nil }
+      guard allowsAssetCatalog, let name = url.assetCatalogName else { return nil }
       return .assetCatalog(name: name)
     case .some:
-      // An explicit but unsupported scheme (e.g. `file`, `data`).
+      // An explicit but unsupported scheme (e.g. `file`, `data`, plain `http`).
       return nil
     case .none:
-      guard allowsBundledResource,
-        let resource = Self.bundledResource(from: rawSource) else {
+      guard allowsBundledResource, let resource = rawSource.bundledResourceComponents else {
         return nil
       }
       return .bundledResource(fileName: resource.fileName, ext: resource.ext)
     }
   }
 
-  /// Builds the asset name for an `assets`-scheme source from the URL's host and
-  /// path, e.g. `assets://Images/logo` → `Images/logo`.
-  private static func assetCatalogName(from url: URL) -> String? {
-    let name = (url.host(percentEncoded: false) ?? "") + url.path(percentEncoded: false)
+  /// Whether an `https` image served from `host` is permitted by a configured
+  /// `.remote` type. The caller has already matched the `https` scheme, so only
+  /// the host is validated against each type's `allowedDomains`.
+  private func allowsRemoteImage(host: String?) -> Bool {
+    guard let host = host?.lowercased() else { return false }
+    for case .remote(let allowedDomains) in allowedImageTypes {
+      guard !allowedDomains.isEmpty else { return true }
+      let matches = allowedDomains.contains { domain in
+        let domain = domain.lowercased()
+        return host == domain || host.hasSuffix("." + domain)
+      }
+      if matches { return true }
+    }
+    return false
+  }
+}
+
+private extension URL {
+
+  /// The asset-catalog name for an `assets`-scheme URL, taken from its host and
+  /// path (e.g. `assets://Images/logo` → `Images/logo`). `nil` when empty.
+  var assetCatalogName: String? {
+    let name = (host(percentEncoded: false) ?? "") + path(percentEncoded: false)
     return name.isEmpty ? nil : name
   }
+}
+
+private extension String {
 
   /// Splits a scheme-less relative path into a bundle resource's base file name
-  /// and extension, e.g. `./logo.png` → (`logo`, `png`). Returns `nil` for
-  /// nested paths or sources without a file extension.
-  private static func bundledResource(from rawSource: String) -> (fileName: String, ext: String)? {
-    let path = rawSource.hasPrefix("./") ? String(rawSource.dropFirst(2)) : rawSource
+  /// and extension (e.g. `./logo.png` → (`logo`, `png`)). `nil` for nested
+  /// paths or sources without a file extension.
+  var bundledResourceComponents: (fileName: String, ext: String)? {
+    let path = hasPrefix("./") ? String(dropFirst(2)) : self
     // Only a bare file name is supported; nested paths are invalid.
     guard !path.isEmpty, !path.contains("/") else { return nil }
 
