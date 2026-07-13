@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Shimmer
 import SwiftUI
 
 /// Renders a block-level Markdown image, loading it asynchronously from its URL.
@@ -31,16 +32,25 @@ struct BlockImageView: View {
             .resizable()
             .scaledToFit()
         case .failure:
-          placeholder(systemImage: "photo")
+          placeholder(systemImage: "photo.badge.exclamationmark")
         case .empty:
-          placeholder(systemImage: "photo")
+          loadingPlaceholder
         @unknown default:
-          placeholder(systemImage: "photo")
+          placeholder(systemImage: "photo.badge.exclamationmark")
         }
       }
     } else {
-      placeholder(systemImage: "photo")
+      placeholder(systemImage: "photo.badge.exclamationmark")
     }
+  }
+
+  private var loadingPlaceholder: some View {
+    RoundedRectangle(cornerRadius: 8)
+      .fill(.quaternary)
+      .frame(maxWidth: .infinity)
+      .frame(height: 200)
+      .shimmering()
+      .accessibilityHidden(true)
   }
 
   private func placeholder(systemImage: String) -> some View {
