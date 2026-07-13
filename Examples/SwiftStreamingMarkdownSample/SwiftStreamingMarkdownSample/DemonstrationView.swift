@@ -36,11 +36,7 @@ struct DemonstrationView: View {
           } else {
             MarkdownView(
               text: markdownText,
-              config: demonstration.renderConfig(theme: markdownTheme, isStreaming: false)
-                .withImageConfig(ImageConfig(
-                  enabled: true,
-                  allowedImageTypes: [.remote(allowedDomains: ["markdownguide.org"])]
-                )),
+              config: demonstration.renderConfig(theme: markdownTheme, isStreaming: false),
               listener: listener
             )
             .id(staticContentID)

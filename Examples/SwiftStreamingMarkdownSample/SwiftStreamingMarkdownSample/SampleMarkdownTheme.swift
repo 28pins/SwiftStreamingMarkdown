@@ -53,6 +53,10 @@ enum SampleMarkdownTheme: String, CaseIterable, Identifiable {
     resolvedConfig(for: demonstration)
       .withTextContextMenu(value: demonstration.customContextMenu)
       .withShouldAnimateText(value: isStreaming)
+      .withImageConfig(ImageConfig(
+        enabled: true,
+        allowedImageTypes: [.remote(allowedDomains: ["markdownguide.org"])]
+      ))
   }
 
   private func resolvedTheme(for demonstration: Demonstration) -> SampleMarkdownTheme {
