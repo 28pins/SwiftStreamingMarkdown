@@ -15,13 +15,9 @@ struct BlockImageView: View {
 
   let data: ImageData
 
-  @State private var availableWidth: CGFloat = 0
-
   var body: some View {
     imageContent
-      .frame(maxWidth: availableWidth > 0 ? availableWidth * 2 / 3 : nil, alignment: .center)
       .frame(maxWidth: .infinity, alignment: .center)
-      .onWidthChange { availableWidth = $0 }
       .accessibilityLabel(data.alt.isEmpty ? Text(verbatim: "Image") : Text(data.alt))
   }
 
