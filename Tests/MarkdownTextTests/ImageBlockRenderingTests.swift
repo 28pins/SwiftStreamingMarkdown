@@ -121,7 +121,7 @@ final class ImageBlockRenderingTests: XCTestCase {
     guard case .image(_, let data) = renderables.first else {
       return XCTFail("Expected an image block for the bundled-resource source")
     }
-    XCTAssertEqual(data.source, .bundledResource(name: "logo.png"))
+    XCTAssertEqual(data.source, .bundledResource(fileName: "logo", ext: "png"))
   }
 
   func test_dot_slash_relative_path_strips_prefix_for_bundled_resource() async {
@@ -133,7 +133,31 @@ final class ImageBlockRenderingTests: XCTestCase {
     guard case .image(_, let data) = renderables.first else {
       return XCTFail("Expected an image block for the bundled-resource source")
     }
-    XCTAssertEqual(data.source, .bundledResource(name: "logo.png"))
+    XCTAssertEqual(data.source, .bundledResource(fileName: "logo", ext: "png"))
+  }
+
+  func test_nested_relative_path_is_invalid_for_bundled_resource() async {
+    let renderables = await renderables(
+      for: "![alt](Images/logo.png)",
+      imageConfig: ImageConfig(enabled: true, allowedImageTypes: [.bundledResource])
+    )
+
+    guard case .image(_, let data) = renderables.first else {
+      return XCTFail("Expected an image block")
+    }
+    XCTAssertNil(data.source)
+  }
+
+  func test_relative_path_without_extension_is_invalid_for_bundled_resource() async {
+    let renderables = await renderables(
+      for: "![alt](logo)",
+      imageConfig: ImageConfig(enabled: true, allowedImageTypes: [.bundledResource])
+    )
+
+    guard case .image(_, let data) = renderables.first else {
+      return XCTFail("Expected an image block")
+    }
+    XCTAssertNil(data.source)
   }
 
   func test_relative_path_is_not_allowed_without_bundled_resource_type() async {

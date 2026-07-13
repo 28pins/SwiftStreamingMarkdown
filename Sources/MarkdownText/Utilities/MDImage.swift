@@ -22,24 +22,4 @@ extension MDImage {
     self.init(systemSymbolName: name, accessibilityDescription: nil)
     #endif
   }
-
-  /// Loads a loose image resource from the app's main bundle by name.
-  ///
-  /// The name may include a file extension (e.g. `logo.png`); when omitted, the
-  /// main bundle is searched for a resource with that base name.
-  static func bundledResource(named name: String) -> MDImage? {
-    let resourceName = (name as NSString).deletingPathExtension
-    let fileExtension = (name as NSString).pathExtension
-    guard let url = Bundle.main.url(
-      forResource: resourceName,
-      withExtension: fileExtension.isEmpty ? nil : fileExtension
-    ) else {
-      return nil
-    }
-    #if canImport(UIKit)
-    return UIImage(contentsOfFile: url.path)
-    #elseif canImport(AppKit)
-    return NSImage(contentsOf: url)
-    #endif
-  }
 }
