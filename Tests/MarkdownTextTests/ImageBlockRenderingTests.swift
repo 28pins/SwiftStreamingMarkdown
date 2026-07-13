@@ -10,6 +10,13 @@ import XCTest
 @MainActor
 final class ImageBlockRenderingTests: XCTestCase {
 
+  private func url(_ string: String) -> URL {
+    guard let url = URL(string: string) else {
+      fatalError("Invalid test URL: \(string)")
+    }
+    return url
+  }
+
   private func renderables(
     for text: String,
     imageSupport: Bool
@@ -45,14 +52,14 @@ final class ImageBlockRenderingTests: XCTestCase {
   func test_standalone_image_renders_as_image_block_when_enabled() async {
     let renderables = await renderables(
       for: "![alt](https://example.com/a.png)",
-      imageSupport: true
+      imageConfig: ImageConfig(enabled: true, allowedImageTypes: [.remote(allowedDomains: [])])
     )
 
     XCTAssertEqual(renderables.count, 1)
     guard case .image(_, let data) = renderables[0] else {
       return XCTFail("Expected an image block when image support is enabled")
     }
-    XCTAssertEqual(data.url, URL(string: "https://example.com/a.png"))
+    XCTAssertEqual(data.source, .remote(url("https://example.com/a.png")))
     XCTAssertEqual(data.alt, "alt")
   }
 
@@ -69,7 +76,7 @@ final class ImageBlockRenderingTests: XCTestCase {
     guard case .image(_, let allowedData) = allowed.first else {
       return XCTFail("Expected an image block for the allowed domain")
     }
-    XCTAssertTrue(allowedData.isDomainAllowed)
+    XCTAssertEqual(allowedData.source, .remote(url("https://allowed.example/a.png")))
 
     let blocked = await renderables(
       for: "![alt](https://blocked.example/a.png)",
@@ -78,7 +85,43 @@ final class ImageBlockRenderingTests: XCTestCase {
     guard case .image(_, let blockedData) = blocked.first else {
       return XCTFail("Expected an image block for the blocked domain")
     }
-    XCTAssertFalse(blockedData.isDomainAllowed)
+    XCTAssertNil(blockedData.source)
+  }
+
+  func test_relative_path_resolves_to_asset_catalog_when_permitted() async {
+    let renderables = await renderables(
+      for: "![alt](logo)",
+      imageConfig: ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog])
+    )
+
+    guard case .image(_, let data) = renderables.first else {
+      return XCTFail("Expected an image block for the asset-catalog source")
+    }
+    XCTAssertEqual(data.source, .assetCatalog(name: "logo"))
+  }
+
+  func test_relative_path_is_not_allowed_without_asset_catalog_type() async {
+    let renderables = await renderables(
+      for: "![alt](logo)",
+      imageConfig: ImageConfig(enabled: true, allowedImageTypes: [.remote(allowedDomains: [])])
+    )
+
+    guard case .image(_, let data) = renderables.first else {
+      return XCTFail("Expected an image block")
+    }
+    XCTAssertNil(data.source)
+  }
+
+  func test_remote_url_is_not_allowed_with_only_asset_catalog_type() async {
+    let renderables = await renderables(
+      for: "![alt](https://example.com/a.png)",
+      imageConfig: ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog])
+    )
+
+    guard case .image(_, let data) = renderables.first else {
+      return XCTFail("Expected an image block")
+    }
+    XCTAssertNil(data.source)
   }
 
   func test_image_mixed_with_text_is_split_into_blocks_when_enabled() async {
@@ -91,10 +134,9 @@ final class ImageBlockRenderingTests: XCTestCase {
     guard case .paragraph = renderables[0] else {
       return XCTFail("Expected leading text paragraph")
     }
-    guard case .image(_, let data) = renderables[1] else {
+    guard case .image = renderables[1] else {
       return XCTFail("Expected the middle block to be an image")
     }
-    XCTAssertEqual(data.url, URL(string: "https://example.com/a.png"))
     guard case .paragraph = renderables[2] else {
       return XCTFail("Expected trailing text paragraph")
     }

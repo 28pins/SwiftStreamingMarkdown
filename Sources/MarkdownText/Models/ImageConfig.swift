@@ -20,6 +20,11 @@ public struct ImageConfig: Hashable, Sendable {
     /// An empty list permits any host. Matching is case-insensitive and
     /// includes subdomains, so `example.com` also matches `cdn.example.com`.
     case remote(allowedDomains: [String])
+
+    /// Bundled images referenced by a relative path, resolved from the app's
+    /// asset catalog via `Image(_:)`. A Markdown image whose source has no URL
+    /// scheme (e.g. `![logo](logo)`) is treated as an asset name.
+    case assetCatalog
   }
 
   /// Whether Markdown images are rendered as block-level content.
@@ -50,6 +55,12 @@ public struct ImageConfig: Hashable, Sendable {
     guard enabled, let url else { return false }
     return allowedImageTypes.contains { $0.allows(url) }
   }
+
+  /// Whether bundled asset-catalog images are permitted under this config.
+  var allowsAssetCatalog: Bool {
+    guard enabled else { return false }
+    return allowedImageTypes.contains { $0 == .assetCatalog }
+  }
 }
 
 extension ImageConfig.ImageType {
@@ -68,6 +79,8 @@ extension ImageConfig.ImageType {
         let domain = domain.lowercased()
         return host == domain || host.hasSuffix("." + domain)
       }
+    case .assetCatalog:
+      return false
     }
   }
 }

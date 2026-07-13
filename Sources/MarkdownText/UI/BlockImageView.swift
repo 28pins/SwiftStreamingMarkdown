@@ -7,7 +7,8 @@ import Foundation
 import Shimmer
 import SwiftUI
 
-/// Renders a block-level Markdown image, loading it asynchronously from its URL.
+/// Renders a block-level Markdown image, either loaded asynchronously from a
+/// remote URL or resolved from the app's asset catalog.
 ///
 /// - Important: Image support is **experimental**. See
 ///   `MarkdownRenderConfig.imageConfig`.
@@ -23,23 +24,33 @@ struct BlockImageView: View {
 
   @ViewBuilder
   private var imageContent: some View {
-    if data.isDomainAllowed {
-      AsyncImage(url: data.url) { phase in
-        switch phase {
-        case .success(let image):
-          image
-            .resizable()
-            .scaledToFit()
-        case .failure:
-          placeholder(systemImage: "photo.badge.exclamationmark")
-        case .empty:
-          loadingPlaceholder
-        @unknown default:
-          placeholder(systemImage: "photo.badge.exclamationmark")
-        }
-      }
-    } else {
+    switch data.source {
+    case .remote(let url):
+      remoteImage(url: url)
+    case .assetCatalog(let name):
+      Image(name)
+        .resizable()
+        .scaledToFit()
+    case nil:
       placeholder(systemImage: "photo.badge.exclamationmark")
+    }
+  }
+
+  @ViewBuilder
+  private func remoteImage(url: URL) -> some View {
+    AsyncImage(url: url) { phase in
+      switch phase {
+      case .success(let image):
+        image
+          .resizable()
+          .scaledToFit()
+      case .failure:
+        placeholder(systemImage: "photo.badge.exclamationmark")
+      case .empty:
+        loadingPlaceholder
+      @unknown default:
+        placeholder(systemImage: "photo.badge.exclamationmark")
+      }
     }
   }
 

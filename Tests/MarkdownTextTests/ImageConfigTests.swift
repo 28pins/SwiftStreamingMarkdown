@@ -60,4 +60,15 @@ final class ImageConfigTests: XCTestCase {
     XCTAssertFalse(config.allowsImage(from: url("file:///tmp/a.png")))
     XCTAssertFalse(config.allowsImage(from: url("ftp://example.com/a.png")))
   }
+
+  func test_asset_catalog_permission_requires_type_and_enabled() {
+    XCTAssertFalse(ImageConfig(enabled: false, allowedImageTypes: [.assetCatalog]).allowsAssetCatalog)
+    XCTAssertFalse(ImageConfig(enabled: true, allowedImageTypes: [.remote(allowedDomains: [])]).allowsAssetCatalog)
+    XCTAssertTrue(ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog]).allowsAssetCatalog)
+  }
+
+  func test_asset_catalog_type_does_not_permit_remote_urls() {
+    let config = ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog])
+    XCTAssertFalse(config.allowsImage(from: url("https://example.com/a.png")))
+  }
 }
