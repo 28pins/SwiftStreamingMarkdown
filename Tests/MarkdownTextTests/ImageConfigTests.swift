@@ -30,10 +30,14 @@ final class ImageConfigTests: XCTestCase {
     XCTAssertFalse(config.allowsImage(from: nil))
   }
 
-  func test_empty_allowed_domains_permits_any_host() {
+  func test_empty_allowed_domains_permits_any_https_host() {
     let config = ImageConfig(enabled: true, allowedImageTypes: [.remote(allowedDomains: [])])
     XCTAssertTrue(config.allowsImage(from: url("https://anything.example/a.png")))
-    XCTAssertTrue(config.allowsImage(from: url("http://anything.example/a.png")))
+  }
+
+  func test_plain_http_is_never_allowed() {
+    let config = ImageConfig(enabled: true, allowedImageTypes: [.remote(allowedDomains: [])])
+    XCTAssertFalse(config.allowsImage(from: url("http://anything.example/a.png")))
   }
 
   func test_allowed_domain_matches_exact_and_subdomains() {
@@ -65,6 +69,12 @@ final class ImageConfigTests: XCTestCase {
     XCTAssertFalse(ImageConfig(enabled: false, allowedImageTypes: [.assetCatalog]).allowsAssetCatalog)
     XCTAssertFalse(ImageConfig(enabled: true, allowedImageTypes: [.remote(allowedDomains: [])]).allowsAssetCatalog)
     XCTAssertTrue(ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog]).allowsAssetCatalog)
+  }
+
+  func test_bundled_resource_permission_requires_type_and_enabled() {
+    XCTAssertFalse(ImageConfig(enabled: false, allowedImageTypes: [.bundledResource]).allowsBundledResource)
+    XCTAssertFalse(ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog]).allowsBundledResource)
+    XCTAssertTrue(ImageConfig(enabled: true, allowedImageTypes: [.bundledResource]).allowsBundledResource)
   }
 
   func test_asset_catalog_type_does_not_permit_remote_urls() {

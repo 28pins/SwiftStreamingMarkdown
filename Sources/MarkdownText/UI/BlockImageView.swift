@@ -7,8 +7,9 @@ import Foundation
 import Shimmer
 import SwiftUI
 
-/// Renders a block-level Markdown image, either loaded asynchronously from a
-/// remote URL or resolved from the app's asset catalog.
+/// Renders a block-level Markdown image, loaded asynchronously from a remote
+/// URL, resolved from the app's asset catalog, or loaded from a bundled
+/// resource file.
 ///
 /// - Important: Image support is **experimental**. See
 ///   `MarkdownRenderConfig.imageConfig`.
@@ -31,8 +32,10 @@ struct BlockImageView: View {
       Image(name)
         .resizable()
         .scaledToFit()
+    case .bundledResource(let name):
+      BundledResourceImage(name: name)
     case nil:
-      placeholder(systemImage: "photo.badge.exclamationmark")
+      ImagePlaceholder.failure
     }
   }
 
@@ -45,16 +48,47 @@ struct BlockImageView: View {
           .resizable()
           .scaledToFit()
       case .failure:
-        placeholder(systemImage: "photo.badge.exclamationmark")
+        ImagePlaceholder.failure
       case .empty:
-        loadingPlaceholder
+        ImagePlaceholder.loading
       @unknown default:
-        placeholder(systemImage: "photo.badge.exclamationmark")
+        ImagePlaceholder.failure
       }
     }
   }
+}
 
-  private var loadingPlaceholder: some View {
+/// Loads and renders a loose image resource from the app's main bundle.
+private struct BundledResourceImage: View {
+
+  let name: String
+
+  @State private var image: MDImage?
+  @State private var didLoad = false
+
+  var body: some View {
+    Group {
+      if let image {
+        Image(mdImage: image)
+          .resizable()
+          .scaledToFit()
+      } else if didLoad {
+        ImagePlaceholder.failure
+      } else {
+        ImagePlaceholder.loading
+      }
+    }
+    .task {
+      image = MDImage.bundledResource(named: name)
+      didLoad = true
+    }
+  }
+}
+
+/// Shared placeholders for the loading and failed states of a block image.
+private enum ImagePlaceholder {
+
+  static var loading: some View {
     RoundedRectangle(cornerRadius: 8)
       .fill(.quaternary)
       .frame(maxWidth: .infinity)
@@ -63,8 +97,8 @@ struct BlockImageView: View {
       .accessibilityHidden(true)
   }
 
-  private func placeholder(systemImage: String) -> some View {
-    Image(systemName: systemImage)
+  static var failure: some View {
+    Image(systemName: "photo.badge.exclamationmark")
       .imageScale(.large)
       .foregroundStyle(.secondary)
       .frame(maxWidth: .infinity, minHeight: 44, alignment: .center)

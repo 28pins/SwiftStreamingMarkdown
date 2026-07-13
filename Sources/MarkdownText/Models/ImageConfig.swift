@@ -14,17 +14,30 @@ public struct ImageConfig: Hashable, Sendable {
 
   /// A category of image source permitted while image rendering is enabled.
   public enum ImageType: Hashable, Sendable {
-    /// Remote images loaded over `http`/`https`, restricted to the hosts in
-    /// `allowedDomains`.
+    /// Remote images loaded over `https`, restricted to the hosts in
+    /// `allowedDomains`. Plain `http` is never permitted.
     ///
     /// An empty list permits any host. Matching is case-insensitive and
     /// includes subdomains, so `example.com` also matches `cdn.example.com`.
+    ///
+    /// Maps from sources with an `https` scheme, e.g.
+    /// `![logo](https://example.com/logo.png)`.
     case remote(allowedDomains: [String])
 
-    /// Bundled images referenced by a relative path, resolved from the app's
-    /// asset catalog via `Image(_:)`. A Markdown image whose source has no URL
-    /// scheme (e.g. `![logo](logo)`) is treated as an asset name.
+    /// Bundled images resolved from the app's asset catalog by name via
+    /// `Image(_:)`.
+    ///
+    /// Maps from sources with an `assets` scheme, where the asset name is the
+    /// remainder of the source, e.g. `![logo](assets://Images/logo)` resolves
+    /// the asset named `Images/logo`.
     case assetCatalog
+
+    /// Bundled images resolved from a loose resource file in the app's main
+    /// bundle by name.
+    ///
+    /// Maps from scheme-less relative paths, e.g. `![logo](logo.png)` or
+    /// `![logo](./logo.png)`.
+    case bundledResource
   }
 
   /// Whether Markdown images are rendered as block-level content.
@@ -61,6 +74,12 @@ public struct ImageConfig: Hashable, Sendable {
     guard enabled else { return false }
     return allowedImageTypes.contains { $0 == .assetCatalog }
   }
+
+  /// Whether loose bundled resource images are permitted under this config.
+  var allowsBundledResource: Bool {
+    guard enabled else { return false }
+    return allowedImageTypes.contains { $0 == .bundledResource }
+  }
 }
 
 extension ImageConfig.ImageType {
@@ -69,9 +88,7 @@ extension ImageConfig.ImageType {
   func allows(_ url: URL) -> Bool {
     switch self {
     case .remote(let allowedDomains):
-      guard let scheme = url.scheme?.lowercased(),
-        scheme == "http" || scheme == "https",
-        let host = url.host?.lowercased() else {
+      guard let scheme = url.scheme?.lowercased(), scheme == "https", let host = url.host?.lowercased() else {
         return false
       }
       guard !allowedDomains.isEmpty else { return true }
@@ -79,7 +96,7 @@ extension ImageConfig.ImageType {
         let domain = domain.lowercased()
         return host == domain || host.hasSuffix("." + domain)
       }
-    case .assetCatalog:
+    case .assetCatalog, .bundledResource:
       return false
     }
   }

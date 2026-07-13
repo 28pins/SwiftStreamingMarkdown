@@ -15,10 +15,12 @@ struct ImageData: Equatable, Sendable {
 
   /// A resolved image source that the active `ImageConfig` permits.
   enum Source: Equatable, Sendable {
-    /// A remote image loaded asynchronously over the network.
+    /// A remote image loaded asynchronously over `https`.
     case remote(URL)
     /// A bundled image resolved from the app's asset catalog by name.
     case assetCatalog(name: String)
+    /// A loose image resource resolved from the app's main bundle by name.
+    case bundledResource(name: String)
   }
 
   /// The permitted image source, or `nil` when the source is missing,
@@ -42,17 +44,51 @@ struct ImageData: Equatable, Sendable {
 
   /// Resolves a Markdown image source string into a permitted `Source`.
   ///
-  /// A source with an explicit URL scheme is treated as a remote image and
-  /// validated against the remote allowlist. A scheme-less source is treated as
-  /// a relative path and resolved from the asset catalog when permitted.
+  /// The source's URL scheme determines its type:
+  /// - `https` → `.remote`, validated against the remote allowlist. Plain
+  ///   `http` and all other explicit schemes are rejected.
+  /// - `assets` → `.assetCatalog`, with the remainder of the source as the
+  ///   asset name (e.g. `assets://Images/logo` → `Images/logo`).
+  /// - no scheme (a relative path) → `.bundledResource`, with a leading `./`
+  ///   stripped (e.g. `./logo.png` → `logo.png`).
+  ///
+  /// Returns `nil` when image support is disabled, the source is empty, or the
+  /// resolved type is not among the config's `allowedImageTypes`.
   private static func resolveSource(rawSource: String?, imageConfig: ImageConfig) -> Source? {
     guard imageConfig.enabled, let rawSource, !rawSource.isEmpty else { return nil }
 
     let url = URL.fromMixedEncodingString(rawSource)
-    if let url, url.scheme != nil {
-      return imageConfig.allowsImage(from: url) ? .remote(url) : nil
+    switch url?.scheme?.lowercased() {
+    case "http", "https":
+      guard let url, imageConfig.allowsImage(from: url) else { return nil }
+      return .remote(url)
+    case "assets":
+      guard imageConfig.allowsAssetCatalog,
+        let name = assetCatalogName(scheme: "assets", rawSource: rawSource) else {
+        return nil
+      }
+      return .assetCatalog(name: name)
+    case .some:
+      // An explicit but unsupported scheme (e.g. `file`, `data`).
+      return nil
+    case .none:
+      guard imageConfig.allowsBundledResource else { return nil }
+      return .bundledResource(name: bundledResourceName(rawSource: rawSource))
     }
+  }
 
-    return imageConfig.allowsAssetCatalog ? .assetCatalog(name: rawSource) : nil
+  /// Extracts the asset name from an `assets`-scheme source by dropping the
+  /// scheme prefix, e.g. `assets://Images/logo` → `Images/logo`.
+  private static func assetCatalogName(scheme: String, rawSource: String) -> String? {
+    let prefix = scheme + "://"
+    guard rawSource.count > prefix.count else { return nil }
+    let name = String(rawSource.dropFirst(prefix.count))
+    return name.isEmpty ? nil : name
+  }
+
+  /// Normalizes a scheme-less relative path into a bundle resource name by
+  /// stripping a leading `./`, e.g. `./logo.png` → `logo.png`.
+  private static func bundledResourceName(rawSource: String) -> String {
+    rawSource.hasPrefix("./") ? String(rawSource.dropFirst(2)) : rawSource
   }
 }
