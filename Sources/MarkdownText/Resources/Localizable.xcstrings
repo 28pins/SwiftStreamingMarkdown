@@ -455,6 +455,18 @@
         }
       }
     },
+    "a11y_image": {
+      "comment": "Accessibility label for a block image that has no alt text",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        }
+      }
+    },
     "a11y_item_position_in_table": {
       "comment": "a11y understand their position in the table",
       "extractionState": "manual",

@@ -87,6 +87,13 @@ extension String {
     comment: "Accessibility label for the button that dismisses the text selection modal"
   )
 
+  static let imageLabel = NSLocalizedString(
+    "a11y_image",
+    bundle: .module,
+    value: "Image",
+    comment: "Accessibility label for a block image that has no alt text"
+  )
+
 }
 
 extension Markdown.Document {

@@ -18,7 +18,7 @@ struct BlockImageView: View {
   var body: some View {
     imageContent
       .frame(maxWidth: .infinity, alignment: .center)
-      .accessibilityLabel(data.alt.isEmpty ? Text(verbatim: "Image") : Text(data.alt))
+      .accessibilityLabel(data.alt.isEmpty ? Text(String.imageLabel) : Text(data.alt))
   }
 
   @ViewBuilder
