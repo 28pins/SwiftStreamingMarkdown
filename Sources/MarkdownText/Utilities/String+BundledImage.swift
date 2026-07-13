@@ -11,20 +11,14 @@ extension String {
   /// the resource's base file name and `ext` its extension (e.g.
   /// `"logo".bundledResourceImage(withExtension: "png")`).
   ///
-  /// The file is read off the main actor to avoid blocking rendering; the
-  /// resulting `MDImage` is decoded on the caller's actor since `UIImage` and
-  /// `NSImage` are not `Sendable`. Returns `nil` when the resource is missing
+  /// As a nonisolated `async` method, this runs off the main actor, so the file
+  /// read does not block rendering. Returns `nil` when the resource is missing
   /// or cannot be decoded.
   func bundledResourceImage(withExtension ext: String) async -> MDImage? {
-    let fileName = self
-    let data = await Task.detached(priority: .utility) { () -> Data? in
-      guard let url = Bundle.main.url(forResource: fileName, withExtension: ext) else {
-        return nil
-      }
-      return try? Data(contentsOf: url)
-    }.value
-
-    guard let data else { return nil }
+    guard let url = Bundle.main.url(forResource: self, withExtension: ext),
+      let data = try? Data(contentsOf: url) else {
+      return nil
+    }
     return MDImage(data: data)
   }
 }

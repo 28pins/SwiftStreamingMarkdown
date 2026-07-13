@@ -21,9 +21,9 @@ struct BundledResourceImage: View {
           .resizable()
           .scaledToFit()
       } else if didLoad {
-        ImagePlaceholder.failure
+        BlockImageFailureView()
       } else {
-        ImagePlaceholder.loading
+        BlockImageLoadingView()
       }
     }
     .task {

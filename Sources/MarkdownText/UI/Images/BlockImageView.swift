@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import Shimmer
 import SwiftUI
 
 /// Renders a block-level Markdown image, loaded asynchronously from a remote
@@ -35,7 +34,7 @@ struct BlockImageView: View {
     case .bundledResource(let fileName, let ext):
       BundledResourceImage(fileName: fileName, ext: ext)
     case nil:
-      ImagePlaceholder.failure
+      BlockImageFailureView()
     }
   }
 
@@ -48,32 +47,12 @@ struct BlockImageView: View {
           .resizable()
           .scaledToFit()
       case .failure:
-        ImagePlaceholder.failure
+        BlockImageFailureView()
       case .empty:
-        ImagePlaceholder.loading
+        BlockImageLoadingView()
       @unknown default:
-        ImagePlaceholder.failure
+        BlockImageFailureView()
       }
     }
-  }
-}
-
-/// Shared placeholders for the loading and failed states of a block image.
-enum ImagePlaceholder {
-
-  static var loading: some View {
-    RoundedRectangle(cornerRadius: 8)
-      .fill(.quaternary)
-      .frame(maxWidth: .infinity)
-      .frame(height: 200)
-      .shimmering()
-      .accessibilityHidden(true)
-  }
-
-  static var failure: some View {
-    Image(systemName: "photo.badge.exclamationmark")
-      .imageScale(.large)
-      .foregroundStyle(.secondary)
-      .frame(maxWidth: .infinity, minHeight: 44, alignment: .center)
   }
 }
