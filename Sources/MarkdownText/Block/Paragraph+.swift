@@ -29,10 +29,6 @@ extension Paragraph: BlockConvertible {
     return MarkdownRenderable.paragraph(id: self.id, content: paragraphContent)
   }
 
-  /// The single `Image` child when this paragraph wraps nothing but an image,
-  /// otherwise `nil`. Image-only paragraphs are produced either directly (a
-  /// standalone `![alt](url)`) or by `ImageBlockRewriter` splitting a mixed
-  /// paragraph.
   private var imageOnlyChild: Markdown.Image? {
     guard self.childCount == 1 else {
       return nil
