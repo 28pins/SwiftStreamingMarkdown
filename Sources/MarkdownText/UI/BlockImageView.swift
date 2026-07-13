@@ -29,7 +29,7 @@ struct BlockImageView: View {
         placeholder(systemImage: "photo")
       }
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
+    .containerRelativeFrameCompat(.horizontal) { width, _ in width * 2 / 3 }
     .accessibilityLabel(data.alt.isEmpty ? Text("Image") : Text(data.alt))
     .transition(.opacity)
   }

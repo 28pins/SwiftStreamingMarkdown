@@ -236,4 +236,24 @@ extension MarkdownRenderConfig {
       thematicBreakColor: value
     )
   }
+
+  /// Returns a copy with `imageSupport` replaced. Image support is experimental.
+  public func withImageSupport(enabled: Bool) -> MarkdownRenderConfig {
+    MarkdownRenderConfig(
+      shouldAnimateText: shouldAnimateText,
+      blockQuoteStyle: blockQuoteStyle,
+      headingStyle: headingStyle,
+      orderedListStyle: orderedListStyle,
+      paragraphStyle: paragraphStyle,
+      tableStyle: tableStyle,
+      inlineStyle: inlineStyle,
+      textContextMenu: textContextMenu,
+      citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
+      blockSpacing: blockSpacing,
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor,
+      imageSupport: enabled
+    )
+  }
 }

@@ -200,6 +200,10 @@ Bundled SVG asset:
 
 ![Streaming Markdown SVG sample](Images/streaming-markdown.svg)
 
+Remote(trusted) markdown:
+
+![mountains](https://www.markdownguide.org/assets/images/generated/assets/images/san-juan-mountains-1080.webp)
+
 Remote unsupported image fallback:
 
 ![Alt text for an unsupported image](https://example.com/demo-image.png)
