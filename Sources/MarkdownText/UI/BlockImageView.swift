@@ -12,8 +12,6 @@ import SwiftUI
 ///   `MarkdownRenderConfig.imageConfig`.
 struct BlockImageView: View {
 
-  @Environment(\.markdownConfig) private var config: MarkdownRenderConfig
-
   let data: ImageData
 
   var body: some View {
@@ -25,7 +23,7 @@ struct BlockImageView: View {
 
   @ViewBuilder
   private var imageContent: some View {
-    if config.imageConfig.allowsImage(from: data.url) {
+    if data.isDomainAllowed {
       AsyncImage(url: data.url) { phase in
         switch phase {
         case .success(let image):

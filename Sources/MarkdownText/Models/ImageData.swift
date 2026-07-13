@@ -20,13 +20,20 @@ struct ImageData: Equatable, Sendable {
   /// The image's alternate text, used as the accessibility label.
   let alt: String
 
-  init(url: URL?, alt: String) {
+  /// Whether `url` is permitted by the active `ImageConfig`. Precomputed during
+  /// pre-rendering so the view layer does not evaluate eligibility in its body.
+  let isDomainAllowed: Bool
+
+  init(url: URL?, alt: String, isDomainAllowed: Bool) {
     self.url = url
     self.alt = alt
+    self.isDomainAllowed = isDomainAllowed
   }
 
-  init(image: Markdown.Image) {
-    self.url = image.source.flatMap { URL.fromMixedEncodingString($0) }
+  init(image: Markdown.Image, imageConfig: ImageConfig) {
+    let url = image.source.flatMap { URL.fromMixedEncodingString($0) }
+    self.url = url
     self.alt = image.plainText
+    self.isDomainAllowed = imageConfig.allowsImage(from: url)
   }
 }

@@ -16,7 +16,7 @@ extension Paragraph: BlockConvertible {
 
   func convert(attributeContainer: NSAttributeContainer, config: MarkdownRenderConfig) -> MarkdownRenderable {
     if config.imageConfig.enabled, let image = self.imageOnlyChild {
-      return .image(id: self.id, data: ImageData(image: image))
+      return .image(id: self.id, data: ImageData(image: image, imageConfig: config.imageConfig))
     }
     var container = attributeContainer
     container[.font] = config.paragraphStyle.textFonts.normal
