@@ -5,6 +5,32 @@
 
 import SwiftUI
 
+extension View {
+  /// Presents the built-in fullscreen image viewer for a resolved image source.
+  ///
+  /// The viewer is an iOS-only feature; on other platforms this is a no-op.
+  @ViewBuilder
+  func imageViewer(
+    source: ImageData.Source?,
+    alt: String,
+    isPresented: Binding<Bool>
+  ) -> some View {
+    #if os(iOS)
+    fullScreenCover(isPresented: isPresented) {
+      if let source {
+        ImageViewerView(source: source, alt: alt) {
+          isPresented.wrappedValue = false
+        }
+      }
+    }
+    #else
+    self
+    #endif
+  }
+}
+
+#if os(iOS)
+
 /// The built-in fullscreen image viewer presented when a user taps a rendered
 /// block-level image and `ImageConfig.fullscreenViewerEnabled` is `true`.
 ///
@@ -102,18 +128,4 @@ private struct BundledResourceZoomView: View {
   }
 }
 
-extension View {
-  /// Presents the built-in fullscreen image viewer. Uses `fullScreenCover` on
-  /// platforms that support it and falls back to a `sheet` on macOS.
-  @ViewBuilder
-  func imageViewerPresentation<Content: View>(
-    isPresented: Binding<Bool>,
-    @ViewBuilder content: @escaping () -> Content
-  ) -> some View {
-    #if os(macOS)
-    sheet(isPresented: isPresented, content: content)
-    #else
-    fullScreenCover(isPresented: isPresented, content: content)
-    #endif
-  }
-}
+#endif

@@ -44,25 +44,22 @@ struct ImageData: Equatable, Sendable {
     self.source = imageConfig.resolvedSource(for: image.source)
   }
 
-  /// The public tap payload for this image, or `nil` when the source is not
-  /// resolvable (in which case a placeholder is rendered and the image is not
-  /// interactive).
-  var markdownImage: MarkdownImage? {
+  /// Builds the public tap payload for this image, or `nil` when the source is
+  /// not resolvable. For bundled-resource images the raw file bytes are read
+  /// off the main actor and passed along, so the listener receives the actual
+  /// image data rather than an internal file reference.
+  func makeMarkdownImage() async -> MarkdownImage? {
     guard let source else { return nil }
-    return MarkdownImage(source: source, alt: alt)
-  }
-}
-
-extension MarkdownImage {
-  /// Map an internal resolved `ImageData.Source` to the public payload source.
-  init(source: ImageData.Source, alt: String) {
     switch source {
     case .remote(let url):
-      self.init(source: MarkdownImage.Source.remote(url), alt: alt)
+      return MarkdownImage(source: .remote(url), alt: alt)
     case .assetCatalog(let name):
-      self.init(source: MarkdownImage.Source.assetCatalog(name: name), alt: alt)
+      return MarkdownImage(source: .assetCatalog(name: name), alt: alt)
     case .bundledResource(let fileName, let ext):
-      self.init(source: MarkdownImage.Source.bundledResource(fileName: fileName, ext: ext), alt: alt)
+      guard let data = await fileName.bundledResourceData(withExtension: ext) else {
+        return nil
+      }
+      return MarkdownImage(source: .bundledResource(data: data), alt: alt)
     }
   }
 }

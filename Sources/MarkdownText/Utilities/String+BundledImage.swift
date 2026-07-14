@@ -15,10 +15,22 @@ extension String {
   /// read does not block rendering. Returns `nil` when the resource is missing
   /// or cannot be decoded.
   func bundledResourceImage(withExtension ext: String) async -> MDImage? {
-    guard let url = Bundle.main.url(forResource: self, withExtension: ext),
-      let data = try? Data(contentsOf: url) else {
+    guard let data = await bundledResourceData(withExtension: ext) else {
       return nil
     }
     return MDImage(data: data)
+  }
+
+  /// Reads the raw bytes of a loose image resource from the app's main bundle,
+  /// where `self` is the resource's base file name and `ext` its extension.
+  ///
+  /// As a nonisolated `async` method, this runs off the main actor, so the file
+  /// read does not block rendering. Returns `nil` when the resource is missing
+  /// or unreadable.
+  func bundledResourceData(withExtension ext: String) async -> Data? {
+    guard let url = Bundle.main.url(forResource: self, withExtension: ext) else {
+      return nil
+    }
+    return try? Data(contentsOf: url)
   }
 }

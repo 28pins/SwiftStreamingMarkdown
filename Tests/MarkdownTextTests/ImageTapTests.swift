@@ -15,23 +15,31 @@ final class ImageTapTests: XCTestCase {
     return url
   }
 
-  func test_markdownImage_maps_each_resolved_source() {
-    XCTAssertEqual(
-      ImageData(source: ImageData.Source.remote(url("https://example.com/a.png")), alt: "a").markdownImage,
-      MarkdownImage(source: MarkdownImage.Source.remote(url("https://example.com/a.png")), alt: "a")
-    )
-    XCTAssertEqual(
-      ImageData(source: ImageData.Source.assetCatalog(name: "Images/logo"), alt: "b").markdownImage,
-      MarkdownImage(source: MarkdownImage.Source.assetCatalog(name: "Images/logo"), alt: "b")
-    )
-    XCTAssertEqual(
-      ImageData(source: ImageData.Source.bundledResource(fileName: "logo", ext: "png"), alt: "c").markdownImage,
-      MarkdownImage(source: MarkdownImage.Source.bundledResource(fileName: "logo", ext: "png"), alt: "c")
-    )
+  func test_makeMarkdownImage_maps_remote_and_asset_catalog_sources() async {
+    let remote = await ImageData(
+      source: ImageData.Source.remote(url("https://example.com/a.png")),
+      alt: "a"
+    ).makeMarkdownImage()
+    XCTAssertEqual(remote, MarkdownImage(source: .remote(url("https://example.com/a.png")), alt: "a"))
+
+    let asset = await ImageData(
+      source: ImageData.Source.assetCatalog(name: "Images/logo"),
+      alt: "b"
+    ).makeMarkdownImage()
+    XCTAssertEqual(asset, MarkdownImage(source: .assetCatalog(name: "Images/logo"), alt: "b"))
   }
 
-  func test_markdownImage_is_nil_without_a_resolved_source() {
-    XCTAssertNil(ImageData(source: nil, alt: "d").markdownImage)
+  func test_makeMarkdownImage_is_nil_without_a_resolved_source() async {
+    let payload = await ImageData(source: nil, alt: "d").makeMarkdownImage()
+    XCTAssertNil(payload)
+  }
+
+  func test_makeMarkdownImage_is_nil_for_missing_bundled_resource() async {
+    let payload = await ImageData(
+      source: ImageData.Source.bundledResource(fileName: "does-not-exist", ext: "png"),
+      alt: "c"
+    ).makeMarkdownImage()
+    XCTAssertNil(payload)
   }
 
   func test_controller_forwards_image_tap_to_listener() async {

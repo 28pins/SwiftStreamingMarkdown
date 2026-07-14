@@ -5,12 +5,10 @@
 
 import SwiftUI
 
+#if os(iOS)
+
 /// A zoomable, pannable image view supporting pinch-to-zoom, double-tap zoom,
 /// and swipe-to-dismiss. Used by the built-in fullscreen image viewer.
-///
-/// Adapted from the reusable `PinchZoomView` in Microsoft's CopilotNative app,
-/// with app-specific dependencies (design system, screen-size listener)
-/// removed so it works cross-platform.
 struct PinchZoomView: View {
   static let dismissVelocity = 5000.0
   static let minZoomScale: CGFloat = 1.0
@@ -205,3 +203,5 @@ struct PinchZoomView: View {
     return offset.width != clampedOffset.width || offset.height != clampedOffset.height
   }
 }
+
+#endif

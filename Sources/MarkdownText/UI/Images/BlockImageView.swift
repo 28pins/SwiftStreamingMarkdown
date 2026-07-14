@@ -22,30 +22,24 @@ struct BlockImageView: View {
   @State private var isViewerPresented = false
 
   var body: some View {
-    Group {
-      if let source = data.source {
-        imageContent
-          .contentShape(Rectangle())
-          .onTapGesture {
-            handleTap(source: source)
-          }
-          .imageViewerPresentation(isPresented: $isViewerPresented) {
-            ImageViewerView(source: source, alt: data.alt) {
-              isViewerPresented = false
-            }
-          }
-      } else {
-        imageContent
+    imageContent
+      .frame(maxWidth: .infinity, alignment: .center)
+      .accessibilityLabel(data.alt.isEmpty ? Text(String.imageLabel) : Text(data.alt))
+      .contentShape(Rectangle())
+      .onTapGesture {
+        handleTap()
       }
-    }
-    .frame(maxWidth: .infinity, alignment: .center)
-    .accessibilityLabel(data.alt.isEmpty ? Text(String.imageLabel) : Text(data.alt))
+      .imageViewer(source: data.source, alt: data.alt, isPresented: $isViewerPresented)
   }
 
-  private func handleTap(source: ImageData.Source) {
-    controller?.onImageTap(image: MarkdownImage(source: source, alt: data.alt))
+  private func handleTap() {
+    guard data.source != nil else { return }
     if config.imageConfig.fullscreenViewerEnabled {
       isViewerPresented = true
+    }
+    Task {
+      guard let image = await data.makeMarkdownImage() else { return }
+      controller?.onImageTap(image: image)
     }
   }
 

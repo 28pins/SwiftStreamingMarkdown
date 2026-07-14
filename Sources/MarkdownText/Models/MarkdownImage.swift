@@ -18,9 +18,9 @@ public struct MarkdownImage: Equatable, Sendable {
     case remote(URL)
     /// A bundled image resolved from the app's asset catalog by name.
     case assetCatalog(name: String)
-    /// A loose image resource resolved from the app's main bundle by its base
-    /// file name and extension.
-    case bundledResource(fileName: String, ext: String)
+    /// A loose image resource from the app's main bundle, delivered as its raw
+    /// file bytes.
+    case bundledResource(data: Data)
   }
 
   /// The resolved image source.
