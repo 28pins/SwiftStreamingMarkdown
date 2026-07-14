@@ -94,6 +94,13 @@ extension String {
     comment: "Accessibility label for a block image that has no alt text"
   )
 
+  static let imageViewerCloseLabel = NSLocalizedString(
+    "a11y_image_viewer_close",
+    bundle: .module,
+    value: "Close",
+    comment: "Accessibility label for the button that dismisses the fullscreen image viewer"
+  )
+
 }
 
 extension Markdown.Document {

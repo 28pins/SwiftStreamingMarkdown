@@ -43,4 +43,26 @@ struct ImageData: Equatable, Sendable {
     self.alt = image.plainText
     self.source = imageConfig.resolvedSource(for: image.source)
   }
+
+  /// The public tap payload for this image, or `nil` when the source is not
+  /// resolvable (in which case a placeholder is rendered and the image is not
+  /// interactive).
+  var markdownImage: MarkdownImage? {
+    guard let source else { return nil }
+    return MarkdownImage(source: source, alt: alt)
+  }
+}
+
+extension MarkdownImage {
+  /// Map an internal resolved `ImageData.Source` to the public payload source.
+  init(source: ImageData.Source, alt: String) {
+    switch source {
+    case .remote(let url):
+      self.init(source: MarkdownImage.Source.remote(url), alt: alt)
+    case .assetCatalog(let name):
+      self.init(source: MarkdownImage.Source.assetCatalog(name: name), alt: alt)
+    case .bundledResource(let fileName, let ext):
+      self.init(source: MarkdownImage.Source.bundledResource(fileName: fileName, ext: ext), alt: alt)
+    }
+  }
 }

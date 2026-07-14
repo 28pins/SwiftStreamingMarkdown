@@ -77,4 +77,20 @@ final class ImageConfigTests: XCTestCase {
     let config = ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog])
     XCTAssertNil(config.resolvedSource(for: "https://example.com/a.png"))
   }
+
+  func test_fullscreen_viewer_is_enabled_by_default() {
+    XCTAssertTrue(ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog]).fullscreenViewerEnabled)
+    XCTAssertTrue(ImageConfig.disabled.fullscreenViewerEnabled)
+  }
+
+  func test_fullscreen_viewer_can_be_disabled() {
+    let config = ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog], fullscreenViewerEnabled: false)
+    XCTAssertFalse(config.fullscreenViewerEnabled)
+  }
+
+  func test_fullscreen_viewer_flag_affects_equality() {
+    let on = ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog], fullscreenViewerEnabled: true)
+    let off = ImageConfig(enabled: true, allowedImageTypes: [.assetCatalog], fullscreenViewerEnabled: false)
+    XCTAssertNotEqual(on, off)
+  }
 }

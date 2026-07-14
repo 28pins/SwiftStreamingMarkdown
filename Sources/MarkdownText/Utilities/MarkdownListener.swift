@@ -11,6 +11,7 @@ public protocol MarkdownListener {
   func onTableDownloadTap(content: String) async
   func onContextMenuAppear(id: String, selectedContent: String) async
   func onContextMenuTap(id: String, selectedContent: String) async
+  func onImageTap(image: MarkdownImage) async
 }
 
 public final class MarkdownController: ObservableObject {
@@ -83,6 +84,12 @@ public final class MarkdownController: ObservableObject {
   func onContextMenuTap(id: String, selectedContent: String) {
     Task {
       await listener?.onContextMenuTap(id: id, selectedContent: selectedContent)
+    }
+  }
+
+  func onImageTap(image: MarkdownImage) {
+    Task {
+      await listener?.onImageTap(image: image)
     }
   }
 

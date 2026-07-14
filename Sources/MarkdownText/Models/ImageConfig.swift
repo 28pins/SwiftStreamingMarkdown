@@ -47,14 +47,26 @@ public struct ImageConfig: Hashable, Sendable {
   /// source matches none of these types renders a placeholder instead.
   public let allowedImageTypes: [ImageType]
 
+  /// Whether tapping a rendered image opens the built-in, zoomable fullscreen
+  /// image viewer. Independent of `MarkdownListener.onImageTap(image:)`, which
+  /// always fires on tap regardless of this flag.
+  public let fullscreenViewerEnabled: Bool
+
   /// Create an image configuration.
   /// - Parameters:
   ///   - enabled: See `enabled`. Defaults to `false`.
   ///   - allowedImageTypes: See `allowedImageTypes`. Defaults to empty, which
   ///     permits no image sources.
-  public init(enabled: Bool = false, allowedImageTypes: [ImageType] = []) {
+  ///   - fullscreenViewerEnabled: See `fullscreenViewerEnabled`. Defaults to
+  ///     `true`.
+  public init(
+    enabled: Bool = false,
+    allowedImageTypes: [ImageType] = [],
+    fullscreenViewerEnabled: Bool = true
+  ) {
     self.enabled = enabled
     self.allowedImageTypes = allowedImageTypes
+    self.fullscreenViewerEnabled = fullscreenViewerEnabled
   }
 
   /// Image support disabled.
