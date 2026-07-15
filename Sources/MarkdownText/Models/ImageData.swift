@@ -50,7 +50,7 @@ struct ImageData: Equatable, Sendable {
   /// image data rather than an internal file reference. `controller` supplies
   /// the listener fallback used when the resource is absent from the main
   /// bundle.
-  func makeMarkdownImage(controller: MarkdownController? = nil) async -> MarkdownImage? {
+  func makeMarkdownImage(controller: MarkdownController) async -> MarkdownImage? {
     guard let source else { return nil }
     switch source {
     case .remote(let url):
