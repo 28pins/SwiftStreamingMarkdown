@@ -10,20 +10,20 @@ import SwiftUI
 /// A zoomable, pannable image view supporting pinch-to-zoom, double-tap zoom,
 /// and swipe-to-dismiss. Used by the built-in fullscreen image viewer.
 struct PinchZoomView: View {
-  static let dismissVelocity = 5000.0
+  static let dismissVelocity = 1500.0
   static let minZoomScale: CGFloat = 1.0
   static let maxZoomScale: CGFloat = 4.0
   static let doubleTapZoomScale: CGFloat = 2.0
-  static let bounceDistance: CGFloat = 80.0
+  static let bounceDistance: CGFloat = 10
   static let elasticityFactor: CGFloat = 0.4
 
   @State private var scale: CGFloat = 1.0
-  @State private var lastScale: CGFloat = 1.0
+  @GestureState private var activeScale: CGFloat = 1.0
   @State private var offset: CGSize = .zero
-  @State private var lastOffset: CGSize = .zero
-  @State private var canSwipeToDismiss = true
-  @State private var velocity = CGSize.zero
-  @State private var lastDragTime: Date?
+  @State private var lastDragDist: CGSize = .zero
+  @State private var imageSize: CGSize = .zero
+
+  private var isScaled: Bool { scale > Self.minZoomScale }
 
   let image: Image
   let onSwipeToDismiss: () -> Void
@@ -33,18 +33,25 @@ struct PinchZoomView: View {
     self.onSwipeToDismiss = onSwipeToDismiss
   }
 
-  private func magnitude(of size: CGSize) -> Double {
-    return sqrt(size.width * size.width + size.height * size.height)
-  }
-
   var body: some View {
     GeometryReader { geometry in
       image
         .resizable()
         .aspectRatio(contentMode: .fit)
-        .scaleEffect(scale)
+        .scaleEffect(scale * activeScale)
         .offset(offset)
-        .frame(width: geometry.size.width, height: geometry.size.height)
+        .background(
+          GeometryReader { proxy in
+            Color.clear
+              .onAppear {
+                imageSize = proxy.size
+              }
+              .onChange(of: proxy.size) { newSize in
+                imageSize = newSize
+              }
+          }
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .onTapGesture(count: 2) { location in
           handleDoubleTap(at: location, in: geometry)
         }
@@ -52,51 +59,31 @@ struct PinchZoomView: View {
           SimultaneousGesture(
             DragGesture()
               .onChanged { value in
-                let newOffset = CGSize(width: value.translation.width + self.lastOffset.width, height: value.translation.height + self.lastOffset.height)
+                let deltaWidth = value.translation.width - lastDragDist.width
+                let deltaHeight = value.translation.height - lastDragDist.height
+                self.lastDragDist = value.translation
+                let newOffset = CGSize(width: deltaWidth + self.offset.width, height: deltaHeight + self.offset.height)
                 self.offset = elasticOffset(newOffset, geometry: geometry)
-
-                if canSwipeToDismiss {
-                  if let lastTime = lastDragTime {
-                    let timeDiff = value.time.timeIntervalSince(lastTime)
-                    velocity = CGSize(
-                      width: value.translation.width / CGFloat(timeDiff),
-                      height: value.translation.height / CGFloat(timeDiff)
-                    )
-                  }
-                }
-                lastDragTime = value.time
               }
-              .onEnded { _ in
-                if isOutOfBounds(self.offset, geometry: geometry), !canSwipeToDismiss {
-                  resetToClampOffset(in: geometry)
-                }
-
-                self.lastOffset = self.offset
-
-                guard canSwipeToDismiss else {
-                  return
-                }
-                if magnitude(of: velocity) > Self.dismissVelocity {
+              .onEnded { value in
+                lastDragDist = .zero
+                if !isScaled, value.velocity.height > Self.dismissVelocity {
                   onSwipeToDismiss()
-                } else {
-                  resetToOriginalSize()
+                }
+
+                if let newOffset = adjustPositionIfNeeded(containerSize: geometry.size) {
+                  animateOffset(to: newOffset)
                 }
               },
             MagnificationGesture()
-              .onChanged { value in
-                let delta = value / self.lastScale
-                self.lastScale = value
-                let newScale = self.scale * delta
-                self.scale = min(max(newScale, Self.minZoomScale), Self.maxZoomScale)
-                self.canSwipeToDismiss = self.scale <= Self.minZoomScale
-              }
-              .onEnded { _ in
-                self.lastScale = Self.minZoomScale
-
-                if canSwipeToDismiss {
-                  resetToOriginalSize()
-                } else if isOutOfBounds(self.offset, geometry: geometry) {
-                  resetToClampOffset(in: geometry)
+              .updating($activeScale, body: { value, state, _ in
+                state = value
+              })
+              .onEnded { value in
+                let newScale = self.scale * value
+                scale = min(max(newScale, Self.minZoomScale), Self.maxZoomScale)
+                if let newOffset = adjustPositionIfNeeded(containerSize: geometry.size) {
+                  animateOffset(to: newOffset)
                 }
               }
           )
@@ -109,7 +96,6 @@ struct PinchZoomView: View {
       if scale > Self.minZoomScale {
         resetToOriginalSize()
       } else {
-        canSwipeToDismiss = false
         scale = Self.doubleTapZoomScale
 
         let imageCenter = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
@@ -118,7 +104,6 @@ struct PinchZoomView: View {
           height: (imageCenter.y - location.y) * (scale - 1)
         )
         offset = tapOffset
-        lastOffset = offset
       }
     }
   }
@@ -126,38 +111,34 @@ struct PinchZoomView: View {
   private func resetToOriginalSize() {
     withAnimation(.easeInOut(duration: 0.25)) {
       scale = Self.minZoomScale
-      lastScale = Self.minZoomScale
       offset = .zero
-      lastOffset = .zero
-      canSwipeToDismiss = true
-    }
-  }
-
-  private func resetToClampOffset(in geometry: GeometryProxy) {
-    withAnimation(.interactiveSpring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)) {
-      self.offset = clampOffset(self.offset, geometry: geometry)
     }
   }
 
   /// Calculate the maximum allowed offset for the current zoom scale.
-  private func maxOffsets(in geometry: GeometryProxy) -> CGSize {
-    // Calculate the actual size of the image at the current zoom scale
-    let scaledWidth = geometry.size.width * scale
-    let scaledHeight = geometry.size.height * scale
+  private func maxOffsets(containerSize: CGSize) -> CGSize {
+    let actualImageWidth = imageSize.width * scale
+    let actualImageHeight = imageSize.height * scale
+    let horizontalThreshold: CGFloat
+    let verticalThreshold: CGFloat
 
-    // Calculate the maximum allowed offset (without elasticity)
-    let maxOffsetX = (scaledWidth - geometry.size.width) / 2
-    let maxOffsetY = (scaledHeight - geometry.size.height) / 2
+    if actualImageWidth >= containerSize.width {
+      horizontalThreshold = (actualImageWidth - containerSize.width) / 2
+    } else {
+      horizontalThreshold = actualImageWidth / 2
+    }
 
-    return CGSize(width: maxOffsetX, height: maxOffsetY)
+    if actualImageHeight >= containerSize.height {
+      verticalThreshold = (actualImageHeight - containerSize.height) / 2
+    } else {
+      verticalThreshold = actualImageHeight / 2
+    }
+
+    return CGSize(width: horizontalThreshold, height: verticalThreshold)
   }
 
   private func elasticOffset(_ newOffset: CGSize, geometry: GeometryProxy) -> CGSize {
-    if scale <= Self.minZoomScale {
-      return newOffset
-    }
-
-    let maxOffset = maxOffsets(in: geometry)
+    let maxOffset = maxOffsets(containerSize: geometry.size)
 
     // Calculate elastic offset
     func applyElasticity(to value: CGFloat, max: CGFloat) -> CGFloat {
@@ -185,22 +166,43 @@ struct PinchZoomView: View {
     )
   }
 
-  private func clampOffset(_ newOffset: CGSize, geometry: GeometryProxy) -> CGSize {
-    if scale <= Self.minZoomScale {
+  private func animateOffset(to offset: CGSize) {
+    withAnimation(.interactiveSpring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)) {
+      self.offset = offset
+    }
+  }
+
+  private func adjustPositionIfNeeded(containerSize: CGSize) -> CGSize? {
+
+    if !isScaled && offset != .zero {
       return .zero
     }
 
-    let maxOffset = maxOffsets(in: geometry)
+    let maxOffset = maxOffsets(containerSize: containerSize)
 
-    return CGSize(
-      width: max(-maxOffset.width, min(maxOffset.width, newOffset.width)),
-      height: max(-maxOffset.height, min(maxOffset.height, newOffset.height))
-    )
-  }
+    var resultOffset = offset
 
-  private func isOutOfBounds(_ offset: CGSize, geometry: GeometryProxy) -> Bool {
-    let clampedOffset = clampOffset(offset, geometry: geometry)
-    return offset.width != clampedOffset.width || offset.height != clampedOffset.height
+    if abs(offset.width) > maxOffset.width {
+      if resultOffset.width > 0 {
+        resultOffset.width -= abs(offset.width) - maxOffset.width
+      } else {
+        resultOffset.width += abs(offset.width) - maxOffset.width
+      }
+    }
+
+    if abs(offset.height) > maxOffset.height {
+      if resultOffset.height > 0 {
+        resultOffset.height -= abs(offset.height) - maxOffset.height
+      } else {
+        resultOffset.height += abs(offset.height) - maxOffset.height
+      }
+    }
+
+    if resultOffset != offset {
+      return resultOffset
+    }
+
+    return nil
   }
 }
 
