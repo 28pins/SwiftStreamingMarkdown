@@ -56,7 +56,6 @@ public final class MarkdownController: ObservableObject {
   }
 
   func onChange(markdown: RenderableDocument) {
-    print("JUN: \(Thread.isMainThread)")
     continuation?.yield(markdown)
   }
 
