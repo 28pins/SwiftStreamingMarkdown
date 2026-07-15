@@ -38,13 +38,15 @@ public struct DocumentView: View {
     .environment(\.markdownConfig, config)
     .environment(\.markdownController, controller)
     .task {
-      controller.onAppear(markdown: renderableDocument)
+      await controller.onAppear(markdown: renderableDocument)
     }
     .onChange(of: renderableDocument, perform: { md in
       controller.onChange(markdown: md)
     })
     .onDisappear {
-      controller.onDisappear()
+      Task {
+        await controller.onDisappear()
+      }
     }
     .sheet(isPresented: $controller.isTextSelectionRequested) {
       TextSelectionView(

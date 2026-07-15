@@ -33,7 +33,7 @@ public final class MarkdownController: ObservableObject {
     isTextSelectionRequested = true
   }
 
-  func onAppear(markdown: RenderableDocument) {
+  func onAppear(markdown: RenderableDocument) async {
     cleanup()
 
     guard let listener else {
@@ -56,10 +56,11 @@ public final class MarkdownController: ObservableObject {
   }
 
   func onChange(markdown: RenderableDocument) {
+    print("JUN: \(Thread.isMainThread)")
     continuation?.yield(markdown)
   }
 
-  func onDisappear() {
+  func onDisappear() async {
     cleanup()
   }
 
