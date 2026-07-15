@@ -107,6 +107,7 @@ private struct BundledResourceZoomView: View {
   let ext: String
   let onSwipeToDismiss: () -> Void
 
+  @Environment(\.markdownController) private var controller
   @State private var image: MDImage?
   @State private var didLoad = false
 
@@ -122,7 +123,7 @@ private struct BundledResourceZoomView: View {
       }
     }
     .task {
-      image = await fileName.bundledResourceImage(withExtension: ext)
+      image = await fileName.bundledResourceImage(withExtension: ext, controller: controller)
       didLoad = true
     }
   }

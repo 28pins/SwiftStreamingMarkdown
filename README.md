@@ -91,6 +91,7 @@ The renderer targets the subset of CommonMark + GitHub-flavored Markdown that LL
 
 - [x] Headings (`#` … `######`)
 - [x] Paragraphs with soft and hard line breaks
+- [x] Images (`![alt](url)`) — block-level, opt-in via the experimental `ImageConfig` (remote-allowlist, asset-catalog, and bundled-resource sources; tap to open the built-in fullscreen viewer)
 - [x] **Bold**, *italic*, ***bold-italic***, ~~strikethrough~~
 - [x] `Inline code`
 - [x] Inline links
@@ -104,7 +105,6 @@ The renderer targets the subset of CommonMark + GitHub-flavored Markdown that LL
 - [x] Inline LaTeX math via `\( … \)`
 - [x] Display LaTeX math via `$$ … $$`
 - [x] Inline citation pills
-- [x] Images (`![alt](url)`) — block-level, opt-in via the experimental `ImageConfig` (remote-allowlist, asset-catalog, and bundled-resource sources; tap to open the built-in fullscreen viewer)
 
 ### Not yet supported
 

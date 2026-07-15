@@ -38,7 +38,7 @@ struct BlockImageView: View {
       isViewerPresented = true
     }
     Task {
-      guard let image = await data.makeMarkdownImage() else { return }
+      guard let image = await data.makeMarkdownImage(controller: controller) else { return }
       controller?.onImageTap(image: image)
     }
   }

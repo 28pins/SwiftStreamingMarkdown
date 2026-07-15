@@ -12,6 +12,21 @@ public protocol MarkdownListener {
   func onContextMenuAppear(id: String, selectedContent: String) async
   func onContextMenuTap(id: String, selectedContent: String) async
   func onImageTap(image: MarkdownImage) async
+
+  /// Resolves a bundled-resource image that the app's main bundle does not
+  /// contain — for example one shipped inside a dependency package or a
+  /// framework rather than the app target.
+  ///
+  /// The renderer calls this only after failing to find `fileName`(`.ext`) in
+  /// `Bundle.main`. Return a readable file URL for the resource, or `nil` when
+  /// it cannot be provided. Defaults to `nil`.
+  ///
+  /// - Important: Image support is **experimental**.
+  func resolveBundledResource(fileName: String, ext: String?) -> URL?
+}
+
+public extension MarkdownListener {
+  func resolveBundledResource(fileName: String, ext: String?) -> URL? { nil }
 }
 
 public final class MarkdownController: ObservableObject {
@@ -91,6 +106,13 @@ public final class MarkdownController: ObservableObject {
     Task {
       await listener?.onImageTap(image: image)
     }
+  }
+
+  /// Asks the listener to resolve a bundled-resource image not present in the
+  /// app's main bundle. Returns `nil` when there is no listener or it cannot
+  /// provide the resource.
+  func resolveBundledResource(fileName: String, ext: String?) -> URL? {
+    listener?.resolveBundledResource(fileName: fileName, ext: ext)
   }
 
   private func cleanup() {

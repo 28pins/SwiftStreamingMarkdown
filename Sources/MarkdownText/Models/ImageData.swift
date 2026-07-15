@@ -47,8 +47,10 @@ struct ImageData: Equatable, Sendable {
   /// Builds the public tap payload for this image, or `nil` when the source is
   /// not resolvable. For bundled-resource images the raw file bytes are read
   /// off the main actor and passed along, so the listener receives the actual
-  /// image data rather than an internal file reference.
-  func makeMarkdownImage() async -> MarkdownImage? {
+  /// image data rather than an internal file reference. `controller` supplies
+  /// the listener fallback used when the resource is absent from the main
+  /// bundle.
+  func makeMarkdownImage(controller: MarkdownController? = nil) async -> MarkdownImage? {
     guard let source else { return nil }
     switch source {
     case .remote(let url):
@@ -56,7 +58,7 @@ struct ImageData: Equatable, Sendable {
     case .assetCatalog(let name):
       return MarkdownImage(source: .assetCatalog(name: name), alt: alt)
     case .bundledResource(let fileName, let ext):
-      guard let data = await fileName.bundledResourceData(withExtension: ext) else {
+      guard let data = await fileName.bundledResourceData(withExtension: ext, controller: controller) else {
         return nil
       }
       return MarkdownImage(source: .bundledResource(data: data), alt: alt)

@@ -11,6 +11,7 @@ struct BundledResourceImage: View {
   let fileName: String
   let ext: String
 
+  @Environment(\.markdownController) private var controller
   @State private var image: MDImage?
   @State private var didLoad = false
 
@@ -27,7 +28,7 @@ struct BundledResourceImage: View {
       }
     }
     .task {
-      image = await fileName.bundledResourceImage(withExtension: ext)
+      image = await fileName.bundledResourceImage(withExtension: ext, controller: controller)
       didLoad = true
     }
   }
