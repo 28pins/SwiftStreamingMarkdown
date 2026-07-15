@@ -11,10 +11,11 @@ import SwiftUI
 /// and swipe-to-dismiss. Used by the built-in fullscreen image viewer.
 struct PinchZoomView: View {
   static let dismissVelocity = 1500.0
+  static let panVelocity = 500.0
   static let minZoomScale: CGFloat = 1.0
   static let maxZoomScale: CGFloat = 4.0
   static let doubleTapZoomScale: CGFloat = 2.0
-  static let bounceDistance: CGFloat = 10
+  static let bounceDistance: CGFloat = 5
   static let elasticityFactor: CGFloat = 0.4
 
   @State private var scale: CGFloat = 1.0
@@ -73,6 +74,8 @@ struct PinchZoomView: View {
 
                 if let newOffset = adjustPositionIfNeeded(containerSize: geometry.size) {
                   animateOffset(to: newOffset)
+                } else if abs(value.velocity.width) > Self.panVelocity || abs(value.velocity.height) > Self.panVelocity {
+                  panOffset(velocity: value.velocity, containerSize: geometry.size)
                 }
               },
             MagnificationGesture()
@@ -119,21 +122,8 @@ struct PinchZoomView: View {
   private func maxOffsets(containerSize: CGSize) -> CGSize {
     let actualImageWidth = imageSize.width * scale
     let actualImageHeight = imageSize.height * scale
-    let horizontalThreshold: CGFloat
-    let verticalThreshold: CGFloat
-
-    if actualImageWidth >= containerSize.width {
-      horizontalThreshold = (actualImageWidth - containerSize.width) / 2
-    } else {
-      horizontalThreshold = actualImageWidth / 2
-    }
-
-    if actualImageHeight >= containerSize.height {
-      verticalThreshold = (actualImageHeight - containerSize.height) / 2
-    } else {
-      verticalThreshold = actualImageHeight / 2
-    }
-
+    let horizontalThreshold = max(0, (actualImageWidth - containerSize.width) / 2)
+    let verticalThreshold = max(0, (actualImageHeight - containerSize.height) / 2)
     return CGSize(width: horizontalThreshold, height: verticalThreshold)
   }
 
@@ -172,13 +162,29 @@ struct PinchZoomView: View {
     }
   }
 
+  private func panOffset(velocity: CGSize, containerSize: CGSize) {
+    let maxOffset = maxOffsets(containerSize: containerSize)
+    let newOffsetX = max(-maxOffset.width, min(offset.width + velocity.width / 2 * 0.5, maxOffset.width))
+    let newOffsetY = max(-maxOffset.height, min(offset.height + velocity.height / 2 * 0.5, maxOffset.height))
+    withAnimation(.easeOut(duration: 0.5)) {
+      self.offset = CGSize(width: newOffsetX, height: newOffsetY)
+    }
+  }
+
   private func adjustPositionIfNeeded(containerSize: CGSize) -> CGSize? {
 
-    if !isScaled && offset != .zero {
-      return .zero
+    if !isScaled {
+      if offset != .zero {
+        return .zero
+      } else {
+        return nil
+      }
     }
 
     let maxOffset = maxOffsets(containerSize: containerSize)
+    if abs(offset.width) <= maxOffset.width && abs(offset.height) <= maxOffset.height {
+      return nil
+    }
 
     var resultOffset = offset
 
