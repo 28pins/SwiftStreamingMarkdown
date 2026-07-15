@@ -41,6 +41,9 @@ let package = Package(
         "SwiftStreamingMarkdown",
         .product(name: "SnapshotTesting", package: "swift-snapshot-testing")
       ],
-      path: "Tests/MarkdownTextTests")
+      path: "Tests/MarkdownTextTests",
+      resources: [
+        .process("Resources")
+      ])
   ]
 )
