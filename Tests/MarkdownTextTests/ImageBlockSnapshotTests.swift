@@ -18,7 +18,13 @@ final class ImageBlockSnapshotTests: SnapshotTestCase {
   let parser: MarkdownParser = MarkdownParserImpl()
 
   func test_disallowed_remote_image_renders_failure_placeholder() async throws {
-    let text = "![Landscape](https://blocked.example/photo.png)"
+    let text = """
+    Here is a landscape photo from an untrusted source:
+
+    ![Landscape](https://blocked.example/photo.png)
+
+    The image above cannot be shown because its host is not allowed.
+    """
     let config = MarkdownRenderConfig(
       imageConfig: ImageConfig(
         enabled: true,

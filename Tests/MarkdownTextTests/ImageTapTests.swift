@@ -16,23 +16,21 @@ final class ImageTapTests: XCTestCase {
   }
 
   func test_makeMarkdownImage_maps_remote_and_asset_catalog_sources() async {
-    let controller = MarkdownController(listener: nil)
     let remote = await ImageData(
       source: ImageData.Source.remote(url("https://example.com/a.png")),
       alt: "a"
-    ).makeMarkdownImage(controller: controller)
+    ).makeMarkdownImage()
     XCTAssertEqual(remote, MarkdownImage(source: .remote(url("https://example.com/a.png")), alt: "a"))
 
     let asset = await ImageData(
       source: ImageData.Source.assetCatalog(name: "Images/logo"),
       alt: "b"
-    ).makeMarkdownImage(controller: controller)
+    ).makeMarkdownImage()
     XCTAssertEqual(asset, MarkdownImage(source: .assetCatalog(name: "Images/logo"), alt: "b"))
   }
 
   func test_makeMarkdownImage_is_nil_without_a_resolved_source() async {
-    let payload = await ImageData(source: nil, alt: "d")
-      .makeMarkdownImage(controller: MarkdownController(listener: nil))
+    let payload = await ImageData(source: nil, alt: "d").makeMarkdownImage()
     XCTAssertNil(payload)
   }
 
@@ -40,7 +38,7 @@ final class ImageTapTests: XCTestCase {
     let payload = await ImageData(
       source: ImageData.Source.bundledResource(fileName: "does-not-exist", ext: "png"),
       alt: "c"
-    ).makeMarkdownImage(controller: MarkdownController(listener: nil))
+    ).makeMarkdownImage()
     XCTAssertNil(payload)
   }
 
