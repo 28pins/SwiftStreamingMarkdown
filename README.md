@@ -59,6 +59,14 @@ Here are a few demos to help you quickly understand this library's capabilities.
   </tr>
   <tr>
     <td>
+      <h3>Image</h3>
+    </td>
+    <td>
+      <img width="400" alt="image-demo" src="https://github.com/user-attachments/assets/0fc4b9d9-0fec-4304-8c04-5ddb7d57297e" />
+    </td>
+  </tr>
+  <tr>
+    <td>
       <h3>Customization</h3>
     </td>
     <td>
