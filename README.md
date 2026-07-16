@@ -62,7 +62,7 @@ Here are a few demos to help you quickly understand this library's capabilities.
       <h3>Image</h3>
     </td>
     <td>
-      <img width="400" alt="image-demo" src="https://github.com/user-attachments/assets/0fc4b9d9-0fec-4304-8c04-5ddb7d57297e" />
+      <img width="361" alt="image-demo Large" src="https://github.com/user-attachments/assets/bc542180-bce8-4d86-9e53-8f4aa2e9db8f" />
     </td>
   </tr>
   <tr>
