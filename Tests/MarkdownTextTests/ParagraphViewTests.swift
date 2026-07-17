@@ -198,7 +198,8 @@ struct ParagraphViewTests {
     let view = ParagraphUIView()
     view.setParagraphContents(
       NSMutableAttributedString(string: "Previous paragraph"),
-      revealAppendedText: false
+      textAnimation: .none,
+      isStreamComplete: true
     )
 
     #expect(view.accessibilityLabel == "Previous paragraph")
@@ -208,6 +209,41 @@ struct ParagraphViewTests {
     #expect(view.attributedText.length == 0)
     #expect(view.accessibilityLabel == nil)
     #expect(view.accessibilityCustomActions == nil)
+  }
+
+  @Test("Character Streaming keeps one attributed paragraph and full accessibility")
+  @MainActor
+  func characterStreamingParagraphIntegration() throws {
+    let url = try #require(URL(string: "https://example.com"))
+    let contents = NSMutableAttributedString(string: "AB")
+    contents.addAttribute(
+      .link,
+      value: url,
+      range: NSRange(location: 0, length: 1)
+    )
+    let view = ParagraphUIView(characterStreaming: true)
+
+    view.setParagraphContents(
+      contents,
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+
+    #expect(view.attributedText.string == "A")
+    #expect(view.accessibilityLabel == "AB")
+    #expect(view.layoutManager is CharacterStreamingLayoutManager)
+    #expect(
+      view.attributedText.attribute(
+        .link,
+        at: 0,
+        effectiveRange: nil
+      ) as? URL == url
+    )
+
+    view.finishTextAnimation()
+
+    #expect(view.attributedText.string == "AB")
+    #expect(view.accessibilityLabel == "AB")
   }
 
   @Test("Long text overflow handling")

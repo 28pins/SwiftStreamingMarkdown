@@ -376,7 +376,8 @@ extension TableView {
         content,
         color: color
       ))
-    } else if config.shouldAnimateText {
+      .environment(\.markdownConfig, config.withTextAnimation(.none))
+    } else if config.textAnimation == .fade {
       Text(AttributedString(content))
         .foregroundStyle(color)
         .lineLimit(nil)

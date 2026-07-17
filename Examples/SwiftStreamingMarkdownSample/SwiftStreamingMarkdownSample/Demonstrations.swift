@@ -66,11 +66,11 @@ enum Demonstration: String, CaseIterable, Identifiable, Hashable {
   func renderConfig(
     theme: SampleMarkdownTheme,
     isStreaming: Bool,
-    streamingTextAnimation: StreamingTextAnimation
+    streamingTextAnimation: SampleStreamingTextAnimation
   ) -> MarkdownRenderConfig {
     theme.renderConfig(
       for: self,
-      shouldAnimateText: isStreaming && streamingTextAnimation == .telegramReveal
+      textAnimation: isStreaming ? streamingTextAnimation.renderAnimation : .none
     )
   }
 

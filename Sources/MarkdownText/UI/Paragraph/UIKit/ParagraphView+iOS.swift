@@ -11,6 +11,7 @@ struct ParagraphView: UIViewRepresentable {
   @Environment(\.markdownConfig) var config: MarkdownRenderConfig
   @Environment(\.markdownController) var markdownController: MarkdownController?
   @Environment(\.accessibilityReduceMotion) var reduceMotion
+  @Environment(\.isMarkdownStreamComplete) var isStreamComplete
 
   var contents: NSMutableAttributedString
   var lineSpacing: CGFloat?
@@ -21,13 +22,18 @@ struct ParagraphView: UIViewRepresentable {
 
   func makeUIView(context: Context) -> ParagraphUIView {
     let openUrlFunction = openURL.callAsFunction(_:)
-    let view = ParagraphViewCache.shared.createOrReuseView(contents: contents, lineSpacing: lineSpacing)
+    let view = ParagraphViewCache.shared.createOrReuseView(
+      contents: contents,
+      lineSpacing: lineSpacing,
+      characterStreaming: resolvedAnimation == .characterStreaming
+    )
     view.prepareForReuse()
     view.onUrlTap = openUrlFunction
     view.setParagraphContents(
       contents,
       lineSpacing: lineSpacing,
-      revealAppendedText: shouldRevealText
+      textAnimation: resolvedAnimation,
+      isStreamComplete: isStreamComplete
     )
     view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
@@ -36,14 +42,19 @@ struct ParagraphView: UIViewRepresentable {
   }
 
   func updateUIView(_ view: ParagraphUIView, context: Context) {
-    if !shouldRevealText {
-      view.finishTextReveal()
-    }
     if view.paragraphContents != contents || view.lineSpacing != lineSpacing {
       view.setParagraphContents(
         contents,
         lineSpacing: lineSpacing,
-        revealAppendedText: view.window != nil && shouldRevealText
+        textAnimation: view.window == nil ? .none : resolvedAnimation,
+        isStreamComplete: isStreamComplete
+      )
+    } else {
+      view.setParagraphContents(
+        contents,
+        lineSpacing: lineSpacing,
+        textAnimation: resolvedAnimation,
+        isStreamComplete: isStreamComplete
       )
     }
     view.setTextContextMenu(config.resolvedTextContextMenu)
@@ -88,11 +99,8 @@ struct ParagraphView: UIViewRepresentable {
     var lastLineSpacing: CGFloat?
   }
 
-  private var shouldRevealText: Bool {
-    shouldRevealAppendedText(
-      isConfigured: config.shouldAnimateText,
-      reduceMotion: reduceMotion
-    )
+  private var resolvedAnimation: MarkdownRenderConfig.TextAnimation {
+    resolvedTextAnimation(config.textAnimation, reduceMotion: reduceMotion)
   }
 }
 

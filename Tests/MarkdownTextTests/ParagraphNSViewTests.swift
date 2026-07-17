@@ -23,7 +23,8 @@ struct ParagraphNSViewTests {
     let longText = String(repeating: "word ", count: 200)
     view.setParagraphContents(
       NSMutableAttributedString(string: longText),
-      revealAppendedText: false
+      textAnimation: .none,
+      isStreamComplete: true
     )
 
     let narrow = view.measureSize(fittingWidth: 200)
@@ -42,10 +43,28 @@ struct ParagraphNSViewTests {
     let view = ParagraphNSView()
     view.setParagraphContents(
       NSMutableAttributedString(string: ""),
-      revealAppendedText: false
+      textAnimation: .none,
+      isStreamComplete: true
     )
 
     #expect(view.measureSize(fittingWidth: 400) == .zero)
+  }
+
+  @Test("Character Streaming uses transformed TextKit rendering")
+  func characterStreamingParagraphIntegration() {
+    let view = ParagraphNSView(characterStreaming: true)
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "AB"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+
+    #expect(view.string == "A")
+    #expect(view.layoutManager is CharacterStreamingLayoutManager)
+
+    view.finishTextAnimation()
+
+    #expect(view.string == "AB")
   }
 }
 #endif
