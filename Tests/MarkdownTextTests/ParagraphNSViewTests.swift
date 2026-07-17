@@ -21,7 +21,10 @@ struct ParagraphNSViewTests {
   func measuresHeightWithoutFrame() {
     let view = ParagraphNSView()
     let longText = String(repeating: "word ", count: 200)
-    view.setParagraphContents(NSMutableAttributedString(string: longText), animatedByWord: false)
+    view.setParagraphContents(
+      NSMutableAttributedString(string: longText),
+      revealAppendedText: false
+    )
 
     let narrow = view.measureSize(fittingWidth: 200)
     let wide = view.measureSize(fittingWidth: 1000)
@@ -37,7 +40,10 @@ struct ParagraphNSViewTests {
   @Test("Empty content measures as zero")
   func measuresEmptyContentAsZero() {
     let view = ParagraphNSView()
-    view.setParagraphContents(NSMutableAttributedString(string: ""), animatedByWord: false)
+    view.setParagraphContents(
+      NSMutableAttributedString(string: ""),
+      revealAppendedText: false
+    )
 
     #expect(view.measureSize(fittingWidth: 400) == .zero)
   }

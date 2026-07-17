@@ -63,8 +63,15 @@ enum Demonstration: String, CaseIterable, Identifiable, Hashable {
     }
   }
 
-  func renderConfig(theme: SampleMarkdownTheme, isStreaming: Bool) -> MarkdownRenderConfig {
-    theme.renderConfig(for: self, isStreaming: isStreaming)
+  func renderConfig(
+    theme: SampleMarkdownTheme,
+    isStreaming: Bool,
+    streamingTextAnimation: StreamingTextAnimation
+  ) -> MarkdownRenderConfig {
+    theme.renderConfig(
+      for: self,
+      shouldAnimateText: isStreaming && streamingTextAnimation == .telegramReveal
+    )
   }
 
   var automaticBackgroundColor: Color {

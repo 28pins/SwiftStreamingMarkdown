@@ -10,6 +10,7 @@ struct ParagraphView: NSViewRepresentable {
   @Environment(\.openURL) var openURL
   @Environment(\.markdownConfig) var config: MarkdownRenderConfig
   @Environment(\.markdownController) var markdownController: MarkdownController?
+  @Environment(\.accessibilityReduceMotion) var reduceMotion
 
   var contents: NSMutableAttributedString
   var lineSpacing: CGFloat?
@@ -26,25 +27,27 @@ struct ParagraphView: NSViewRepresentable {
     // paragraph gets its own view instead.
     let view = ParagraphNSView()
     view.onUrlTap = openUrlFunction
-    view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
+    view.setParagraphContents(
+      contents,
+      lineSpacing: lineSpacing,
+      revealAppendedText: shouldRevealText
+    )
     view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
-
-    if config.shouldAnimateText {
-      view.alphaValue = 0
-      NSAnimationContext.runAnimationGroup { ctx in
-        ctx.duration = ParagraphNSView.animationDuration
-        view.animator().alphaValue = 1
-      }
-    }
 
     return view
   }
 
   func updateNSView(_ view: ParagraphNSView, context: Context) {
+    if !shouldRevealText {
+      view.finishTextReveal()
+    }
     if view.paragraphContents != contents || view.lineSpacing != lineSpacing {
-      let shouldAnimate = view.window != nil && config.shouldAnimateText
-      view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: shouldAnimate)
+      view.setParagraphContents(
+        contents,
+        lineSpacing: lineSpacing,
+        revealAppendedText: view.window != nil && shouldRevealText
+      )
     }
     view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
@@ -77,6 +80,13 @@ struct ParagraphView: NSViewRepresentable {
     var sizeCache: [CGFloat: CGSize] = [:]
     var lastContents: NSMutableAttributedString?
     var lastLineSpacing: CGFloat?
+  }
+
+  private var shouldRevealText: Bool {
+    shouldRevealAppendedText(
+      isConfigured: config.shouldAnimateText,
+      reduceMotion: reduceMotion
+    )
   }
 }
 

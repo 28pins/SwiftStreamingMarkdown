@@ -9,6 +9,21 @@ enum SampleSettings {
   static let preferStreamedMarkdownKey = "preferStreamedMarkdown"
   static let appearanceModeKey = "appearanceMode"
   static let markdownThemeKey = "markdownTheme"
+  static let streamingTextAnimationKey = "streamingTextAnimation"
+}
+
+enum StreamingTextAnimation: String, CaseIterable, Identifiable {
+  case telegramReveal
+  case standard
+
+  var id: String { rawValue }
+
+  var displayName: String {
+    switch self {
+    case .telegramReveal: "Telegram Reveal"
+    case .standard: "Standard Updates"
+    }
+  }
 }
 
 enum AppearanceMode: String, CaseIterable, Identifiable {

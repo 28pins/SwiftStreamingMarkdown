@@ -192,6 +192,24 @@ struct ParagraphViewTests {
     #expect(textContent.string == "", "Text content should be empty")
   }
 
+  @Test("Reused paragraph clears stale accessibility content")
+  @MainActor
+  func prepareForReuseClearsAccessibilityContent() {
+    let view = ParagraphUIView()
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "Previous paragraph"),
+      revealAppendedText: false
+    )
+
+    #expect(view.accessibilityLabel == "Previous paragraph")
+
+    view.prepareForReuse()
+
+    #expect(view.attributedText.length == 0)
+    #expect(view.accessibilityLabel == nil)
+    #expect(view.accessibilityCustomActions == nil)
+  }
+
   @Test("Long text overflow handling")
   func longTextOverflow() {
     let longText = String(repeating: "This is a very long text that should test overflow behavior. ", count: 20)

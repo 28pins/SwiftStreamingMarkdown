@@ -10,6 +10,7 @@ struct ParagraphView: UIViewRepresentable {
   @Environment(\.openURL) var openURL
   @Environment(\.markdownConfig) var config: MarkdownRenderConfig
   @Environment(\.markdownController) var markdownController: MarkdownController?
+  @Environment(\.accessibilityReduceMotion) var reduceMotion
 
   var contents: NSMutableAttributedString
   var lineSpacing: CGFloat?
@@ -21,25 +22,29 @@ struct ParagraphView: UIViewRepresentable {
   func makeUIView(context: Context) -> ParagraphUIView {
     let openUrlFunction = openURL.callAsFunction(_:)
     let view = ParagraphViewCache.shared.createOrReuseView(contents: contents, lineSpacing: lineSpacing)
+    view.prepareForReuse()
     view.onUrlTap = openUrlFunction
-    view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: false)
+    view.setParagraphContents(
+      contents,
+      lineSpacing: lineSpacing,
+      revealAppendedText: shouldRevealText
+    )
     view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
-
-    if config.shouldAnimateText {
-      view.alpha = 0
-      UIView.animate(withDuration: ParagraphUIView.animationDuration) {
-        view.alpha = 1
-      }
-    }
 
     return view
   }
 
   func updateUIView(_ view: ParagraphUIView, context: Context) {
+    if !shouldRevealText {
+      view.finishTextReveal()
+    }
     if view.paragraphContents != contents || view.lineSpacing != lineSpacing {
-      let shouldAnimate = view.window != nil && config.shouldAnimateText // only animate when visible
-      view.setParagraphContents(contents, lineSpacing: lineSpacing, animatedByWord: shouldAnimate)
+      view.setParagraphContents(
+        contents,
+        lineSpacing: lineSpacing,
+        revealAppendedText: view.window != nil && shouldRevealText
+      )
     }
     view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
@@ -81,6 +86,13 @@ struct ParagraphView: UIViewRepresentable {
     var sizeCache: [CGFloat: CGSize] = [:]
     var lastContents: NSMutableAttributedString?
     var lastLineSpacing: CGFloat?
+  }
+
+  private var shouldRevealText: Bool {
+    shouldRevealAppendedText(
+      isConfigured: config.shouldAnimateText,
+      reduceMotion: reduceMotion
+    )
   }
 }
 

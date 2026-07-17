@@ -13,7 +13,8 @@ import SwiftUI
 /// Use `MarkdownRenderConfig.default` or the `with…` builders on the type for
 /// incremental overrides.
 public struct MarkdownRenderConfig: Hashable, Sendable {
-  /// When `true`, newly appended text fades in instead of appearing instantly.
+  /// When `true`, only newly appended text receives a bounded soft reveal.
+  /// Existing text remains stable, and Reduce Motion disables the effect.
   public let shouldAnimateText: Bool
   /// Styling applied to block-quote content.
   public let blockQuoteStyle: MarkdownTextStyle
