@@ -12,6 +12,7 @@ struct ParagraphView: UIViewRepresentable {
   @Environment(\.markdownController) var markdownController: MarkdownController?
   @Environment(\.accessibilityReduceMotion) var reduceMotion
   @Environment(\.isMarkdownStreamComplete) var isStreamComplete
+  @Environment(\.isMarkdownStreamingTailBranch) var isStreamingTailBranch
 
   var contents: NSMutableAttributedString
   var lineSpacing: CGFloat?
@@ -25,7 +26,7 @@ struct ParagraphView: UIViewRepresentable {
     let view = ParagraphViewCache.shared.createOrReuseView(
       contents: contents,
       lineSpacing: lineSpacing,
-      characterStreaming: resolvedAnimation == .characterStreaming
+      characterStreaming: config.textAnimation == .characterStreaming
     )
     view.prepareForReuse()
     view.onUrlTap = openUrlFunction
@@ -33,7 +34,7 @@ struct ParagraphView: UIViewRepresentable {
       contents,
       lineSpacing: lineSpacing,
       textAnimation: resolvedAnimation,
-      isStreamComplete: isStreamComplete
+      isStreamComplete: paragraphStreamComplete
     )
     view.setTextContextMenu(config.resolvedTextContextMenu)
     view.setMarkdownController(markdownController)
@@ -47,14 +48,14 @@ struct ParagraphView: UIViewRepresentable {
         contents,
         lineSpacing: lineSpacing,
         textAnimation: view.window == nil ? .none : resolvedAnimation,
-        isStreamComplete: isStreamComplete
+        isStreamComplete: paragraphStreamComplete
       )
     } else {
       view.setParagraphContents(
         contents,
         lineSpacing: lineSpacing,
         textAnimation: resolvedAnimation,
-        isStreamComplete: isStreamComplete
+        isStreamComplete: paragraphStreamComplete
       )
     }
     view.setTextContextMenu(config.resolvedTextContextMenu)
@@ -75,7 +76,13 @@ struct ParagraphView: UIViewRepresentable {
     }
 
     // Round width to avoid cache misses from floating point precision issues
-    let cacheKey = (width * 10).rounded() / 10 // Round to 1 decimal place
+    let cacheKey = ParagraphSizeCacheKey(
+      width: (width * 10).rounded() / 10,
+      visibleUTF16Length: uiView.attributedText.length
+    )
+    context.coordinator.updateVisibleUTF16Length(
+      uiView.attributedText.length
+    )
 
     // Check if we have a cached size for this width
     if let cachedSize = context.coordinator.sizeCache[cacheKey] {
@@ -94,19 +101,31 @@ struct ParagraphView: UIViewRepresentable {
 
   class Coordinator {
     // Cache all calculated sizes keyed by width
-    var sizeCache: [CGFloat: CGSize] = [:]
+    var sizeCache: [ParagraphSizeCacheKey: CGSize] = [:]
     var lastContents: NSMutableAttributedString?
     var lastLineSpacing: CGFloat?
+    private(set) var lastVisibleUTF16Length: Int?
+
+    func updateVisibleUTF16Length(_ length: Int) {
+      guard lastVisibleUTF16Length != length else { return }
+      sizeCache.removeAll()
+      lastVisibleUTF16Length = length
+    }
   }
 
   private var resolvedAnimation: MarkdownRenderConfig.TextAnimation {
     resolvedTextAnimation(config.textAnimation, reduceMotion: reduceMotion)
   }
+
+  private var paragraphStreamComplete: Bool {
+    isStreamComplete || !isStreamingTailBranch
+  }
 }
 
 extension ParagraphView: Equatable {
   static func == (lhs: ParagraphView, rhs: ParagraphView) -> Bool {
-    lhs.contents == rhs.contents && lhs.lineSpacing == rhs.lineSpacing
+    lhs.contents == rhs.contents
+      && lhs.lineSpacing == rhs.lineSpacing
   }
 }
 #endif

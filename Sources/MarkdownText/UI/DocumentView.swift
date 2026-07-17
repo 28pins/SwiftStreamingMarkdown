@@ -68,6 +68,8 @@ extension EnvironmentValues {
   @Entry public var markdownController: MarkdownController?
   /// Whether the current streamed source has finished producing snapshots.
   @Entry var isMarkdownStreamComplete = true
+  /// Whether this branch ends at the only paragraph whose final grapheme may still grow.
+  @Entry var isMarkdownStreamingTailBranch = true
 }
 
 #if DEBUG

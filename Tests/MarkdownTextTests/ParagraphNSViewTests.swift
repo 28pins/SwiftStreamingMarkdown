@@ -66,5 +66,129 @@ struct ParagraphNSViewTests {
 
     #expect(view.string == "AB")
   }
+
+  @Test("Rapid snapshots preserve the pending Character Streaming deadline")
+  func characterStreamingRapidSnapshots() {
+    let view = ParagraphNSView(characterStreaming: true)
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "ABCDE"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+    #expect(view.string == "A")
+
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "ABCDEF"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+
+    #expect(view.string == "A")
+    view.finishTextAnimation()
+  }
+
+  @Test("Character Streaming remains settled when Reduce Motion turns off")
+  func characterStreamingReduceMotionToggle() {
+    let contents = NSMutableAttributedString(string: "Already visible")
+    let view = ParagraphNSView(characterStreaming: true)
+    view.setParagraphContents(
+      contents,
+      textAnimation: .none,
+      isStreamComplete: false
+    )
+
+    view.setParagraphContents(
+      contents,
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+
+    #expect(view.string == contents.string)
+    #expect(view.layoutManager is CharacterStreamingLayoutManager)
+    view.finishTextAnimation()
+  }
+
+  @Test("Completion-only updates preserve an active Fade")
+  func fadeCompletionPreservesAnimation() throws {
+    let view = ParagraphNSView()
+    let initial = NSMutableAttributedString(
+      string: "A",
+      attributes: [.foregroundColor: NSColor.black]
+    )
+    view.setParagraphContents(
+      initial,
+      textAnimation: .none,
+      isStreamComplete: false
+    )
+
+    let updated = NSMutableAttributedString(
+      string: "AB",
+      attributes: [.foregroundColor: NSColor.black]
+    )
+    view.setParagraphContents(
+      updated,
+      textAnimation: .fade,
+      isStreamComplete: false
+    )
+    let before = try #require(
+      view.textStorage?.attribute(
+        .foregroundColor,
+        at: 1,
+        effectiveRange: nil
+      ) as? NSColor
+    ).alphaComponent
+
+    view.setParagraphContents(
+      updated,
+      textAnimation: .fade,
+      isStreamComplete: true
+    )
+    let after = try #require(
+      view.textStorage?.attribute(
+        .foregroundColor,
+        at: 1,
+        effectiveRange: nil
+      ) as? NSColor
+    ).alphaComponent
+
+    #expect(before < 1)
+    #expect(after == before)
+    view.finishTextAnimation()
+  }
+
+  @Test("Character Streaming wrapped size grows with its visible prefix")
+  func characterStreamingWrappedMeasurement() {
+    let view = ParagraphNSView(characterStreaming: true)
+    view.setParagraphContents(
+      NSMutableAttributedString(
+        string: "This paragraph grows across several narrow wrapped lines."
+      ),
+      textAnimation: .characterStreaming,
+      isStreamComplete: true
+    )
+    let initial = view.measureSize(fittingWidth: 70)
+
+    view.finishTextAnimation()
+    let settled = view.measureSize(fittingWidth: 70)
+
+    #expect(settled.height > initial.height)
+  }
+
+  @Test("Streaming size cache evicts prior visible prefixes")
+  func characterStreamingSizeCacheIsBounded() {
+    let coordinator = ParagraphView.Coordinator()
+    let key = ParagraphSizeCacheKey(width: 70, visibleUTF16Length: 1)
+    coordinator.sizeCache[key] = CGSize(width: 70, height: 20)
+
+    coordinator.updateVisibleUTF16Length(2)
+
+    #expect(coordinator.sizeCache.isEmpty)
+    #expect(coordinator.lastVisibleUTF16Length == 2)
+  }
+
+  @Test("AppKit Character Streaming translates positive offsets below baseline")
+  func characterStreamingBaselineDirection() {
+    #expect(CharacterStreamingLayoutManager.baselineTranslation(5) == 5)
+  }
 }
 #endif

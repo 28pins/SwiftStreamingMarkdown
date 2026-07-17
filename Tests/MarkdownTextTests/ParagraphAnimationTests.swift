@@ -80,8 +80,8 @@ struct ParagraphAnimationTests {
 
     #expect(transform.opacity == 0.08)
     #expect(transform.scale == 0.82)
-    #expect(transform.baselineOffset == 3)
-    #expect(transform.blurRadius == 3)
+    #expect(transform.baselineOffset == 5)
+    #expect(transform.blurRadius == 2)
   }
 
   @Test("Settles exactly to the final transform after 260ms")
@@ -143,6 +143,43 @@ struct ParagraphAnimationTests {
     _ = try #require(state.releaseNext(at: 0.1))
     #expect(state.visibleAttributedText.string == "A")
     #expect(!state.hasPendingGrapheme)
+  }
+
+  @Test("Parsed lists select their trailing paragraph structurally")
+  @MainActor
+  func parsedListTailOwnership() async throws {
+    let document = await MarkdownParserImpl().parse(
+      text: "1. First item\n2. Second item",
+      config: .default
+    )
+    let renderable = try #require(document.renderables.last)
+    guard case .orderedList(_, let items) = renderable else {
+      Issue.record("Expected an ordered list")
+      return
+    }
+
+    #expect(items.count == 2)
+    #expect(
+      !isTrailingStreamingElement(
+        at: 0,
+        count: items.count,
+        parentIsTrailing: true
+      )
+    )
+    #expect(
+      isTrailingStreamingElement(
+        at: 1,
+        count: items.count,
+        parentIsTrailing: true
+      )
+    )
+    #expect(
+      !isTrailingStreamingElement(
+        at: 1,
+        count: items.count,
+        parentIsTrailing: false
+      )
+    )
   }
 
   @Test("Replacement rewinds to a composed prefix and restyling is retained")
@@ -249,6 +286,14 @@ struct ParagraphAnimationTests {
       plan.segments.last?.delay
         == ParagraphAnimationConstants.fadeStaggerDuration
     )
+  }
+
+  @Test("Visible prefix length participates in paragraph size caching")
+  func streamingSizeCacheKey() {
+    let initial = ParagraphSizeCacheKey(width: 120, visibleUTF16Length: 1)
+    let wrapped = ParagraphSizeCacheKey(width: 120, visibleUTF16Length: 80)
+
+    #expect(initial != wrapped)
   }
 }
 

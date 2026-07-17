@@ -20,8 +20,13 @@ enum ParagraphAnimationConstants {
 
   static let initialCharacterOpacity: CGFloat = 0.08
   static let initialCharacterScale: CGFloat = 0.82
-  static let initialCharacterBaselineOffset: CGFloat = 3
-  static let initialCharacterBlurRadius: CGFloat = 3
+  static let initialCharacterBaselineOffset: CGFloat = 5
+  static let initialCharacterBlurRadius: CGFloat = 2
+}
+
+struct ParagraphSizeCacheKey: Hashable {
+  let width: CGFloat
+  let visibleUTF16Length: Int
 }
 
 struct ParagraphRevealSegment: Equatable {

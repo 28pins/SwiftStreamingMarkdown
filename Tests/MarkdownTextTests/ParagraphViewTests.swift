@@ -246,6 +246,139 @@ struct ParagraphViewTests {
     #expect(view.accessibilityLabel == "AB")
   }
 
+  @Test("Rapid snapshots preserve the pending Character Streaming deadline")
+  @MainActor
+  func characterStreamingRapidSnapshots() {
+    let view = ParagraphUIView(characterStreaming: true)
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "ABCDE"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+    #expect(view.attributedText.string == "A")
+
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "ABCDEF"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+
+    #expect(view.attributedText.string == "A")
+    view.finishTextAnimation()
+  }
+
+  @Test("Character Streaming remains settled when Reduce Motion turns off")
+  @MainActor
+  func characterStreamingReduceMotionToggle() {
+    let contents = NSMutableAttributedString(string: "Already visible")
+    let view = ParagraphUIView(characterStreaming: true)
+    view.setParagraphContents(
+      contents,
+      textAnimation: .none,
+      isStreamComplete: false
+    )
+
+    view.setParagraphContents(
+      contents,
+      textAnimation: .characterStreaming,
+      isStreamComplete: false
+    )
+
+    #expect(view.attributedText.string == contents.string)
+    #expect(view.layoutManager is CharacterStreamingLayoutManager)
+    view.finishTextAnimation()
+  }
+
+  @Test("Completion-only updates preserve an active Fade")
+  @MainActor
+  func fadeCompletionPreservesAnimation() throws {
+    let view = ParagraphUIView()
+    let initial = NSMutableAttributedString(
+      string: "A",
+      attributes: [.foregroundColor: UIColor.black]
+    )
+    view.setParagraphContents(
+      initial,
+      textAnimation: .none,
+      isStreamComplete: false
+    )
+
+    let updated = NSMutableAttributedString(
+      string: "AB",
+      attributes: [.foregroundColor: UIColor.black]
+    )
+    view.setParagraphContents(
+      updated,
+      textAnimation: .fade,
+      isStreamComplete: false
+    )
+    let before = try #require(
+      view.attributedText.attribute(
+        .foregroundColor,
+        at: 1,
+        effectiveRange: nil
+      ) as? UIColor
+    ).cgColor.alpha
+
+    view.setParagraphContents(
+      updated,
+      textAnimation: .fade,
+      isStreamComplete: true
+    )
+    let after = try #require(
+      view.attributedText.attribute(
+        .foregroundColor,
+        at: 1,
+        effectiveRange: nil
+      ) as? UIColor
+    ).cgColor.alpha
+
+    #expect(before < 1)
+    #expect(after == before)
+    view.finishTextAnimation()
+  }
+
+  @Test("Character Streaming wrapped size grows with its visible prefix")
+  @MainActor
+  func characterStreamingWrappedMeasurement() {
+    let view = ParagraphUIView(characterStreaming: true)
+    view.setParagraphContents(
+      NSMutableAttributedString(
+        string: "This paragraph grows across several narrow wrapped lines."
+      ),
+      textAnimation: .characterStreaming,
+      isStreamComplete: true
+    )
+    let initial = view.sizeThatFits(
+      CGSize(width: 70, height: CGFloat.greatestFiniteMagnitude)
+    )
+
+    view.finishTextAnimation()
+    let settled = view.sizeThatFits(
+      CGSize(width: 70, height: CGFloat.greatestFiniteMagnitude)
+    )
+
+    #expect(settled.height > initial.height)
+  }
+
+  @Test("Streaming size cache evicts prior visible prefixes")
+  @MainActor
+  func characterStreamingSizeCacheIsBounded() {
+    let coordinator = ParagraphView.Coordinator()
+    let key = ParagraphSizeCacheKey(width: 70, visibleUTF16Length: 1)
+    coordinator.sizeCache[key] = CGSize(width: 70, height: 20)
+
+    coordinator.updateVisibleUTF16Length(2)
+
+    #expect(coordinator.sizeCache.isEmpty)
+    #expect(coordinator.lastVisibleUTF16Length == 2)
+  }
+
+  @Test("UIKit Character Streaming translates positive offsets below baseline")
+  func characterStreamingBaselineDirection() {
+    #expect(CharacterStreamingLayoutManager.baselineTranslation(5) == 5)
+  }
+
   @Test("Long text overflow handling")
   func longTextOverflow() {
     let longText = String(repeating: "This is a very long text that should test overflow behavior. ", count: 20)

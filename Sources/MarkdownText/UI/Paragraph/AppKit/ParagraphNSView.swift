@@ -138,7 +138,8 @@ class ParagraphNSView: NSTextView {
     } else {
       finalString = newContents
     }
-    let previousText = finalAttributedText.string
+    let previousAttributedText = finalAttributedText
+    let previousText = previousAttributedText.string
     let contentsChanged = paragraphContents != newContents
       || self.lineSpacing != lineSpacing
     let modeChanged = self.textAnimation != textAnimation
@@ -168,6 +169,10 @@ class ParagraphNSView: NSTextView {
       textStorage?.setAttributedString(finalString)
     case .fade:
       stopCharacterStreaming()
+      guard contentsChanged || modeChanged else {
+        invalidateIntrinsicContentSize()
+        return
+      }
       textStorage?.setAttributedString(finalString)
       let revealPlan = contentsChanged
         ? ParagraphRevealPlan.appendedText(
@@ -193,17 +198,27 @@ class ParagraphNSView: NSTextView {
       setUpDisplayLink()
     case .characterStreaming:
       activeAnimation = nil
+      let currentTime = CACurrentMediaTime()
       if modeChanged {
         characterStreamingState.reset()
+        if previousAttributedText.length > 0 {
+          characterStreamingState.update(
+            target: previousAttributedText,
+            isComplete: true,
+            at: currentTime
+          )
+          characterStreamingState.settle()
+        }
       }
-      let currentTime = CACurrentMediaTime()
       characterStreamingState.update(
         target: finalString,
         isComplete: isStreamComplete,
         at: currentTime
       )
       synchronizeCharacterStreamingText()
-      releaseOneCharacter(at: currentTime)
+      if characterStreamingTimer == nil {
+        releaseOneCharacter(at: currentTime)
+      }
     }
 
     invalidateIntrinsicContentSize()
@@ -383,10 +398,9 @@ class ParagraphNSView: NSTextView {
   }
 
   private func scheduleNextCharacterRelease() {
-    characterStreamingTimer?.invalidate()
-    characterStreamingTimer = nil
     guard textAnimation == .characterStreaming,
-          characterStreamingState.hasPendingGrapheme else {
+          characterStreamingState.hasPendingGrapheme,
+          characterStreamingTimer == nil else {
       return
     }
 

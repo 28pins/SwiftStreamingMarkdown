@@ -123,7 +123,7 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
     context.setAlpha(transform.opacity)
     context.translateBy(
       x: 0,
-      y: platformBaselineTranslation(transform.baselineOffset)
+      y: Self.baselineTranslation(transform.baselineOffset)
     )
     context.translateBy(x: anchor.x, y: anchor.y)
     context.scaleBy(x: transform.scale, y: transform.scale)
@@ -140,12 +140,8 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
     #endif
   }
 
-  private func platformBaselineTranslation(_ offset: CGFloat) -> CGFloat {
-    #if canImport(UIKit)
+  static func baselineTranslation(_ offset: CGFloat) -> CGFloat {
     offset
-    #elseif canImport(AppKit)
-    -offset
-    #endif
   }
 }
 #endif
