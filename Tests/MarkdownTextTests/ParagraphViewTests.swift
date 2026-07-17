@@ -234,6 +234,13 @@ struct ParagraphViewTests {
     #expect(view.layoutManager is CharacterStreamingLayoutManager)
     #expect(
       view.attributedText.attribute(
+        .shadow,
+        at: 0,
+        effectiveRange: nil
+      ) == nil
+    )
+    #expect(
+      view.attributedText.attribute(
         .link,
         at: 0,
         effectiveRange: nil
@@ -261,6 +268,27 @@ struct ParagraphViewTests {
       NSMutableAttributedString(string: "ABCDEF"),
       textAnimation: .characterStreaming,
       isStreamComplete: false
+    )
+
+    #expect(view.attributedText.string == "A")
+    view.finishTextAnimation()
+  }
+
+  @Test("A drained queue still enforces Character Streaming cadence")
+  @MainActor
+  func characterStreamingDrainedQueueCadence() {
+    let view = ParagraphUIView(characterStreaming: true)
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "A"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: true
+    )
+    #expect(view.attributedText.string == "A")
+
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "AB"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: true
     )
 
     #expect(view.attributedText.string == "A")
@@ -379,6 +407,29 @@ struct ParagraphViewTests {
     #expect(CharacterStreamingLayoutManager.baselineTranslation(5) == 5)
   }
 
+  @Test("UIKit renders blurred glyph pixels before crossfading to sharp")
+  @MainActor
+  func characterStreamingBitmapBlur() throws {
+    let initial = try renderedGlyphMetrics(
+      for: .value(at: 0)
+    )
+    let intermediate = try renderedGlyphMetrics(
+      for: .value(at: 0.5)
+    )
+    let settled = try renderedGlyphMetrics(
+      for: .value(at: 1)
+    )
+
+    #expect(initial.maximumAlpha > 0)
+    #expect(initial.maximumAlpha < intermediate.maximumAlpha)
+    #expect(intermediate.maximumAlpha < settled.maximumAlpha)
+    #expect(initial.faintPixelCount > 0)
+    #expect(initial.opaquePixelCount == 0)
+    #expect(settled.opaquePixelCount > 0)
+    #expect(initial.redPixelCount > 0)
+    #expect(intermediate.redPixelCount > 0)
+  }
+
   @Test("Long text overflow handling")
   func longTextOverflow() {
     let longText = String(repeating: "This is a very long text that should test overflow behavior. ", count: 20)
@@ -473,6 +524,48 @@ struct ParagraphViewTests {
     #expect(citationData?.title == "Test Source", "Should preserve citation title")
     #expect(citationData?.accessibilityLabel == "Test Source", "Should preserve accessibility label")
     #expect(citationData?.url != nil, "Should have valid URL")
+  }
+
+  @MainActor
+  private func renderedGlyphMetrics(
+    for transform: CharacterStreamingTransform
+  ) throws -> CharacterStreamingGlyphImageMetrics {
+    let textStorage = NSTextStorage(
+      attributedString: NSAttributedString(
+        string: "A",
+        attributes: [
+          .font: UIFont.systemFont(ofSize: 40),
+          .foregroundColor: UIColor.red
+        ]
+      )
+    )
+    let layoutManager = CharacterStreamingLayoutManager()
+    let textContainer = NSTextContainer(
+      size: CGSize(width: 100, height: 100)
+    )
+    textContainer.lineFragmentPadding = 0
+    layoutManager.addTextContainer(textContainer)
+    textStorage.addLayoutManager(layoutManager)
+    let glyphRange = layoutManager.glyphRange(for: textContainer)
+    layoutManager.updateAnimationFrames([
+      CharacterStreamingGlyphAnimationFrame(
+        range: NSRange(location: 0, length: 1),
+        transform: transform,
+        startTime: 0
+      )
+    ])
+
+    let image = UIGraphicsImageRenderer(
+      size: CGSize(width: 100, height: 100)
+    ).image { _ in
+      layoutManager.drawGlyphs(
+        forGlyphRange: glyphRange,
+        at: CGPoint(x: 20, y: 20)
+      )
+    }
+    return characterStreamingGlyphImageMetrics(
+      for: try #require(image.cgImage)
+    )
   }
 }
 #endif

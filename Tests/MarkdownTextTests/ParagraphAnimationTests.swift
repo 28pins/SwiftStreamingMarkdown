@@ -55,6 +55,22 @@ struct ParagraphAnimationTests {
     #expect(state.nextReleaseInterval == 0.018)
   }
 
+  @Test("Idle queues retain the next release deadline")
+  func idleQueueRetainsDeadline() throws {
+    let state = CharacterStreamingState()
+    state.update(target: attributed("A"), isComplete: true, at: 0)
+    _ = try #require(state.releaseNext(at: 0))
+    #expect(!state.hasPendingGrapheme)
+
+    state.update(target: attributed("AB"), isComplete: true, at: 0.001)
+    #expect(state.releaseNext(at: 0.001) == nil)
+    #expect(state.releaseNext(at: 0.004_499) == nil)
+    #expect(abs(state.releaseDelay(at: 0.001) - 0.017) < 0.000_001)
+
+    let release = try #require(state.releaseNext(at: 0.018))
+    #expect(substring("AB", in: release.range) == "B")
+  }
+
   @Test("Withholds a terminal grapheme across chunks that extend it")
   func crossChunkContinuity() throws {
     let state = CharacterStreamingState()
@@ -99,6 +115,61 @@ struct ParagraphAnimationTests {
     #expect(transform.baselineOffset == 0)
     #expect(transform.blurRadius == 0)
     #expect(animation.isFinished(at: 1.26))
+  }
+
+  @Test("Overlapping shaped glyph ranges animate once using the newest release")
+  func overlappingShapedGlyphClusters() {
+    let olderTransform = CharacterStreamingTransform.value(at: 0.75)
+    let newerTransform = CharacterStreamingTransform.value(at: 0.25)
+    let settledNeighborTransform = CharacterStreamingTransform.value(at: 0.5)
+    let clusters = CharacterStreamingLayoutManager.coalescedGlyphFrames([
+      CharacterStreamingGlyphAnimationFrame(
+        range: NSRange(location: 0, length: 2),
+        transform: olderTransform,
+        startTime: 1
+      ),
+      CharacterStreamingGlyphAnimationFrame(
+        range: NSRange(location: 1, length: 2),
+        transform: newerTransform,
+        startTime: 2
+      ),
+      CharacterStreamingGlyphAnimationFrame(
+        range: NSRange(location: 4, length: 1),
+        transform: settledNeighborTransform,
+        startTime: 1.5
+      )
+    ])
+
+    #expect(clusters.count == 2)
+    #expect(clusters[0].range == NSRange(location: 0, length: 3))
+    #expect(clusters[0].transform == newerTransform)
+    #expect(clusters[0].startTime == 2)
+    #expect(clusters[1].range == NSRange(location: 4, length: 1))
+  }
+
+  @Test("Glyph blur crossfades a blurred-only pass to the sharp pass")
+  func genuineGlyphBlurBlend() {
+    let initial = CharacterStreamingGlyphBlend.value(
+      for: .value(at: 0)
+    )
+    #expect(initial.blurredAlpha == 0.08)
+    #expect(initial.sharpAlpha == 0)
+    #expect(initial.blurRadius == 2)
+
+    let intermediate = CharacterStreamingGlyphBlend.value(
+      for: .value(at: 0.5)
+    )
+    #expect(intermediate.blurredAlpha > 0)
+    #expect(intermediate.sharpAlpha > 0)
+    #expect(intermediate.blurRadius > 0)
+    #expect(intermediate.blurRadius < 2)
+
+    let settled = CharacterStreamingGlyphBlend.value(
+      for: .value(at: 1)
+    )
+    #expect(settled.blurredAlpha == 0)
+    #expect(settled.sharpAlpha == 1)
+    #expect(settled.blurRadius == 0)
   }
 
   @Test("Releases Unicode composed character sequences intact")
@@ -241,7 +312,7 @@ struct ParagraphAnimationTests {
       at: 0.01
     )
     #expect(extendedPrefix.visibleAttributedText.string.isEmpty)
-    let release = try #require(extendedPrefix.releaseNext(at: 0.01))
+    let release = try #require(extendedPrefix.releaseNext(at: 0.018))
     #expect(substring("e\u{301}X", in: release.range) == "e\u{301}")
   }
 
@@ -276,13 +347,16 @@ struct ParagraphAnimationTests {
       at: 0
     )
 
-    for index in 0..<100 {
-      _ = try #require(state.releaseNext(at: Double(index) / 1_000))
+    var time: CFTimeInterval = 0
+    for _ in 0..<100 {
+      _ = try #require(state.releaseNext(at: time))
+      time += state.nextReleaseInterval
     }
 
+    #expect(!state.activeAnimations.isEmpty)
     #expect(
       state.activeAnimations.count
-        == ParagraphAnimationConstants.maximumActiveCharacterAnimations
+        <= ParagraphAnimationConstants.maximumActiveCharacterAnimations
     )
   }
 
@@ -349,7 +423,7 @@ private func assertNormalizationReplacement(
   state.update(target: attributed(replacement), isComplete: false, at: 0.01)
   #expect(state.visibleAttributedText.string.isEmpty)
 
-  let release = try #require(state.releaseNext(at: 0.01))
+  let release = try #require(state.releaseNext(at: 0.018))
   #expect(substring(replacement, in: release.range) == expected)
   #expect(state.visibleAttributedText.string == expected)
 }

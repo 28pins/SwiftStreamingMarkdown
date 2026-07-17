@@ -192,7 +192,7 @@ final class CharacterStreamingState {
   private(set) var activeAnimations: [CharacterStreamingAnimation] = []
   private(set) var isComplete = false
 
-  private var lastReleaseTime: CFTimeInterval?
+  private var nextReleaseDeadline: CFTimeInterval?
 
   var visibleAttributedText: NSAttributedString {
     target.attributedSubstring(
@@ -206,6 +206,11 @@ final class CharacterStreamingState {
 
   var nextReleaseInterval: CFTimeInterval {
     Self.releaseInterval(forBacklog: pendingGraphemeCount)
+  }
+
+  func releaseDelay(at time: CFTimeInterval) -> CFTimeInterval {
+    guard let nextReleaseDeadline else { return 0 }
+    return max(0, nextReleaseDeadline - time)
   }
 
   func update(
@@ -241,7 +246,7 @@ final class CharacterStreamingState {
 
   func releaseNext(at time: CFTimeInterval) -> CharacterStreamingRelease? {
     guard pendingGraphemeCount > 0,
-          lastReleaseTime != time,
+          nextReleaseDeadline.map({ time >= $0 }) ?? true,
           releasedUTF16Length < releasableUTF16Length else {
       return nil
     }
@@ -256,7 +261,7 @@ final class CharacterStreamingState {
 
     releasedUTF16Length = NSMaxRange(range)
     pendingGraphemeCount -= 1
-    lastReleaseTime = time
+    nextReleaseDeadline = time + nextReleaseInterval
     pruneAnimations(at: time)
     activeAnimations.append(CharacterStreamingAnimation(range: range, startTime: time))
     if activeAnimations.count > ParagraphAnimationConstants.maximumActiveCharacterAnimations {
@@ -275,7 +280,7 @@ final class CharacterStreamingState {
     releasedUTF16Length = target.length
     pendingGraphemeCount = 0
     activeAnimations.removeAll()
-    lastReleaseTime = nil
+    nextReleaseDeadline = nil
   }
 
   func reset() {
@@ -284,7 +289,7 @@ final class CharacterStreamingState {
     pendingGraphemeCount = 0
     activeAnimations.removeAll()
     isComplete = false
-    lastReleaseTime = nil
+    nextReleaseDeadline = nil
   }
 
   static func releaseInterval(forBacklog backlog: Int) -> CFTimeInterval {

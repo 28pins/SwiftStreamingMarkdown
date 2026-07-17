@@ -28,7 +28,6 @@ class ParagraphUIView: UITextView {
   private var activeAnimation: FadeAnimationData?
   private let characterStreamingState = CharacterStreamingState()
   private var characterStreamingTimer: Timer?
-  private var animatedCharacterRanges: [NSRange] = []
   private var textAnimationDisplayLink: CADisplayLink?
   private var textAnimation: MarkdownRenderConfig.TextAnimation = .none
   private var isStreamComplete = true
@@ -462,7 +461,6 @@ class ParagraphUIView: UITextView {
 
   private func synchronizeCharacterStreamingText() {
     attributedText = characterStreamingState.visibleAttributedText
-    animatedCharacterRanges.removeAll()
     invalidateCachedSize()
     invalidateIntrinsicContentSize()
   }
@@ -475,7 +473,9 @@ class ParagraphUIView: UITextView {
     }
 
     let timer = Timer(
-      timeInterval: characterStreamingState.nextReleaseInterval,
+      timeInterval: characterStreamingState.releaseDelay(
+        at: CACurrentMediaTime()
+      ),
       repeats: false
     ) { [weak self] _ in
       guard let self else { return }
@@ -489,54 +489,15 @@ class ParagraphUIView: UITextView {
   private func updateCharacterStreamingAnimations(at currentTime: CFTimeInterval) {
     characterStreamingState.pruneAnimations(at: currentTime)
     let animations = characterStreamingState.activeAnimations
-    let rangesToRestore = animatedCharacterRanges.filter {
-      NSMaxRange($0) <= textStorage.length
-    }
-
-    textStorage.beginEditing()
-    restoreFinalAttributesWithoutEditing(in: rangesToRestore)
-    for animation in animations where NSMaxRange(animation.range) <= textStorage.length {
-      let transform = animation.transform(at: currentTime)
-      guard transform.blurRadius > 0 else { continue }
-      finalAttributedText.enumerateAttributes(
-        in: animation.range,
-        options: []
-      ) { attributes, attributeRange, _ in
-        var attributes = attributes
-        let color = (attributes[.foregroundColor] as? UIColor)
-          ?? UIColor(Color.Theme.Foreground.Primary.Primary750)
-        let shadow = NSShadow()
-        shadow.shadowOffset = .zero
-        shadow.shadowBlurRadius = transform.blurRadius
-        shadow.shadowColor = color.withAlphaComponent(color.cgColor.alpha)
-        attributes[.shadow] = shadow
-        textStorage.setAttributes(attributes, range: attributeRange)
-      }
-    }
-    textStorage.endEditing()
-
-    animatedCharacterRanges = animations.map(\.range)
     characterStreamingLayoutManager?.updateAnimations(
       animations,
       at: currentTime
     )
   }
 
-  private func restoreFinalAttributesWithoutEditing(in ranges: [NSRange]) {
-    for range in ranges where NSMaxRange(range) <= finalAttributedText.length {
-      finalAttributedText.enumerateAttributes(
-        in: range,
-        options: []
-      ) { attributes, attributeRange, _ in
-        textStorage.setAttributes(attributes, range: attributeRange)
-      }
-    }
-  }
-
   private func stopCharacterStreaming() {
     characterStreamingTimer?.invalidate()
     characterStreamingTimer = nil
-    animatedCharacterRanges.removeAll()
     if supportsCharacterStreaming {
       characterStreamingLayoutManager?.clearAnimations()
     }
