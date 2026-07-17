@@ -376,7 +376,12 @@ extension TableView {
         content,
         color: color
       ))
-      .environment(\.markdownConfig, config.withTextAnimation(.none))
+      .environment(
+        \.markdownConfig,
+        config.withTextAnimation(
+          tableAttachmentTextAnimation(config.textAnimation)
+        )
+      )
     } else if config.textAnimation == .fade {
       Text(AttributedString(content))
         .foregroundStyle(color)
@@ -393,6 +398,12 @@ extension TableView {
         .multilineTextAlignment(.leading)
     }
   }
+}
+
+func tableAttachmentTextAnimation(
+  _ animation: MarkdownRenderConfig.TextAnimation
+) -> MarkdownRenderConfig.TextAnimation {
+  animation == .characterStreaming ? .none : animation
 }
 
 #if DEBUG

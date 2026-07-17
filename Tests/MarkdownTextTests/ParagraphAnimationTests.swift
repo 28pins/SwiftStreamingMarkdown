@@ -189,6 +189,7 @@ struct ParagraphAnimationTests {
     for time in [0.0, 0.018, 0.036] {
       _ = try #require(state.releaseNext(at: time))
     }
+
     #expect(state.visibleAttributedText.string == "abc")
 
     state.update(target: attributed("abZ!"), isComplete: false, at: 0.05)
@@ -212,6 +213,36 @@ struct ParagraphAnimationTests {
         effectiveRange: nil
       ) as? String == "updated"
     )
+  }
+
+  @Test("Normalization changes rewind to composed UTF-16 boundaries")
+  func normalizationSafeReplacement() throws {
+    try assertNormalizationReplacement(
+      from: "\u{00E9}X",
+      to: "e\u{301}X",
+      expected: "e\u{301}"
+    )
+    try assertNormalizationReplacement(
+      from: "e\u{301}X",
+      to: "\u{00E9}X",
+      expected: "\u{00E9}"
+    )
+
+    let extendedPrefix = CharacterStreamingState()
+    extendedPrefix.update(
+      target: attributed("e"),
+      isComplete: true,
+      at: 0
+    )
+    _ = try #require(extendedPrefix.releaseNext(at: 0))
+    extendedPrefix.update(
+      target: attributed("e\u{301}X"),
+      isComplete: false,
+      at: 0.01
+    )
+    #expect(extendedPrefix.visibleAttributedText.string.isEmpty)
+    let release = try #require(extendedPrefix.releaseNext(at: 0.01))
+    #expect(substring("e\u{301}X", in: release.range) == "e\u{301}")
   }
 
   @Test("Preserves attributed Markdown runs in released content")
@@ -303,6 +334,24 @@ private func attributed(_ text: String) -> NSAttributedString {
 
 private func substring(_ text: String, in range: NSRange) -> String {
   (text as NSString).substring(with: range)
+}
+
+private func assertNormalizationReplacement(
+  from original: String,
+  to replacement: String,
+  expected: String
+) throws {
+  let state = CharacterStreamingState()
+  state.update(target: attributed(original), isComplete: false, at: 0)
+  _ = try #require(state.releaseNext(at: 0))
+  #expect(!state.visibleAttributedText.string.isEmpty)
+
+  state.update(target: attributed(replacement), isComplete: false, at: 0.01)
+  #expect(state.visibleAttributedText.string.isEmpty)
+
+  let release = try #require(state.releaseNext(at: 0.01))
+  #expect(substring(replacement, in: release.range) == expected)
+  #expect(state.visibleAttributedText.string == expected)
 }
 
 private extension ParagraphRevealPlan {

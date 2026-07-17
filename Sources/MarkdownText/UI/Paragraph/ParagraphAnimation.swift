@@ -216,14 +216,20 @@ final class CharacterStreamingState {
     let oldString = target.string
     let newString = newTarget.string
 
-    if oldString != newString && !newString.hasPrefix(oldString) {
-      releasedUTF16Length = min(
-        releasedUTF16Length,
-        Self.commonPrefixUTF16Length(oldString, newString)
-      )
-      activeAnimations.removeAll {
-        NSMaxRange($0.range) > releasedUTF16Length
-      }
+    let exactPrefixLength = Self.commonPrefixUTF16Length(
+      oldString,
+      newString
+    )
+    var retainedPrefixLength = releasedUTF16Length
+    if exactPrefixLength != oldString.utf16.count {
+      retainedPrefixLength = min(retainedPrefixLength, exactPrefixLength)
+    }
+    releasedUTF16Length = Self.composedSequenceBoundary(
+      atOrBefore: retainedPrefixLength,
+      in: newString
+    )
+    activeAnimations.removeAll {
+      NSMaxRange($0.range) > releasedUTF16Length
     }
 
     target = NSAttributedString(attributedString: newTarget)
@@ -329,15 +335,27 @@ final class CharacterStreamingState {
     _ first: String,
     _ second: String
   ) -> Int {
-    var firstIndex = first.startIndex
-    var secondIndex = second.startIndex
-    while firstIndex < first.endIndex,
-          secondIndex < second.endIndex,
-          first[firstIndex] == second[secondIndex] {
-      first.formIndex(after: &firstIndex)
-      second.formIndex(after: &secondIndex)
+    let firstUTF16 = first as NSString
+    let secondUTF16 = second as NSString
+    let maximumLength = min(firstUTF16.length, secondUTF16.length)
+    var length = 0
+    while length < maximumLength,
+          firstUTF16.character(at: length) == secondUTF16.character(at: length) {
+      length += 1
     }
-    return firstIndex.utf16Offset(in: first)
+    return length
+  }
+
+  private static func composedSequenceBoundary(
+    atOrBefore offset: Int,
+    in string: String
+  ) -> Int {
+    let utf16 = string as NSString
+    guard offset > 0, offset < utf16.length else {
+      return min(offset, utf16.length)
+    }
+    let sequence = utf16.rangeOfComposedCharacterSequence(at: offset)
+    return sequence.location < offset ? sequence.location : offset
   }
 }
 
