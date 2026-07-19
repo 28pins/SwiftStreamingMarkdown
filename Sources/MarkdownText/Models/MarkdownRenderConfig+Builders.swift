@@ -42,7 +42,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -61,7 +62,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -80,7 +82,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -99,7 +102,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -118,7 +122,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -137,7 +142,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -157,7 +163,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -176,7 +183,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: value,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -195,7 +203,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: value,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -215,7 +224,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: value,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig
     )
   }
 
@@ -234,7 +244,8 @@ extension MarkdownRenderConfig {
       codeBlockConfig: codeBlockConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: value
+      thematicBreakColor: value,
+      imageConfig: imageConfig
     )
   }
 

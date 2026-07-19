@@ -75,6 +75,9 @@ class ParagraphUIView: UITextView {
     // Fix for crash: "UIPreviewTarget requires that the container view is in a window". When the view is removed from the window (e.g. scrolled out in LazyVStack), we should clear the selection to prevent any pending menu or drag interactions from trying to reference the detached view.
     if newWindow == nil {
       selectedTextRange = nil
+      if textAnimation == .characterStreaming {
+        finishTextAnimation()
+      }
     }
   }
 

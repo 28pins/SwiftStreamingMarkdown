@@ -72,6 +72,13 @@ class ParagraphNSView: NSTextView {
     AppAppearance.update(appearance: effectiveAppearance)
   }
 
+  override func viewWillMove(toWindow newWindow: NSWindow?) {
+    super.viewWillMove(toWindow: newWindow)
+    if newWindow == nil, textAnimation == .characterStreaming {
+      finishTextAnimation()
+    }
+  }
+
   // MARK: - Intrinsic Content Size
 
   override var intrinsicContentSize: NSSize {

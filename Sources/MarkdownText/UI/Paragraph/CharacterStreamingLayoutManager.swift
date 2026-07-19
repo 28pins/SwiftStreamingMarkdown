@@ -43,11 +43,70 @@ struct CharacterStreamingGlyphBlend: Equatable {
   }
 }
 
+private struct CharacterStreamingGlyphImageSignature: Equatable {
+  let range: NSRange
+  let bounds: CGRect
+  let scale: CGFloat
+  let glyphs: [UInt32]
+  let attributedString: NSAttributedString?
+
+  static func == (
+    lhs: CharacterStreamingGlyphImageSignature,
+    rhs: CharacterStreamingGlyphImageSignature
+  ) -> Bool {
+    guard lhs.range == rhs.range,
+          lhs.bounds == rhs.bounds,
+          lhs.scale == rhs.scale,
+          lhs.glyphs == rhs.glyphs else {
+      return false
+    }
+    switch (lhs.attributedString, rhs.attributedString) {
+    case (nil, nil):
+      return true
+    case let (lhs?, rhs?):
+      return lhs.isEqual(to: rhs)
+    default:
+      return false
+    }
+  }
+}
+
+private struct CharacterStreamingGlyphImageCacheEntry {
+  let signature: CharacterStreamingGlyphImageSignature
+  let sourceImage: CGImage
+  var blurredImages: [Int: CGImage] = [:]
+}
+
+private struct CharacterStreamingGlyphDrawingFrame {
+  let range: NSRange
+  let origin: CGPoint
+  let bounds: CGRect
+  let anchor: CGPoint
+  let transform: CharacterStreamingTransform
+  let backingScale: CGFloat
+  let cacheID: CFTimeInterval
+}
+
 final class CharacterStreamingLayoutManager: NSLayoutManager {
   private static let blurContext = CIContext(
     options: [.cacheIntermediates: false]
   )
+  private static let blurRadiusStep: CGFloat = 0.25
   private var animationFrames: [CharacterStreamingGlyphAnimationFrame] = []
+  private var glyphImageCache: [
+    CFTimeInterval: CharacterStreamingGlyphImageCacheEntry
+  ] = [:]
+  private(set) var renderedGlyphImageCount = 0
+
+  var cachedGlyphImageCount: Int {
+    glyphImageCache.count
+  }
+
+  var cachedBlurredImageCount: Int {
+    glyphImageCache.values.reduce(0) {
+      $0 + $1.blurredImages.count
+    }
+  }
 
   func updateAnimations(
     _ animations: [CharacterStreamingAnimation],
@@ -65,19 +124,26 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
   func updateAnimationFrames(
     _ frames: [CharacterStreamingGlyphAnimationFrame]
   ) {
+    let invalidatedRange = Self.unionRange(
+      (animationFrames + frames).map(\.range)
+    )
     animationFrames = frames
-    invalidateDisplay(forCharacterRange: NSRange(
-      location: 0,
-      length: textStorage?.length ?? 0
-    ))
+    let activeStartTimes = Set(frames.map(\.startTime))
+    glyphImageCache = glyphImageCache.filter {
+      activeStartTimes.contains($0.key)
+    }
+    if let invalidatedRange {
+      invalidateDisplay(forCharacterRange: invalidatedRange)
+    }
   }
 
   func clearAnimations() {
+    let invalidatedRange = Self.unionRange(animationFrames.map(\.range))
     animationFrames.removeAll()
-    invalidateDisplay(forCharacterRange: NSRange(
-      location: 0,
-      length: textStorage?.length ?? 0
-    ))
+    glyphImageCache.removeAll()
+    if let invalidatedRange {
+      invalidateDisplay(forCharacterRange: invalidatedRange)
+    }
   }
 
   override func drawGlyphs(
@@ -128,7 +194,7 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
         drawTransformedGlyphs(
           in: transformedRange,
           at: origin,
-          transform: cluster.transform
+          frame: cluster
         )
         nextGlyphLocation = NSMaxRange(transformedRange)
       }
@@ -172,10 +238,16 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
     return clusters
   }
 
+  static func unionRange(_ ranges: [NSRange]) -> NSRange? {
+    ranges.reduce(nil) { result, range in
+      result.map { NSUnionRange($0, range) } ?? range
+    }
+  }
+
   private func drawTransformedGlyphs(
     in glyphRange: NSRange,
     at origin: CGPoint,
-    transform: CharacterStreamingTransform
+    frame: CharacterStreamingGlyphAnimationFrame
   ) {
     guard let context = currentGraphicsContext(),
           let textContainer = textContainer(
@@ -191,28 +263,30 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
       in: textContainer
     ).offsetBy(dx: origin.x, dy: origin.y)
     let anchor = CGPoint(x: bounds.midX, y: bounds.maxY)
+    let transform = frame.transform
     let blend = CharacterStreamingGlyphBlend.value(for: transform)
+    let drawingFrame = CharacterStreamingGlyphDrawingFrame(
+      range: glyphRange,
+      origin: origin,
+      bounds: bounds,
+      anchor: anchor,
+      transform: transform,
+      backingScale: Self.backingScale(for: context),
+      cacheID: frame.startTime
+    )
 
     if blend.blurredAlpha > 0, blend.blurRadius > 0 {
       drawGlyphPass(
-        in: glyphRange,
-        at: origin,
+        drawingFrame,
         context: context,
-        bounds: bounds,
-        anchor: anchor,
-        transform: transform,
         alpha: blend.blurredAlpha,
         blurRadius: blend.blurRadius
       )
     }
     if blend.sharpAlpha > 0 {
       drawGlyphPass(
-        in: glyphRange,
-        at: origin,
+        drawingFrame,
         context: context,
-        bounds: bounds,
-        anchor: anchor,
-        transform: transform,
         alpha: blend.sharpAlpha,
         blurRadius: nil
       )
@@ -220,36 +294,33 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
   }
 
   private func drawGlyphPass(
-    in glyphRange: NSRange,
-    at origin: CGPoint,
+    _ frame: CharacterStreamingGlyphDrawingFrame,
     context: CGContext,
-    bounds: CGRect,
-    anchor: CGPoint,
-    transform: CharacterStreamingTransform,
     alpha: CGFloat,
     blurRadius: CGFloat?
   ) {
     context.saveGState()
     context.translateBy(
       x: 0,
-      y: Self.baselineTranslation(transform.baselineOffset)
+      y: Self.baselineTranslation(frame.transform.baselineOffset)
     )
-    context.translateBy(x: anchor.x, y: anchor.y)
-    context.scaleBy(x: transform.scale, y: transform.scale)
-    context.translateBy(x: -anchor.x, y: -anchor.y)
+    context.translateBy(x: frame.anchor.x, y: frame.anchor.y)
+    context.scaleBy(x: frame.transform.scale, y: frame.transform.scale)
+    context.translateBy(x: -frame.anchor.x, y: -frame.anchor.y)
 
     if let blurRadius, blurRadius > 0 {
       drawBlurredGlyphs(
-        in: glyphRange,
-        at: origin,
-        bounds: bounds,
+        in: frame.range,
+        at: frame.origin,
+        bounds: frame.bounds,
         radius: blurRadius,
-        scale: Self.backingScale(for: context),
+        scale: frame.backingScale,
+        cacheID: frame.cacheID,
         alpha: alpha
       )
     } else {
       context.setAlpha(alpha)
-      super.drawGlyphs(forGlyphRange: glyphRange, at: origin)
+      super.drawGlyphs(forGlyphRange: frame.range, at: frame.origin)
     }
 
     context.restoreGState()
@@ -261,34 +332,39 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
     bounds: CGRect,
     radius: CGFloat,
     scale: CGFloat,
+    cacheID: CFTimeInterval,
     alpha: CGFloat
   ) {
-    let padding = radius * 4
+    let padding = ParagraphAnimationConstants.initialCharacterBlurRadius * 4
     let imageBounds = bounds.insetBy(dx: -padding, dy: -padding)
     guard imageBounds.width > 0,
           imageBounds.height > 0,
-          let sourceImage = glyphImage(
+          let sourceImage = cachedGlyphImage(
             in: glyphRange,
             at: origin,
             bounds: imageBounds,
-            scale: scale
+            scale: scale,
+            cacheID: cacheID
           ) else {
       super.drawGlyphs(forGlyphRange: glyphRange, at: origin)
       return
     }
 
-    let inputImage = CIImage(cgImage: sourceImage)
-    guard let filter = CIFilter(name: "CIGaussianBlur") else {
-      super.drawGlyphs(forGlyphRange: glyphRange, at: origin)
-      return
-    }
-    filter.setValue(inputImage, forKey: kCIInputImageKey)
-    filter.setValue(radius * scale, forKey: kCIInputRadiusKey)
-    guard let outputImage = filter.outputImage?.cropped(to: inputImage.extent),
-          let blurredImage = Self.blurContext.createCGImage(
-            outputImage,
-            from: inputImage.extent
-          ) else {
+    let blurIndex = max(
+      1,
+      Int(ceil(radius / Self.blurRadiusStep))
+    )
+    let quantizedRadius = min(
+      ParagraphAnimationConstants.initialCharacterBlurRadius,
+      CGFloat(blurIndex) * Self.blurRadiusStep
+    )
+    guard let blurredImage = cachedBlurredImage(
+      for: sourceImage,
+      radius: quantizedRadius,
+      scale: scale,
+      cacheID: cacheID,
+      blurIndex: blurIndex
+    ) else {
       super.drawGlyphs(forGlyphRange: glyphRange, at: origin)
       return
     }
@@ -318,12 +394,102 @@ final class CharacterStreamingLayoutManager: NSLayoutManager {
     #endif
   }
 
+  private func cachedGlyphImage(
+    in glyphRange: NSRange,
+    at origin: CGPoint,
+    bounds: CGRect,
+    scale: CGFloat,
+    cacheID: CFTimeInterval
+  ) -> CGImage? {
+    let signature = glyphImageSignature(
+      in: glyphRange,
+      bounds: bounds,
+      scale: scale
+    )
+    if let entry = glyphImageCache[cacheID],
+       entry.signature == signature {
+      return entry.sourceImage
+    }
+    guard let sourceImage = glyphImage(
+      in: glyphRange,
+      at: origin,
+      bounds: bounds,
+      scale: scale
+    ) else {
+      return nil
+    }
+    glyphImageCache[cacheID] = CharacterStreamingGlyphImageCacheEntry(
+      signature: signature,
+      sourceImage: sourceImage
+    )
+    return sourceImage
+  }
+
+  private func cachedBlurredImage(
+    for sourceImage: CGImage,
+    radius: CGFloat,
+    scale: CGFloat,
+    cacheID: CFTimeInterval,
+    blurIndex: Int
+  ) -> CGImage? {
+    if let blurredImage = glyphImageCache[cacheID]?
+      .blurredImages[blurIndex] {
+      return blurredImage
+    }
+
+    let inputImage = CIImage(cgImage: sourceImage)
+    guard let filter = CIFilter(name: "CIGaussianBlur") else {
+      return nil
+    }
+    filter.setValue(inputImage, forKey: kCIInputImageKey)
+    filter.setValue(radius * scale, forKey: kCIInputRadiusKey)
+    guard let outputImage = filter.outputImage?.cropped(to: inputImage.extent),
+          let blurredImage = Self.blurContext.createCGImage(
+            outputImage,
+            from: inputImage.extent
+          ) else {
+      return nil
+    }
+    glyphImageCache[cacheID]?.blurredImages[blurIndex] = blurredImage
+    return blurredImage
+  }
+
+  private func glyphImageSignature(
+    in glyphRange: NSRange,
+    bounds: CGRect,
+    scale: CGFloat
+  ) -> CharacterStreamingGlyphImageSignature {
+    let glyphs = (glyphRange.location..<NSMaxRange(glyphRange)).map {
+      UInt32(glyph(at: $0))
+    }
+    let attributedString: NSAttributedString?
+    if let textStorage {
+      let characterRange = characterRange(
+        forGlyphRange: glyphRange,
+        actualGlyphRange: nil
+      )
+      attributedString = textStorage.attributedSubstring(
+        from: characterRange
+      )
+    } else {
+      attributedString = nil
+    }
+    return CharacterStreamingGlyphImageSignature(
+      range: glyphRange,
+      bounds: bounds,
+      scale: scale,
+      glyphs: glyphs,
+      attributedString: attributedString
+    )
+  }
+
   private func glyphImage(
     in glyphRange: NSRange,
     at origin: CGPoint,
     bounds: CGRect,
     scale: CGFloat
   ) -> CGImage? {
+    renderedGlyphImageCount += 1
     #if canImport(UIKit)
     let format = UIGraphicsImageRendererFormat()
     format.opaque = false

@@ -114,6 +114,23 @@ struct ParagraphNSViewTests {
     view.finishTextAnimation()
   }
 
+  @Test("Detaching settles Character Streaming and stops scheduled work")
+  func characterStreamingSettlesWhenDetached() {
+    let view = ParagraphNSView(characterStreaming: true)
+    view.setParagraphContents(
+      NSMutableAttributedString(string: "AB"),
+      textAnimation: .characterStreaming,
+      isStreamComplete: true
+    )
+    #expect(view.string == "A")
+
+    let window = NSWindow()
+    window.contentView?.addSubview(view)
+    view.removeFromSuperview()
+
+    #expect(view.string == "AB")
+  }
+
   @Test("Character Streaming remains settled when Reduce Motion turns off")
   func characterStreamingReduceMotionToggle() {
     let contents = NSMutableAttributedString(string: "Already visible")
@@ -268,29 +285,54 @@ struct ParagraphNSViewTests {
       )
     ])
 
-    let image = NSImage(
-      size: CGSize(width: 100, height: 100),
-      flipped: true
-    ) { _ in
-      layoutManager.drawGlyphs(
-        forGlyphRange: glyphRange,
-        at: CGPoint(x: 20, y: 20)
+    func renderImage() throws -> CGImage {
+      let image = NSImage(
+        size: CGSize(width: 100, height: 100),
+        flipped: true
+      ) { _ in
+        layoutManager.drawGlyphs(
+          forGlyphRange: glyphRange,
+          at: CGPoint(x: 20, y: 20)
+        )
+        return true
+      }
+      var proposedRect = CGRect(
+        origin: .zero,
+        size: image.size
       )
-      return true
-    }
-    var proposedRect = CGRect(
-      origin: .zero,
-      size: image.size
-    )
-    return characterStreamingGlyphImageMetrics(
-      for: try #require(
+      return try #require(
         image.cgImage(
           forProposedRect: &proposedRect,
           context: nil,
           hints: nil
         )
       )
-    )
+    }
+
+    let image = try renderImage()
+    if transform.blurRadius > 0 {
+      let sourceCount = layoutManager.cachedGlyphImageCount
+      let blurredCount = layoutManager.cachedBlurredImageCount
+      _ = try renderImage()
+      #expect(sourceCount == 1)
+      #expect(blurredCount == 1)
+      #expect(layoutManager.cachedGlyphImageCount == sourceCount)
+      #expect(layoutManager.cachedBlurredImageCount == blurredCount)
+      #expect(layoutManager.renderedGlyphImageCount == 1)
+      textStorage.addAttribute(
+        .foregroundColor,
+        value: NSColor.blue,
+        range: NSRange(location: 0, length: textStorage.length)
+      )
+      _ = try renderImage()
+      #expect(layoutManager.renderedGlyphImageCount == 2)
+      #expect(layoutManager.cachedGlyphImageCount == 1)
+      #expect(layoutManager.cachedBlurredImageCount == 1)
+      layoutManager.clearAnimations()
+      #expect(layoutManager.cachedGlyphImageCount == 0)
+      #expect(layoutManager.cachedBlurredImageCount == 0)
+    }
+    return characterStreamingGlyphImageMetrics(for: image)
   }
 }
 #endif

@@ -145,6 +145,11 @@ struct ParagraphAnimationTests {
     #expect(clusters[0].transform == newerTransform)
     #expect(clusters[0].startTime == 2)
     #expect(clusters[1].range == NSRange(location: 4, length: 1))
+    #expect(
+      CharacterStreamingLayoutManager.unionRange(
+        clusters.map(\.range)
+      ) == NSRange(location: 0, length: 5)
+    )
   }
 
   @Test("Glyph blur crossfades a blurred-only pass to the sharp pass")
