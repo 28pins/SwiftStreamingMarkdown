@@ -15,6 +15,9 @@ import SwiftUI
 public struct MarkdownRenderConfig: Hashable, Sendable {
   /// When `true`, newly appended text fades in instead of appearing instantly.
   public let shouldAnimateText: Bool
+  /// How newly appended words animate in while streaming. Only applies when
+  /// `shouldAnimateText` is `true`. Defaults to `.fade`.
+  public let paragraphAnimationStyle: ParagraphAnimationStyle
   /// Styling applied to block-quote content.
   public let blockQuoteStyle: MarkdownTextStyle
   /// Per-level heading styling.
@@ -254,6 +257,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   /// override only the fields they care about.
   public init(
     shouldAnimateText: Bool = false,
+    paragraphAnimationStyle: ParagraphAnimationStyle = .fade,
     blockQuoteStyle: MarkdownTextStyle = MarkdownRenderConfig.defaultBlockQuoteStyle,
     headingStyle: MarkdownHeadingTextStyle = MarkdownRenderConfig.defaultHeadingStyle,
     orderedListStyle: MarkdownTextStyle = MarkdownRenderConfig.defaultOrderedListStyle,
@@ -269,6 +273,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     imageConfig: ImageConfig = .disabled
   ) {
     self.shouldAnimateText = shouldAnimateText
+    self.paragraphAnimationStyle = paragraphAnimationStyle
     self.blockQuoteStyle = blockQuoteStyle
     self.headingStyle = headingStyle
     self.orderedListStyle = orderedListStyle
