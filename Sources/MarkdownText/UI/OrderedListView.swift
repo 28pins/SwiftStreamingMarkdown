@@ -97,8 +97,12 @@ struct ListItemContentWrapper<Content: View>: View {
   }
 }
 
-func markdownListAccessibilityLabel(for item: String, at index: Int, length: Int) -> String {
-  "\(String.markdownList(length: String(length))), item \(index + 1): \(item)"
+func markdownListAccessibilityLabel(
+  for item: String,
+  at index: Int,
+  length: Int
+) -> String {
+  String.markdownListItem(length: length, index: index + 1, item: item)
 }
 
 #Preview(body: {

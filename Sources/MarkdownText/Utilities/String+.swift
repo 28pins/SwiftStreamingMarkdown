@@ -34,15 +34,17 @@ extension String {
       ), citationLabel)
   }
 
-  static func markdownList(length: String) -> String {
+  static func markdownListItem(length: Int, index: Int, item: String) -> String {
     return String(format:
       NSLocalizedString(
-        "markdown_list",
+        "markdown_list_item",
         bundle: .module,
-        value: "List with %@ items",
-        comment: "Description for a list with some items"
+        value: "List with %1$d items, item %2$d: %3$@",
+        comment: "Accessibility label describing a list item's position, the list length, and the item's text"
       ),
-      length)
+      length,
+      index,
+      item)
   }
 
   static let taskListItemChecked = NSLocalizedString(

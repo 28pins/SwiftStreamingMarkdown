@@ -74,6 +74,13 @@ public struct CodeBlockConfig: Hashable, Sendable {
   /// copy control). `nil` falls back to the bundled `Stone350`.
   public let foregroundColor: Color?
 
+  /// Font set applied to the code text. Defaults to the bundled code fonts.
+  public let codeTextFonts: TextFonts
+
+  /// Font set applied to the language label and copy control. Defaults to the
+  /// bundled small-text fonts.
+  public let chromeTextFonts: TextFonts
+
   /// Create a code-block configuration.
   /// - Parameters:
   ///   - theme: See `theme`. Defaults to `Theme.default`.
@@ -84,9 +91,34 @@ public struct CodeBlockConfig: Hashable, Sendable {
     backgroundColor: Color? = nil,
     foregroundColor: Color? = nil
   ) {
+    self.init(
+      theme: theme,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      codeTextFonts: nil,
+      chromeTextFonts: nil
+    )
+  }
+
+  /// Create a code-block configuration with optional font overrides.
+  /// - Parameters:
+  ///   - theme: See `theme`. Defaults to `Theme.default`.
+  ///   - backgroundColor: See `backgroundColor`. Defaults to `nil` (unset).
+  ///   - foregroundColor: See `foregroundColor`. Defaults to `nil` (`Stone350`).
+  ///   - codeTextFonts: See `codeTextFonts`. Pass `nil` for bundled defaults.
+  ///   - chromeTextFonts: See `chromeTextFonts`. Pass `nil` for bundled defaults.
+  public init(
+    theme: Theme = .default,
+    backgroundColor: Color? = nil,
+    foregroundColor: Color? = nil,
+    codeTextFonts: TextFonts?,
+    chromeTextFonts: TextFonts?
+  ) {
     self.theme = theme
     self.backgroundColor = backgroundColor
     self.foregroundColor = foregroundColor
+    self.codeTextFonts = codeTextFonts ?? Typography.codeTextFonts
+    self.chromeTextFonts = chromeTextFonts ?? Typography.smallTextFonts
   }
 
   /// The default code-block configuration, which keeps the bundled dark

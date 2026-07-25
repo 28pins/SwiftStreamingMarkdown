@@ -1631,6 +1631,36 @@
         }
       }
     },
+    "markdown_list_item": {
+      "comment": "Accessibility label describing a list item's position, the list length, and the item's text",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "العنصر %2$d من قائمة تضم %1$d عنصرًا: %3$@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liste mit %1$d Elementen, Element %2$d: %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "List with %1$d items, item %2$d: %3$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "列表共 %1$d 项，第 %2$d 项：%3$@"
+          }
+        }
+      }
+    },
     "markdown_list": {
       "comment": "Description for a list with some items",
       "extractionState": "extracted_with_value",
