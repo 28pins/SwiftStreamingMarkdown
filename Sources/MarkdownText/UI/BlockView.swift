@@ -39,19 +39,13 @@ struct SingleBlockView: View {
     Group {
       switch renderable {
       case .heading(_, _, let contents):
-        HStack(spacing: 0) {
-          ParagraphView(contents: contents)
-            .transition(.opacity)
-            .accessibilityAddTraits(.isHeader)
-          Spacer()
-        }
+        ParagraphView(contents: contents)
+          .transition(.opacity)
+          .accessibilityAddTraits(.isHeader)
       case .paragraph(_, let contents):
-        HStack(spacing: 0) {
-          ParagraphView(contents: contents, lineSpacing: 5)
-            .fixedSize(horizontal: false, vertical: true)
-            .transition(.opacity)
-          Spacer()
-        }
+        ParagraphView(contents: contents, lineSpacing: 5)
+          .fixedSize(horizontal: false, vertical: true)
+          .transition(.opacity)
       case .latex(_, let latexString):
         ScrollView(.horizontal) {
           HStack(spacing: 0) {
