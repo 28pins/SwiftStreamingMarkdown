@@ -18,7 +18,7 @@ public struct CanvasView<Content: View>: View {
   }
 
   public var body: some View {
-    VStack {
+    VStack(alignment: .leading) {
       content()
       Spacer()
     }

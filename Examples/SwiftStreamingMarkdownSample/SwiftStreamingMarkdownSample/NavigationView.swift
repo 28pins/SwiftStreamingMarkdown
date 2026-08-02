@@ -23,14 +23,32 @@ struct NavigationView: View {
           }
           .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-          List(Demonstration.allCases) { demo in
-            NavigationLink(value: demo) {
-              VStack(alignment: .leading, spacing: 4) {
-                Text(demo.rawValue)
-                  .font(.headline)
-                Text(demo.subtitle)
-                  .font(.subheadline)
-                  .foregroundStyle(.secondary)
+          List {
+            Section("Featured") {
+              NavigationLink {
+                LLMChatView()
+              } label: {
+                VStack(alignment: .leading, spacing: 4) {
+                  Text("LLM Chat")
+                    .font(.headline)
+                  Text("Interactive chat with rich mock Markdown responses")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                }
+              }
+            }
+
+            Section("Demonstrations") {
+              ForEach(Demonstration.allCases) { demo in
+                NavigationLink(value: demo) {
+                  VStack(alignment: .leading, spacing: 4) {
+                    Text(demo.rawValue)
+                      .font(.headline)
+                    Text(demo.subtitle)
+                      .font(.subheadline)
+                      .foregroundStyle(.secondary)
+                  }
+                }
               }
             }
           }
