@@ -10,6 +10,12 @@ struct LLMChatView: View {
   @StateObject private var viewModel = LLMChatViewModel()
   @StateObject private var interactor = LLMChatInteractor()
 
+  #if os(macOS)
+  private let maxChatWidth: CGFloat = 640
+  #else
+  private let maxChatWidth: CGFloat = .infinity
+  #endif
+
   var body: some View {
     ScrollViewReader { proxy in
       ScrollView {
@@ -20,6 +26,8 @@ struct LLMChatView: View {
           }
         }
         .padding()
+        .frame(maxWidth: maxChatWidth)
+        .frame(maxWidth: .infinity)
       }
       .defaultScrollAnchor(.bottom)
       .onChange(of: viewModel.messages.count) {
@@ -66,6 +74,8 @@ struct LLMChatView: View {
     }
     .padding(.horizontal)
     .padding(.vertical, 10)
+    .frame(maxWidth: maxChatWidth)
+    .frame(maxWidth: .infinity)
     .background(.bar)
   }
 
