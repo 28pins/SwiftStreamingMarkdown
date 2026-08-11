@@ -256,4 +256,25 @@ extension MarkdownRenderConfig {
       imageConfig: value
     )
   }
+
+  /// Returns a copy with `blockQuoteAlertStyle` replaced.
+  public func withBlockQuoteAlertStyle(_ value: [BlockQuoteAlertKind: MarkdownBlockQuoteAlertStyle]) -> MarkdownRenderConfig {
+    MarkdownRenderConfig(
+      shouldAnimateText: shouldAnimateText,
+      blockQuoteStyle: blockQuoteStyle,
+      headingStyle: headingStyle,
+      orderedListStyle: orderedListStyle,
+      paragraphStyle: paragraphStyle,
+      tableStyle: tableStyle,
+      inlineStyle: inlineStyle,
+      textContextMenu: textContextMenu,
+      citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
+      blockSpacing: blockSpacing,
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig,
+      blockQuoteAlertStyle: value
+    )
+  }
 }
