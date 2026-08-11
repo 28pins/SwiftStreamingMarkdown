@@ -292,7 +292,6 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
-      mermaidConfig: mermaidConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
       thematicBreakColor: thematicBreakColor,
