@@ -214,7 +214,9 @@ extension MarkdownRenderConfig {
       mermaidConfig: value,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig,
+      blockQuoteAlertStyle: blockQuoteAlertStyle
     )
   }
 
@@ -290,6 +292,7 @@ extension MarkdownRenderConfig {
       textContextMenu: textContextMenu,
       citationConfig: citationConfig,
       codeBlockConfig: codeBlockConfig,
+      mermaidConfig: mermaidConfig,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
       thematicBreakColor: thematicBreakColor,
