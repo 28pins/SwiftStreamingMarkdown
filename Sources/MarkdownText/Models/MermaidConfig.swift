@@ -62,12 +62,21 @@ public struct MermaidConfig: Hashable, Sendable {
   /// the active `ColorScheme`.
   public let theme: Theme
 
+  /// Whether Mermaid diagram rendering is enabled.
+  public let isEnabled: Bool
+
   /// Create a mermaid configuration.
-  /// - Parameter theme: See `theme`. Defaults to `.auto`.
-  public init(theme: Theme = .auto) {
+  /// - Parameters:
+  ///   - theme: See `theme`. Defaults to `.auto`.
+  ///   - isEnabled: See `isEnabled`. Defaults to `true`.
+  public init(theme: Theme = .auto, isEnabled: Bool = true) {
     self.theme = theme
+    self.isEnabled = isEnabled
   }
 
   /// The default mermaid configuration, following the active color scheme.
   public static let `default` = MermaidConfig()
+
+  /// Mermaid diagram rendering disabled.
+  public static let disabled = MermaidConfig(isEnabled: false)
 }
