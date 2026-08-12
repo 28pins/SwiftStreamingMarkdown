@@ -214,7 +214,9 @@ extension MarkdownRenderConfig {
       mermaidConfig: value,
       blockSpacing: blockSpacing,
       textSelectionConfig: textSelectionConfig,
-      thematicBreakColor: thematicBreakColor
+      thematicBreakColor: thematicBreakColor,
+      imageConfig: imageConfig,
+      blockQuoteAlertStyle: blockQuoteAlertStyle
     )
   }
 
