@@ -34,6 +34,8 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
   public let citationConfig: CitationConfig
   /// Configuration that controls code-block syntax-highlighting styling.
   public let codeBlockConfig: CodeBlockConfig
+  /// Configuration that controls Mermaid diagram styling.
+  public let mermaidConfig: MermaidConfig
   /// Vertical spacing between adjacent blocks (paragraphs, headings,
   /// code blocks, lists, etc.). Defaults to 30.
   public let blockSpacing: CGFloat
@@ -315,6 +317,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     textContextMenu: TextContextMenu? = nil,
     citationConfig: CitationConfig = .default,
     codeBlockConfig: CodeBlockConfig = .default,
+    mermaidConfig: MermaidConfig = .default,
     blockSpacing: CGFloat = MarkdownRenderConfig.defaultBlockSpacing,
     textSelectionConfig: TextSelectionConfig = .default,
     thematicBreakColor: Color = MarkdownRenderConfig.defaultThematicBreakColor,
@@ -331,6 +334,7 @@ public struct MarkdownRenderConfig: Hashable, Sendable {
     self.textContextMenu = textContextMenu
     self.citationConfig = citationConfig
     self.codeBlockConfig = codeBlockConfig
+    self.mermaidConfig = mermaidConfig
     self.blockSpacing = blockSpacing
     self.textSelectionConfig = textSelectionConfig
     self.thematicBreakColor = thematicBreakColor
