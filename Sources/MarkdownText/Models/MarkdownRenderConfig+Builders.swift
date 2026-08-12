@@ -198,6 +198,26 @@ extension MarkdownRenderConfig {
     )
   }
 
+  /// Returns a copy with `mermaidConfig` replaced.
+  public func withMermaidConfig(_ value: MermaidConfig) -> MarkdownRenderConfig {
+    MarkdownRenderConfig(
+      shouldAnimateText: shouldAnimateText,
+      blockQuoteStyle: blockQuoteStyle,
+      headingStyle: headingStyle,
+      orderedListStyle: orderedListStyle,
+      paragraphStyle: paragraphStyle,
+      tableStyle: tableStyle,
+      inlineStyle: inlineStyle,
+      textContextMenu: textContextMenu,
+      citationConfig: citationConfig,
+      codeBlockConfig: codeBlockConfig,
+      mermaidConfig: value,
+      blockSpacing: blockSpacing,
+      textSelectionConfig: textSelectionConfig,
+      thematicBreakColor: thematicBreakColor
+    )
+  }
+
   /// Returns a copy with `textSelectionConfig` replaced. Pass a config with
   /// `isEnabled: false` to hide the built-in "Select more text" edit-menu action.
   public func withTextSelectionConfig(value: TextSelectionConfig) -> MarkdownRenderConfig {
