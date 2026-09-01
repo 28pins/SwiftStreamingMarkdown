@@ -21,7 +21,7 @@ final class MermaidStreamDebouncer {
 
   /// - Parameter delayMs: See `delayMs`. Defaults to `300`.
   init(delayMs: Int = 300) {
-    self.delayMs = delayMs
+    self.delayMs = max(0, delayMs)
   }
 
   /// Schedule `source` for commit, cancelling any pending commit.
