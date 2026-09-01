@@ -8,7 +8,7 @@ import Foundation
 /// Coalesces rapidly-repeated source updates from a streaming Mermaid code
 /// fence so the diagram renderer only re-runs after the source has stopped
 /// changing, avoiding per-token layout jitter.
-final class MermaidStreamDebouncer {
+@MainActor final class MermaidStreamDebouncer {
 
   /// Invoked on the main actor with the latest source once it has been stable
   /// for `delayMs`. Called at most once per `schedule(_:)` burst.
