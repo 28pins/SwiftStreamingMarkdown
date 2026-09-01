@@ -17,7 +17,9 @@ extension BlockQuote: BlockConvertible {
         let text = inlineContainer.extractPlainText(removeHeading: false)
         if alertKind == nil, let (kind, rest) = Self.parseAlertTag(text) {
           alertKind = kind
-          finalQuoteTypes.append(.text(rest, alertKind))
+          if !rest.isEmpty {
+            finalQuoteTypes.append(.text(rest, alertKind))
+          }
         } else {
           finalQuoteTypes.append(.text(text, alertKind))
         }
