@@ -26,7 +26,7 @@ struct BlockQuoteView: View {
 
 private struct InternalBlockQuoteView: View {
   let item: BlockQuoteType
-	public var isForAlertQuote: Bool = false
+	let isForAlertQuote: Bool = false
 
   var body: some View {
     HStack(spacing: 8.0) {
